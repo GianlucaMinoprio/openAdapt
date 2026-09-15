@@ -1,0 +1,18 @@
+[project]
+name = "nike-adapt-ble-discovery"
+version = "0.1.0"
+description = "Read-only BLE discovery spike; no shoe-control operations"
+requires-python = ">=3.11,<3.12"
+dependencies = [
+    "bleak==3.0.2",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+addopts = "-ra"
+
+[dependency-groups]
+dev = [
+    "pytest==9.1.1",
+]

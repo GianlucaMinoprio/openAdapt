@@ -1,0 +1,31 @@
+# Never publish owner captures, downloaded tooling or proprietary artifacts.
+private/
+tools/
+.venv/
+__pycache__/
+.pytest_cache/
+*.apk
+*.apks
+*.xapk
+*.aab
+*.pcap
+*.pcapng
+*.pklg
+*.log
+.env
+.env.*
+*.pem
+*.key
+*.zip
+*.tgz
+*.tar.gz
+*.private.*
+*.py[cod]
+/SNIFFER-SOURCES.json
+
+# Historical local reports contain device identifiers; publish curated docs instead.
+/*.md
+!/README.md
+
+# Keep Codex project instructions with the original source.
+!/AGENTS.md

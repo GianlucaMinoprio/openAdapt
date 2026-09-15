@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "id": "io.github.gianlucaminoprio.openadapt",
+  "name": "OpenAdapt",
+  "version": "0.1.0",
+  "author": "OpenAdapt",
+  "license": "MIT",
+  "description": "Lacing, colors and battery for your saved Auto Max shoes.",
+  "kinds": ["bar-widget"],
+  "entryPoints": {"barWidget": "Panel.qml"},
+  "barWidget": {
+    "displayName": "OpenAdapt",
+    "description": "Two shoes. One small control panel.",
+    "category": "Bluetooth",
+    "allowMultiple": false,
+    "defaultSection": "right"
+  }
+}
