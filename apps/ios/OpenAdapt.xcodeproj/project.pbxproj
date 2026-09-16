@@ -1,0 +1,600 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		03139027160F4551181174E1 /* ShoeIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50AD91D14F5DBA8EEAB25571 /* ShoeIntents.swift */; };
+		115F03E4D375F2CF8A23A9C8 /* ShoeChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DD02860DE47D0D277FD3FD8 /* ShoeChannel.swift */; };
+		1A22E22A4EA4A249514A7D8B /* ShoeShortcuts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 720272D1739CBEE839DA99FC /* ShoeShortcuts.swift */; };
+		2D3A72243E92891DE070356A /* OpenAdaptUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A482D8DFFCFC70727B85C8F /* OpenAdaptUITests.swift */; };
+		3A593B19310987A64C342E8F /* ShortcutExecution.swift in Sources */ = {isa = PBXBuildFile; fileRef = D76DF510A6A273ABC7F86303 /* ShortcutExecution.swift */; };
+		51A69E150491C017EE647C5A /* Wire.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37FF80C9AF348C3694BB7170 /* Wire.swift */; };
+		651F5B6CEE8C64E61429E7A3 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5AB3A7259B1E2E6E98EC1B9 /* RootView.swift */; };
+		654FD73997011CF41D6DDA61 /* ShortcutBackgroundLease.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3328D7FDACE06810B8610695 /* ShortcutBackgroundLease.swift */; };
+		6C59159037A37F550B5E1838 /* SiriShortcuts in Resources */ = {isa = PBXBuildFile; fileRef = 9888C6035326340946B3208F /* SiriShortcuts */; };
+		711C4F54969628C32176A17F /* PairVault.swift in Sources */ = {isa = PBXBuildFile; fileRef = 609975299E9E05DF768F8DF5 /* PairVault.swift */; };
+		865AA89D496F065251FD4BA6 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 2FFF5290DE6BC947D2C4C6CF /* PrivacyInfo.xcprivacy */; };
+		8713A8965F871141D79AA424 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 69B037DF56886B1FB769AF72 /* Assets.xcassets */; };
+		90D4DC53376D81A06134E843 /* SavedShoeConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D075BE1AF18E9F676948CDF /* SavedShoeConnection.swift */; };
+		91088F921F275BDCC3660AE1 /* SneakerMark.swift in Sources */ = {isa = PBXBuildFile; fileRef = 704D50CE44E384F654DB06A1 /* SneakerMark.swift */; };
+		941BFF2EFBDD12C20AE93316 /* OpenAdaptApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4CF2236D455A10D1709DA2B /* OpenAdaptApp.swift */; };
+		9B10EA45AF3BCC3F2B302BAF /* FitControlView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21550DE93C83F2A6DF2C6C38 /* FitControlView.swift */; };
+		9B2981A4DD39275CD7E38A0C /* Motion.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB6A6B43E62FC2CACE674D9 /* Motion.swift */; };
+		B46211CECF98EDC2491B2DEB /* SavedFitHistory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BD86C3F54032DC95AD71698 /* SavedFitHistory.swift */; };
+		C539BE758AC48481A1359223 /* PairingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62DCAD468F4D239292AA9413 /* PairingView.swift */; };
+		E497DA3FA2C39FFF08FFBDE4 /* Sheets.swift in Sources */ = {isa = PBXBuildFile; fileRef = A18150B9CD2988063A8C6542 /* Sheets.swift */; };
+		EDDA931868A7FA905072F325 /* BluetoothController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000FBDF8F99DBC6AEB55093 /* BluetoothController.swift */; };
+		F8E4B45972C06D54D3FE0750 /* ShoeCrypto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96E2F3E08931AB09F01A787E /* ShoeCrypto.swift */; };
+		F9AD67BD445BE5FB84816AF7 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF3B529B867B2FE919412D1C /* Models.swift */; };
+		F9EB4CA174883F16D4B89116 /* AppStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4082C1AE737480A49341316B /* AppStore.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		D7ABAFE1338C53267F1C6020 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 7BCE45D58D2E4AA449EBFC6B /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 727EBAD8FF1D29E78C23A436;
+			remoteInfo = OpenAdapt;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		1DD02860DE47D0D277FD3FD8 /* ShoeChannel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoeChannel.swift; sourceTree = "<group>"; };
+		21550DE93C83F2A6DF2C6C38 /* FitControlView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FitControlView.swift; sourceTree = "<group>"; };
+		2FFF5290DE6BC947D2C4C6CF /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		3106B64CC36E14F8D8DA4D78 /* OpenAdapt.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = OpenAdapt.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		3328D7FDACE06810B8610695 /* ShortcutBackgroundLease.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutBackgroundLease.swift; sourceTree = "<group>"; };
+		37FF80C9AF348C3694BB7170 /* Wire.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Wire.swift; sourceTree = "<group>"; };
+		3C0B4A0F914DB0BDE9B01EF6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		4082C1AE737480A49341316B /* AppStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStore.swift; sourceTree = "<group>"; };
+		50AD91D14F5DBA8EEAB25571 /* ShoeIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoeIntents.swift; sourceTree = "<group>"; };
+		609975299E9E05DF768F8DF5 /* PairVault.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PairVault.swift; sourceTree = "<group>"; };
+		62DCAD468F4D239292AA9413 /* PairingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PairingView.swift; sourceTree = "<group>"; };
+		69B037DF56886B1FB769AF72 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		6A482D8DFFCFC70727B85C8F /* OpenAdaptUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAdaptUITests.swift; sourceTree = "<group>"; };
+		6BD86C3F54032DC95AD71698 /* SavedFitHistory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedFitHistory.swift; sourceTree = "<group>"; };
+		704D50CE44E384F654DB06A1 /* SneakerMark.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SneakerMark.swift; sourceTree = "<group>"; };
+		720272D1739CBEE839DA99FC /* ShoeShortcuts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoeShortcuts.swift; sourceTree = "<group>"; };
+		96E2F3E08931AB09F01A787E /* ShoeCrypto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoeCrypto.swift; sourceTree = "<group>"; };
+		9888C6035326340946B3208F /* SiriShortcuts */ = {isa = PBXFileReference; lastKnownFileType = folder; name = SiriShortcuts; path = Config/SiriShortcuts; sourceTree = SOURCE_ROOT; };
+		9D075BE1AF18E9F676948CDF /* SavedShoeConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedShoeConnection.swift; sourceTree = "<group>"; };
+		A000FBDF8F99DBC6AEB55093 /* BluetoothController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluetoothController.swift; sourceTree = "<group>"; };
+		A18150B9CD2988063A8C6542 /* Sheets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sheets.swift; sourceTree = "<group>"; };
+		B5AB3A7259B1E2E6E98EC1B9 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		B918B58821DB6622785B350F /* Base.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Base.xcconfig; sourceTree = "<group>"; };
+		BBB6A6B43E62FC2CACE674D9 /* Motion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Motion.swift; sourceTree = "<group>"; };
+		BF3B529B867B2FE919412D1C /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		D25EDB7814943E503FB8A1D1 /* OpenAdaptUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = OpenAdaptUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		D76DF510A6A273ABC7F86303 /* ShortcutExecution.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutExecution.swift; sourceTree = "<group>"; };
+		F4CF2236D455A10D1709DA2B /* OpenAdaptApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAdaptApp.swift; sourceTree = "<group>"; };
+		F65A7F03095AFF804C58C0F4 /* OpenAdapt.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = OpenAdapt.entitlements; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		0E195AAA254DA26598A1AF2C /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				3106B64CC36E14F8D8DA4D78 /* OpenAdapt.app */,
+				D25EDB7814943E503FB8A1D1 /* OpenAdaptUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1645C7233B0B069F973C24F5 /* Bluetooth */ = {
+			isa = PBXGroup;
+			children = (
+				A000FBDF8F99DBC6AEB55093 /* BluetoothController.swift */,
+			);
+			path = Bluetooth;
+			sourceTree = "<group>";
+		};
+		28DCDB53B8CBB4D81F2E2DD2 /* Intents */ = {
+			isa = PBXGroup;
+			children = (
+				50AD91D14F5DBA8EEAB25571 /* ShoeIntents.swift */,
+				3328D7FDACE06810B8610695 /* ShortcutBackgroundLease.swift */,
+			);
+			path = Intents;
+			sourceTree = "<group>";
+		};
+		3A7A2F68B75A28BE1901EDF7 /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				B918B58821DB6622785B350F /* Base.xcconfig */,
+			);
+			path = Config;
+			sourceTree = "<group>";
+		};
+		51DFAB4468143A0403AC5A2B = {
+			isa = PBXGroup;
+			children = (
+				9888C6035326340946B3208F /* SiriShortcuts */,
+				3A7A2F68B75A28BE1901EDF7 /* Config */,
+				7295CE5EA6C269EAC6D1A9D4 /* OpenAdapt */,
+				B9F2E0D1BD15344B968E45E4 /* OpenAdaptCore */,
+				B55E7B550A1C92CB33ECF3A4 /* OpenAdaptUITests */,
+				0E195AAA254DA26598A1AF2C /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		7295CE5EA6C269EAC6D1A9D4 /* OpenAdapt */ = {
+			isa = PBXGroup;
+			children = (
+				4082C1AE737480A49341316B /* AppStore.swift */,
+				69B037DF56886B1FB769AF72 /* Assets.xcassets */,
+				3C0B4A0F914DB0BDE9B01EF6 /* Info.plist */,
+				F65A7F03095AFF804C58C0F4 /* OpenAdapt.entitlements */,
+				F4CF2236D455A10D1709DA2B /* OpenAdaptApp.swift */,
+				2FFF5290DE6BC947D2C4C6CF /* PrivacyInfo.xcprivacy */,
+				1645C7233B0B069F973C24F5 /* Bluetooth */,
+				28DCDB53B8CBB4D81F2E2DD2 /* Intents */,
+				D263A39D81078CDDDE8E7792 /* Storage */,
+				C2DF3AA4E73FDDC37DB888E2 /* Views */,
+			);
+			path = OpenAdapt;
+			sourceTree = "<group>";
+		};
+		B55E7B550A1C92CB33ECF3A4 /* OpenAdaptUITests */ = {
+			isa = PBXGroup;
+			children = (
+				6A482D8DFFCFC70727B85C8F /* OpenAdaptUITests.swift */,
+			);
+			path = OpenAdaptUITests;
+			sourceTree = "<group>";
+		};
+		B9F2E0D1BD15344B968E45E4 /* OpenAdaptCore */ = {
+			isa = PBXGroup;
+			children = (
+				BF3B529B867B2FE919412D1C /* Models.swift */,
+				6BD86C3F54032DC95AD71698 /* SavedFitHistory.swift */,
+				9D075BE1AF18E9F676948CDF /* SavedShoeConnection.swift */,
+				1DD02860DE47D0D277FD3FD8 /* ShoeChannel.swift */,
+				96E2F3E08931AB09F01A787E /* ShoeCrypto.swift */,
+				720272D1739CBEE839DA99FC /* ShoeShortcuts.swift */,
+				D76DF510A6A273ABC7F86303 /* ShortcutExecution.swift */,
+				37FF80C9AF348C3694BB7170 /* Wire.swift */,
+			);
+			name = OpenAdaptCore;
+			path = Sources/OpenAdaptCore;
+			sourceTree = "<group>";
+		};
+		C2DF3AA4E73FDDC37DB888E2 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				21550DE93C83F2A6DF2C6C38 /* FitControlView.swift */,
+				BBB6A6B43E62FC2CACE674D9 /* Motion.swift */,
+				62DCAD468F4D239292AA9413 /* PairingView.swift */,
+				B5AB3A7259B1E2E6E98EC1B9 /* RootView.swift */,
+				A18150B9CD2988063A8C6542 /* Sheets.swift */,
+				704D50CE44E384F654DB06A1 /* SneakerMark.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		D263A39D81078CDDDE8E7792 /* Storage */ = {
+			isa = PBXGroup;
+			children = (
+				609975299E9E05DF768F8DF5 /* PairVault.swift */,
+			);
+			path = Storage;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		046A0601A10B0925CF8D4A13 /* OpenAdaptUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 348AEC9B8A1881CB052F03AE /* Build configuration list for PBXNativeTarget "OpenAdaptUITests" */;
+			buildPhases = (
+				58B0E1612952748A378EBC57 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				797B3130CAA7CE5CB63B377D /* PBXTargetDependency */,
+			);
+			name = OpenAdaptUITests;
+			packageProductDependencies = (
+			);
+			productName = OpenAdaptUITests;
+			productReference = D25EDB7814943E503FB8A1D1 /* OpenAdaptUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		727EBAD8FF1D29E78C23A436 /* OpenAdapt */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 9B67A7B375EC7A8F4330E1A4 /* Build configuration list for PBXNativeTarget "OpenAdapt" */;
+			buildPhases = (
+				B87DE168A245A300C6E6C6B2 /* Sources */,
+				E7A2CDE867205E45179A6BC0 /* Resources */,
+				96653701970383F4B25873CC /* Local owner pairing (Debug only) */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = OpenAdapt;
+			packageProductDependencies = (
+			);
+			productName = OpenAdapt;
+			productReference = 3106B64CC36E14F8D8DA4D78 /* OpenAdapt.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		7BCE45D58D2E4AA449EBFC6B /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					046A0601A10B0925CF8D4A13 = {
+						DevelopmentTeam = "";
+						TestTargetID = 727EBAD8FF1D29E78C23A436;
+					};
+					727EBAD8FF1D29E78C23A436 = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 3AFF466B388A2633F2314431 /* Build configuration list for PBXProject "OpenAdapt" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 51DFAB4468143A0403AC5A2B;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 0E195AAA254DA26598A1AF2C /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				727EBAD8FF1D29E78C23A436 /* OpenAdapt */,
+				046A0601A10B0925CF8D4A13 /* OpenAdaptUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		E7A2CDE867205E45179A6BC0 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8713A8965F871141D79AA424 /* Assets.xcassets in Resources */,
+				865AA89D496F065251FD4BA6 /* PrivacyInfo.xcprivacy in Resources */,
+				6C59159037A37F550B5E1838 /* SiriShortcuts in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		96653701970383F4B25873CC /* Local owner pairing (Debug only) */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(OPENADAPT_OWNER_PROFILE_PATH)",
+			);
+			name = "Local owner pairing (Debug only)";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/OwnerPairing.private.json",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -eu\ndestination=\"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/OwnerPairing.private.json\"\nsource=\"${OPENADAPT_OWNER_PROFILE_PATH}\"\nif [ \"${CONFIGURATION}\" = \"Debug\" ] && [ \"${OPENADAPT_INCLUDE_OWNER_PAIRING}\" = \"YES\" ] && [ -f \"$source\" ]; then\n  /bin/cp \"$source\" \"$destination\"\n  /bin/chmod 600 \"$destination\"\nelse\n  /bin/rm -f \"$destination\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		58B0E1612952748A378EBC57 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2D3A72243E92891DE070356A /* OpenAdaptUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B87DE168A245A300C6E6C6B2 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F9EB4CA174883F16D4B89116 /* AppStore.swift in Sources */,
+				EDDA931868A7FA905072F325 /* BluetoothController.swift in Sources */,
+				9B10EA45AF3BCC3F2B302BAF /* FitControlView.swift in Sources */,
+				F9AD67BD445BE5FB84816AF7 /* Models.swift in Sources */,
+				9B2981A4DD39275CD7E38A0C /* Motion.swift in Sources */,
+				941BFF2EFBDD12C20AE93316 /* OpenAdaptApp.swift in Sources */,
+				711C4F54969628C32176A17F /* PairVault.swift in Sources */,
+				C539BE758AC48481A1359223 /* PairingView.swift in Sources */,
+				651F5B6CEE8C64E61429E7A3 /* RootView.swift in Sources */,
+				B46211CECF98EDC2491B2DEB /* SavedFitHistory.swift in Sources */,
+				90D4DC53376D81A06134E843 /* SavedShoeConnection.swift in Sources */,
+				E497DA3FA2C39FFF08FFBDE4 /* Sheets.swift in Sources */,
+				115F03E4D375F2CF8A23A9C8 /* ShoeChannel.swift in Sources */,
+				F8E4B45972C06D54D3FE0750 /* ShoeCrypto.swift in Sources */,
+				03139027160F4551181174E1 /* ShoeIntents.swift in Sources */,
+				1A22E22A4EA4A249514A7D8B /* ShoeShortcuts.swift in Sources */,
+				654FD73997011CF41D6DDA61 /* ShortcutBackgroundLease.swift in Sources */,
+				3A593B19310987A64C342E8F /* ShortcutExecution.swift in Sources */,
+				91088F921F275BDCC3660AE1 /* SneakerMark.swift in Sources */,
+				51A69E150491C017EE647C5A /* Wire.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		797B3130CAA7CE5CB63B377D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 727EBAD8FF1D29E78C23A436 /* OpenAdapt */;
+			targetProxy = D7ABAFE1338C53267F1C6020 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		08196321964142FB6D8EF302 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = org.openadapt.ios.uitests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = OpenAdapt;
+			};
+			name = Release;
+		};
+		1026A4F7BCE6AE83B49936F8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = org.openadapt.ios.uitests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = OpenAdapt;
+			};
+			name = Debug;
+		};
+		2713F4B8FD741CB91F9B703B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = B918B58821DB6622785B350F /* Base.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = OpenAdapt/OpenAdapt.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = OpenAdapt/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = OpenAdapt;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "OpenAdapt uses Bluetooth to connect to your saved Adapt shoes and adjust their fit and lights.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UIRequiresFullScreen = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "$(OPENADAPT_BUNDLE_IDENTIFIER)";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		8AC6C766E5C3B4C855ACC757 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 0.1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		A2509B432D3DE0DA70A76881 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 0.1.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		FEA421A64CB569FED9E55843 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = B918B58821DB6622785B350F /* Base.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = OpenAdapt/OpenAdapt.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = OpenAdapt/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = OpenAdapt;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "OpenAdapt uses Bluetooth to connect to your saved Adapt shoes and adjust their fit and lights.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UIRequiresFullScreen = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "$(OPENADAPT_BUNDLE_IDENTIFIER)";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		348AEC9B8A1881CB052F03AE /* Build configuration list for PBXNativeTarget "OpenAdaptUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1026A4F7BCE6AE83B49936F8 /* Debug */,
+				08196321964142FB6D8EF302 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		3AFF466B388A2633F2314431 /* Build configuration list for PBXProject "OpenAdapt" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8AC6C766E5C3B4C855ACC757 /* Debug */,
+				A2509B432D3DE0DA70A76881 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		9B67A7B375EC7A8F4330E1A4 /* Build configuration list for PBXNativeTarget "OpenAdapt" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2713F4B8FD741CB91F9B703B /* Debug */,
+				FEA421A64CB569FED9E55843 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 7BCE45D58D2E4AA449EBFC6B /* Project object */;
+}

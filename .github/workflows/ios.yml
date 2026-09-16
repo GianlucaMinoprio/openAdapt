@@ -1,0 +1,23 @@
+name: iOS
+on:
+  push:
+    paths: ['apps/ios/**', '.github/workflows/ios.yml']
+  pull_request:
+    paths: ['apps/ios/**', '.github/workflows/ios.yml']
+permissions:
+  contents: read
+jobs:
+  build-and-test:
+    runs-on: macos-15
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.3.app/Contents/Developer
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test protocol and import
+        run: swift test --package-path apps/ios
+      - name: Build iOS simulator application
+        run: >-
+          xcodebuild -project apps/ios/OpenAdapt.xcodeproj -scheme OpenAdapt
+          -configuration Release -sdk iphonesimulator
+          -destination 'generic/platform=iOS Simulator'
+          CODE_SIGNING_ALLOWED=NO build

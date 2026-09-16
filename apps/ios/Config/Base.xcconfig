@@ -1,0 +1,5 @@
+// A real, non-secret input keeps sandboxed builds valid without an owner profile.
+OPENADAPT_OWNER_PROFILE_PATH = $(SRCROOT)/Config/NoOwnerPairing.json
+OPENADAPT_INCLUDE_OWNER_PAIRING = NO
+OPENADAPT_BUNDLE_IDENTIFIER = org.openadapt.ios
+#include? "Owner.private.xcconfig"

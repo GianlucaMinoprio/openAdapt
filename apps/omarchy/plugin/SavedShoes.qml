@@ -27,7 +27,7 @@ Column {
       width:root.width; height:86; radius:12
       color:Qt.rgba(root.ink.r,root.ink.g,root.ink.b,0.045)
       border.width:1; border.color:Qt.rgba(root.accent.r,root.accent.g,root.accent.b,0.18)
-      ShoeMark { x:13; anchors.verticalCenter:parent.verticalCenter; width:42; height:42; ink:root.accent }
+      ShoeMark { x:13; anchors.verticalCenter:parent.verticalCenter; width:42; height:42; ink:root.accent; lampInk:"#ffffff" }
       Column {
         x:68; anchors.verticalCenter:parent.verticalCenter; width:parent.width-176; spacing:6
         Text { text:card.modelData.name; textFormat:Text.PlainText; width:parent.width; elide:Text.ElideRight
@@ -52,7 +52,7 @@ Column {
     width:root.width; height:root.loaded && root.pairs.length > 0 ? 40 : 235
     Column {
       anchors.centerIn:parent; width:parent.width; spacing:15
-      ShoeMark { visible:root.pairs.length === 0; width:62; height:62; anchors.horizontalCenter:parent.horizontalCenter; ink:root.accent }
+      ShoeMark { visible:root.pairs.length === 0; width:62; height:62; anchors.horizontalCenter:parent.horizontalCenter; ink:root.accent; lampInk:"#ffffff" }
       Text { visible:root.pairs.length === 0; anchors.horizontalCenter:parent.horizontalCenter
         text:root.loaded ? "Your shoes start here" : "Loading your shoes…"
         color:root.ink; font.family:root.family; font.pixelSize:14 }

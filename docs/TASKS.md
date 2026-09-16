@@ -25,7 +25,14 @@ The owner plans to focus next on a mobile client and testing connection to a fac
 - [ ] Validate Huarache credentials and firmware behavior before enabling that model.
 - [ ] Investigate exact original-app percentage rounding and worn-shoe behavior.
 - [ ] Extend beyond base colors to verified animation support.
-- [ ] Build an iPhone controller and Shortcuts integration.
+- [x] Implement the native iPhone controller, private local owner defaults, and offline protocol tests.
+- [x] Add native guided setup/help, disabled connecting state, an Omarchy-derived sneaker mark, and reviewed gesture/motion polish.
+- [x] Authenticate both current Auto Max shoes and read their status through the native iPhone client.
+- [ ] Validate physical iPhone motor/light behavior and Siri, then prepare signed public distribution.
+- [x] Add App Intents and nine Siri/Shortcuts actions with confirmed completion, background execution, remembered-peripheral connection, and offline tests.
+- [x] Automatically reconnect the last selected pair when opening the iPhone app, with a bounded attempt and Cancel.
+- [x] Add parameter-free Tie Shoes using the last confirmed saved mode, concise replies, and an in-app guide for natural personal shortcut names.
+- [ ] Validate Siri recognition and background command completion with the owner’s physical shoes.
 
 ## Publication
 

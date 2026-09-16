@@ -82,7 +82,7 @@ UI.Panel {
           id:content; width:flick.width; spacing:17
           Item {
             width:parent.width; height:44
-            ShoeMark { width:33; height:34; anchors.left:parent.left; anchors.verticalCenter:parent.verticalCenter; ink:root.accent }
+            ShoeMark { width:33; height:34; anchors.left:parent.left; anchors.verticalCenter:parent.verticalCenter; ink:root.accent; lampInk:"#ffffff" }
             Column {
               x:44; anchors.verticalCenter:parent.verticalCenter; spacing:3; width:parent.width-142
               Text { text:"OpenAdapt"; color:root.ink; font.family:root.family; font.pixelSize:19; font.weight:Font.DemiBold }
@@ -110,7 +110,7 @@ UI.Panel {
 
           Column {
             visible:root.page === "new"; width:parent.width; spacing:18
-            ShoeMark { width:70; height:70; anchors.horizontalCenter:parent.horizontalCenter; ink:root.accent }
+            ShoeMark { width:70; height:70; anchors.horizontalCenter:parent.horizontalCenter; ink:root.accent; lampInk:"#ffffff" }
             Text { text:"New shoes"; color:root.ink; font.family:root.family; font.pixelSize:19; font.weight:Font.Medium }
             Text { width:parent.width; wrapMode:Text.WordWrap; lineHeight:1.4
               text:"Setup for new or reset shoes needs its first pairing test before it can be enabled."

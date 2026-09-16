@@ -2,6 +2,8 @@
 
 A native Quickshell panel for the owner's verified Auto Max pair. The side-profile sneaker sits beside the AI widget in the top-right bar. The bar icon follows the bar foreground; the panel sneaker, slider fills and selection accents follow `Color.accent`, the same theme role as the bar's open-panel underline. Omarchy theme changes update these bindings automatically.
 
+The sneaker artwork is shared with the iPhone app: minimal laceless silhouette and two solid blue dots. See the [editable vector and asset-generation guide](../../assets/brand/README.md). The theme-aware mark preserves its proportions in rectangular containers; the green/accent version has white dots, while the bar’s white mark and desktop launcher keep blue dots.
+
 At the owner's request, the installed Razer theme's blue accent was changed to the deeper green `#36ab23`. Both its source palette and active palette were updated, with the originals saved in `~/.config/openadapt/backups/`. This desktop customization is separate from the app installer; the plugin uses each theme's accent rather than hardcoding green.
 
 ## Controls

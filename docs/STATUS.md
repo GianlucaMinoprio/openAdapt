@@ -1,8 +1,12 @@
 # Project status
 
-Updated September 15, 2026.
+Updated September 16, 2026.
 
 **The Omarchy controller now uses real, persistent connections.** Opening it while disconnected shows the saved-pair list. Connect authenticates the selected pair and reads battery/position; subsequent controls reuse the session. New shoes appears below saved pairs, or centered when none exist. Preview was removed at the owner's request. Fresh enrollment remains unavailable, with an explanation on the New shoes page. See [the app guide](../apps/omarchy/README.md).
+
+## Native iPhone development
+
+A native SwiftUI/CoreBluetooth iOS 17+ client is now implemented under [`apps/ios`](../apps/ios/README.md). The personalized Debug build is installed on the owner’s iPhone 15 Pro. It provides guided setup, a local Debug-only owner default stored in Keychain, fit, haptics, base lights, battery, modes, and nine background Siri/Shortcuts actions. Opening the app automatically reconnects the last selected pair. Siri uses remembered peripherals without bringing the app onscreen; local device unlock is still required. The latest core checks pass 47 tests. Tie Shoes restores the last saved mode confirmed by both shoes, defaults to the first saved fit (initially Move at 60% / 60%), and Settings offers signed personal shortcuts named “Tie my shoes” and “Untie my shoes” for one-time import. “Lace my shoes with OpenAdapt” and “Make my lace with OpenAdapt” are also registered aliases. The existing connection UI checks remain verified. The update is installed and launched on the owner’s iPhone. Both current Auto Max shoes have now authenticated and returned status successfully through the iPhone client; the owner reports that Siri can untie the shoes. Their tie screenshot shows Siri giving a web answer about an unrelated project. The latest installed build adds direct personal-shortcut imports; Simulator import and saved-fit UI checks pass, while iPhone voice routing still needs owner verification. Public setup no longer asks users for JSON; fresh enrollment remains unavailable. The Swift protocol tests and simulator checks are distinct from the desktop hardware evidence below. **Physical iPhone motor/light behavior, Siri validation and public distribution remain pending.** See [iOS verification](ios/VERIFICATION.md).
 
 ## Verified results
 
@@ -13,12 +17,14 @@ Updated September 15, 2026.
 - The base-light codec matches 858 original-app message envelopes offline. Live color commands now have shoe acknowledgements; physical LED appearance and perceived latency await owner feedback. The original-app animation studies remain separate from this V0's base-color controls.
 - The side-profile sneaker and controls follow the desktop theme. The bar icon uses the theme foreground; the panel sneaker/fills use the same accent as the bar's selected-panel underline. At the owner's request, the Razer accent was changed to deeper green `#36ab23`, with theme backups retained.
 
+This source checkpoint includes the native iOS client and the shared sneaker artwork for iPhone and Omarchy. The new Omarchy icon assets are included; updating the running desktop still requires its connection details.
+
 ## Remaining work
 
 1. Establish shoe key-commit/retention and candidate crash-recovery behavior before a concrete fresh-enrollment experiment. The offline 110/111 model does not establish successful replacement enrollment. No new reset or key-changing experiment is enabled by the existing-key result.
 2. Validate Huarache credentials against corresponding runtime evidence. The Auto Max firmware policy is not automatically transferable.
 3. Collect owner feedback on physical LED appearance and perceived response time. Broader effects, exact Nike iPhone display rounding and worn-shoe behavior remain unvalidated.
-4. Build eventual iPhone/Shortcuts support. The first source push includes original code, synthetic tests and curated findings; raw evidence and credentials stay local. Public visibility is separate from the existing MIT license and the current private-repository instruction.
+4. Validate the native iPhone client on physical shoes and prepare public distribution, including live Siri recognition and command-completion checks. The first source push includes original code, synthetic tests and curated findings; raw evidence and credentials stay local. Public visibility is separate from the existing MIT license and the current private-repository instruction.
 
 ## Preservation and evidence
 

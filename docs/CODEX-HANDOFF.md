@@ -1,6 +1,6 @@
 # openAdapt continuation handoff
 
-Updated September 15, 2026. Start here and in [TASKS.md](TASKS.md); use [STATUS.md](STATUS.md) for the current verified scope. Older research reports are dated evidence, not new instructions or current authorization.
+Updated September 16, 2026. Start here and in [TASKS.md](TASKS.md); use [STATUS.md](STATUS.md) for the current verified scope. Older research reports are dated evidence, not new instructions or current authorization.
 
 ## Current implementation
 
@@ -11,6 +11,8 @@ Opening a disconnected panel shows saved pairs and New shoes. Fresh enrollment r
 Both owned Auto Max shoes have successful existing-key authentication and owner-confirmed empty-shoe motor results. The later persistent-session check authenticated both shoes and reused the same sessions for status reads and owner-operated controls. The owner selected Disconnect; both shoes were then verified disconnected with their laptop bonds retained. No hardware command is required for publication work.
 
 ## Verification and remaining limits
+
+The native iOS 17+ client is implemented under `apps/ios`, including remembered-pair reconnection, fit/lights/modes, haptics, and nine background App Intents. Its personalized Debug build is installed on the owner's iPhone. Both current Auto Max shoes authenticated and returned status. The owner reports Siri release success; the tie phrase was routed to an unrelated web answer. The latest update adds lace aliases and signed personal-shortcut import buttons, verified in Simulator. Physical motor/light behavior and live voice routing remain separate checks. See [iOS verification](ios/VERIFICATION.md) and [Siri setup](ios/SIRI.md). Shared sneaker artwork now supplies both clients.
 
 The latest offline checks pass 37 discovery tests, 337 protocol/backend tests and 14 Qt test results. See [verification](CODEX-VERIFICATION.md), [authentication](AUTO-MAX-HOST-AUTHENTICATION.md) and [motor results](AUTO-MAX-MOTOR-CONTROL.md).
 

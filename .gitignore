@@ -29,3 +29,16 @@ __pycache__/
 
 # Keep Codex project instructions with the original source.
 !/AGENTS.md
+
+# iOS build outputs and local signing state.
+.build/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+*.ipa
+*.xcarchive
+*.xcresult
+.DS_Store
+# Siri downloads are signed for a specific app distribution.
+apps/ios/Config/SiriShortcuts/*.shortcut
+apps/ios/Config/SiriShortcuts/manifest.json

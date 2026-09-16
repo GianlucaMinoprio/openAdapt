@@ -2,7 +2,13 @@
 
 An original, MIT-licensed controller for Nike Adapt shoes, starting with a native Omarchy desktop panel. It is not affiliated with or endorsed by Nike.
 
-**OpenAdapt has authenticated and physically laced both shoes of one owner's Auto Max pair.** The Omarchy V0 keeps authenticated Bluetooth connections open so controls reuse the connection. This is an experimental, existing-key controller: **new or factory-reset shoes cannot yet be enrolled through OpenAdapt.** Huarache control and an iPhone app are still future work.
+**OpenAdapt has authenticated and physically laced both shoes of one owner's Auto Max pair.** The Omarchy V0 keeps authenticated Bluetooth connections open so controls reuse the connection. This is an experimental, existing-key controller: **new or factory-reset shoes cannot yet be enrolled through OpenAdapt.** Huarache control remains future work. A native iPhone client is now available as an experimental source build; its CoreBluetooth port still needs physical-device validation.
+
+## iPhone client
+
+The [native iOS client](apps/ios/README.md) includes independent/linked L/R fit controls, haptics, target-versus-progress feedback, battery, base colors, saved modes, guided shoe setup, and private local owner defaults stored in the iPhone Keychain. Open `apps/ios/OpenAdapt.xcodeproj` to build for iOS 17 or later.
+
+This is an existing-key Auto Max client, not fresh enrollment. Both owned shoes have authenticated and returned status through the iPhone client. Physical motor/light behavior and Siri command completion still need device validation; no public TestFlight/App Store download exists yet. See the [iOS verification and release status](docs/ios/VERIFICATION.md).
 
 ## Omarchy V0
 
@@ -24,6 +30,7 @@ Fresh enrollment, key retention/recovery, Huarache support, worn-shoe behavior, 
 
 ## Source and offline checks
 
+- [`apps/ios`](apps/ios): native SwiftUI/CoreBluetooth client and synthetic Swift/UI tests.
 - [`apps/omarchy`](apps/omarchy): native QML panel, local controller, installer and UI/backend tests.
 - [`spikes/001-ble-discovery`](spikes/001-ble-discovery): bounded BLE discovery and allowlisted standard reads.
 - [`spikes/002-local-enrollment`](spikes/002-local-enrollment): original protocol implementation, existing-key authentication/control and offline enrollment model. Its enrollment CLI is offline-only.
