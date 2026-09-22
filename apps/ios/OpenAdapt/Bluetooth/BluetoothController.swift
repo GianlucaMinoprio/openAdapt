@@ -13,7 +13,9 @@ private enum GATT {
 struct NearbyShoe: Identifiable {
     let id: UUID
     let name: String
-    let rssi: Int
+    var rssi: Int
+    var advertisement: ShoeAdvertisement? = nil
+    var model: ShoeModel? { ShoeModel.detected(advertisedName: name) }
     var proximity: String { rssi > -55 ? "Very close" : rssi > -75 ? "Nearby" : "Farther away" }
 }
 
@@ -32,6 +34,26 @@ final class BluetoothController: NSObject, ObservableObject, @preconcurrency CBC
     private var discoveryRequests = Set<UUID>()
 
     func scan() {
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--ui-onboarding") || ProcessInfo.processInfo.arguments.contains("--demo") {
+            stopScan(); nearby = []; scanning = true; availability = "Looking for nearby shoes…"
+            scanTask = Task { [weak self] in
+                try? await Task.sleep(for: .seconds(3))
+                guard !Task.isCancelled, let self else { return }
+                if ProcessInfo.processInfo.arguments.contains("--ui-found-shoes") {
+                    nearby = [
+                        NearbyShoe(id: UUID(uuidString: "11111111-1111-4111-8111-111111111111")!, name: "004-TESTL-001", rssi: -45,
+                            advertisement: ShoeAdvertisement(manufacturerData: Data([0x78, 0, 0xaf, 0x28, 1, 2, 3, 4, 5, 2]))),
+                        NearbyShoe(id: UUID(uuidString: "22222222-2222-4222-8222-222222222222")!, name: "004-TESTR-002", rssi: -50,
+                            advertisement: ShoeAdvertisement(manufacturerData: Data([0x78, 0, 0xaf, 0x28, 6, 7, 8, 9, 10, 1])))
+                    ]
+                    if ProcessInfo.processInfo.arguments.contains("--ui-right-first") { nearby[1].rssi = -35 }
+                }
+                stopScan(); availability = nearby.isEmpty ? "No shoes found. Wake your shoes and scan again." : "Shoes found."
+            }
+            return
+        }
+        #endif
         scanRequested = true
         if central == nil { central = CBCentralManager(delegate: self, queue: .main) }
         else if central?.state == .poweredOn { startScan() }
@@ -39,16 +61,33 @@ final class BluetoothController: NSObject, ObservableObject, @preconcurrency CBC
     }
     private func startScan() {
         stopScan(); scanRequested = false; nearby = []; scanning = true
-        availability = "Looking for awake Auto Max shoes…"
-        central?.scanForPeripherals(withServices: nil, options: [CBCentralManagerScanOptionAllowDuplicatesKey: false])
+        availability = "Looking for nearby Adapt shoes…"
+        central?.scanForPeripherals(withServices: nil, options: [CBCentralManagerScanOptionAllowDuplicatesKey: true])
         scanTask = Task { [weak self] in
             try? await Task.sleep(for: .seconds(10))
             guard !Task.isCancelled else { return }
             self?.stopScan()
-            self?.availability = self?.nearby.isEmpty == true ? "No shoes found. Wake your shoes and scan again." : "Choose a shoe to connect."
+            self?.availability = self?.nearby.isEmpty == true ? "No shoes found. Wake your shoes and scan again." : "Shoes found."
         }
     }
     func stopScan() { central?.stopScan(); scanning = false; scanRequested = false; scanTask?.cancel() }
+    func discoverNewShoes() async throws -> [NearbyShoe] {
+        #if DEBUG
+        let preview = ProcessInfo.processInfo.arguments.contains("--ui-onboarding")
+        #else
+        let preview = false
+        #endif
+        if !preview { try await prepareCentral() }
+        try Task.checkCancellation()
+        scan()
+        defer { stopScan() }
+        while scanning {
+            try await Task.sleep(for: .milliseconds(100))
+            if !preview && central?.state != .poweredOn { throw ShoeConnectionError.bluetooth(availability) }
+        }
+        try Task.checkCancellation()
+        return nearby
+    }
     func connect(id: UUID, expectedName: String) async throws -> PeripheralLink {
         guard central?.state == .poweredOn else { throw AdaptError.unavailable }
         try await waitForClosingConnection(id)
@@ -56,6 +95,35 @@ final class BluetoothController: NSObject, ObservableObject, @preconcurrency CBC
               nearby.contains(where: { $0.id == id && $0.name == expectedName }) else { throw AdaptError.invalidProfile }
         if discoveryRequests.isEmpty { stopScan() }
         return try await open(peripheral)
+    }
+    /// Reads only the standard Device Information characteristic. This path
+    /// never subscribes to Nike's channel, authenticates, enrolls, or writes.
+    func inspectFirmware(of shoe: NearbyShoe) async throws -> ShoeFirmware {
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--ui-onboarding") || ProcessInfo.processInfo.arguments.contains("--demo") {
+            guard ProcessInfo.processInfo.arguments.contains("--ui-found-shoes"), nearby.contains(where: { $0.id == shoe.id }) else {
+                throw AdaptError.unavailable
+            }
+            try await Task.sleep(for: .milliseconds(150))
+            try Task.checkCancellation()
+            return try ShoeFirmware(data: Data("2.4.3M".utf8))
+        }
+        #endif
+        try await prepareCentral()
+        if let existing = links[shoe.id], !existing.closed, let firmware = existing.firmware {
+            return firmware
+        }
+        try await waitForClosingConnection(shoe.id)
+        guard let peripheral = peripherals[shoe.id],
+              nearby.contains(where: { $0.id == shoe.id && $0.name == shoe.name }) else {
+            throw AdaptError.invalidProfile
+        }
+        stopScan()
+        let link = try await open(peripheral, timeout: 12, inspectionOnly: true)
+        defer { disconnect(id: shoe.id) }
+        try Task.checkCancellation()
+        guard let firmware = link.firmware else { throw AdaptError.malformedMessage }
+        return firmware
     }
     func connectSaved(id: UUID?, expectedName: String, allowsNameMatch: Bool) async throws -> PeripheralLink {
         #if DEBUG
@@ -137,11 +205,11 @@ final class BluetoothController: NSObject, ObservableObject, @preconcurrency CBC
             throw ShoeConnectionError.bluetooth("This shoe is already connecting. Wait a moment and try again.")
         }
     }
-    private func open(_ peripheral: CBPeripheral, timeout: TimeInterval = 35) async throws -> PeripheralLink {
+    private func open(_ peripheral: CBPeripheral, timeout: TimeInterval = 35, inspectionOnly: Bool = false) async throws -> PeripheralLink {
         try Task.checkCancellation()
         guard central?.state == .poweredOn else { throw ShoeConnectionError.bluetooth(availability) }
         let id = peripheral.identifier
-        let link = PeripheralLink(peripheral: peripheral)
+        let link = PeripheralLink(peripheral: peripheral, inspectionOnly: inspectionOnly)
         links[id] = link
         link.cancelConnection = { [weak self, weak peripheral] in
             guard let peripheral else { return }
@@ -180,11 +248,23 @@ final class BluetoothController: NSObject, ObservableObject, @preconcurrency CBC
     }
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral,
                         advertisementData: [String: Any], rssi RSSI: NSNumber) {
-        guard scanning, let name = advertisementData[CBAdvertisementDataLocalNameKey] as? String ?? peripheral.name,
-              name.range(of: "^004-[A-Z0-9]+-[0-9]{3}$", options: .regularExpression) != nil else { return }
+        let advertisedName = advertisementData[CBAdvertisementDataLocalNameKey] as? String
+        guard scanning, let name = advertisedName ?? peripheral.name,
+              name.range(of: "^[0-9]{3}-[A-Z0-9]+-[0-9]{3}$", options: .regularExpression) != nil else { return }
+        // Preserve the existing Auto Max discovery path. Other product families
+        // require Nike's company ID and are offered for standard inspection only.
+        let manufacturer = advertisementData[CBAdvertisementDataManufacturerDataKey] as? Data
+        guard name.hasPrefix("004-") || (advertisedName != nil && manufacturer?.prefix(2) == Data([0x78, 0x00])) else { return }
         peripherals[peripheral.identifier] = peripheral
-        if !nearby.contains(where: { $0.id == peripheral.identifier }) {
-            nearby.append(NearbyShoe(id: peripheral.identifier, name: name, rssi: RSSI.intValue))
+        if let index = nearby.firstIndex(where: { $0.id == peripheral.identifier }) {
+            if (-126...0).contains(RSSI.intValue) { nearby[index].rssi = RSSI.intValue }
+            // Manufacturer data and the scan-response name may arrive separately.
+            if let manufacturer, let metadata = ShoeAdvertisement(manufacturerData: manufacturer) {
+                nearby[index].advertisement = metadata
+            }
+        } else {
+            nearby.append(NearbyShoe(id: peripheral.identifier, name: name, rssi: RSSI.intValue,
+                advertisement: manufacturer.flatMap(ShoeAdvertisement.init(manufacturerData:))))
             nearby.sort { $0.rssi > $1.rssi }
         }
     }
@@ -192,7 +272,8 @@ final class BluetoothController: NSObject, ObservableObject, @preconcurrency CBC
         guard let link = links[peripheral.identifier], !link.closed else {
             central.cancelPeripheralConnection(peripheral); return
         }
-        peripheral.discoverServices([GATT.service, GATT.information])
+        ConnectionDiagnostics.record("Bluetooth connected", link: link.diagnosticID)
+        peripheral.discoverServices(link.inspectionOnly ? [GATT.information] : [GATT.service, GATT.information])
     }
     func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
         links.removeValue(forKey: peripheral.identifier)?.close(AdaptError.disconnected)
@@ -205,6 +286,9 @@ final class BluetoothController: NSObject, ObservableObject, @preconcurrency CBC
 @MainActor
 final class PeripheralLink: NSObject, @preconcurrency CBPeripheralDelegate {
     let peripheral: CBPeripheral
+    let inspectionOnly: Bool
+    let diagnosticID = ConnectionDiagnostics.linkID()
+    private(set) var firmware: ShoeFirmware?
     private(set) var session: ShoeSession?
     private(set) var closed = false
     var onDisconnect: (() -> Void)?
@@ -216,10 +300,15 @@ final class PeripheralLink: NSObject, @preconcurrency CBPeripheralDelegate {
     private var discovered = Set<CBUUID>()
     private var ready: CheckedContinuation<Void, Error>?
     private var outbound: [(Data, CheckedContinuation<Void, Error>)] = []
+    private var acknowledgedWriter: AcknowledgedShoeWriter?
+    private var writeType: CBCharacteristicWriteType = .withoutResponse
     private var timeoutTask: Task<Void, Never>?
     private var writeTimer: Task<Void, Never>?
 
-    init(peripheral: CBPeripheral) { self.peripheral = peripheral; super.init(); peripheral.delegate = self }
+    init(peripheral: CBPeripheral, inspectionOnly: Bool = false) {
+        self.peripheral = peripheral; self.inspectionOnly = inspectionOnly
+        super.init(); peripheral.delegate = self
+    }
     func open(timeout: TimeInterval = 35, start: () -> Void) async throws {
         try await withTaskCancellationHandler {
             try await withCheckedThrowingContinuation { continuation in
@@ -235,18 +324,26 @@ final class PeripheralLink: NSObject, @preconcurrency CBPeripheralDelegate {
     }
     func close(_ error: Error) {
         guard !closed else { return }
+        ConnectionDiagnostics.record("Closed: \(error is CancellationError ? "cancelled" : (error as? AdaptError).map { String(describing: $0) } ?? "Bluetooth failure")", link: diagnosticID)
         closed = true; timeoutTask?.cancel(); writeTimer?.cancel()
         session?.channel.close(error)
         let pendingReady = ready; ready = nil; pendingReady?.resume(throwing: error)
         let pendingWrites = outbound; outbound.removeAll()
+        acknowledgedWriter?.close(error)
         for (_, continuation) in pendingWrites { continuation.resume(throwing: error) }
         onDisconnect?()
     }
     private func fail(_ error: Error) { close(error); cancelConnection?() }
     private func write(_ packet: Data) async throws {
-        guard !closed, peripheral.state == .connected, writer != nil else { throw AdaptError.disconnected }
+        guard !inspectionOnly, !closed, peripheral.state == .connected, writer != nil else { throw AdaptError.disconnected }
+        guard packet.count <= peripheral.maximumWriteValueLength(for: writeType) else { throw AdaptError.malformedMessage }
+        if let acknowledgedWriter {
+            try await acknowledgedWriter.write(packet)
+            return
+        }
         guard outbound.count < 32 else { throw AdaptError.busy }
         try await withCheckedThrowingContinuation { continuation in
+            ConnectionDiagnostics.record("Write queued; capacity=\(peripheral.canSendWriteWithoutResponse)", link: diagnosticID)
             outbound.append((packet, continuation))
             flushWrites()
         }
@@ -257,6 +354,7 @@ final class PeripheralLink: NSObject, @preconcurrency CBPeripheralDelegate {
         guard !closed, peripheral.state == .connected, let writer else { return }
         while peripheral.canSendWriteWithoutResponse, !outbound.isEmpty {
             let (packet, continuation) = outbound.removeFirst()
+            ConnectionDiagnostics.record("Write sent", link: diagnosticID)
             peripheral.writeValue(packet, for: writer, type: .withoutResponse)
             continuation.resume()
         }
@@ -265,36 +363,68 @@ final class PeripheralLink: NSObject, @preconcurrency CBPeripheralDelegate {
             writeTimer = Task { [weak self] in
                 try? await Task.sleep(for: .seconds(3))
                 guard !Task.isCancelled else { return }
-                self?.fail(AdaptError.timeout)
+                if let self {
+                    ConnectionDiagnostics.record("Write queue timeout; capacity=\(self.peripheral.canSendWriteWithoutResponse); pending=\(self.outbound.count)", link: self.diagnosticID)
+                    self.fail(AdaptError.timeout)
+                }
             }
         }
     }
-    func peripheralIsReady(toSendWriteWithoutResponse peripheral: CBPeripheral) { flushWrites() }
+    func peripheralIsReady(toSendWriteWithoutResponse peripheral: CBPeripheral) {
+        ConnectionDiagnostics.record("Write-ready callback; capacity=\(peripheral.canSendWriteWithoutResponse)", link: diagnosticID)
+        flushWrites()
+    }
+    func peripheral(_ peripheral: CBPeripheral, didWriteValueFor characteristic: CBCharacteristic, error: Error?) {
+        guard !closed, characteristic === writer, writeType == .withResponse,
+              let acknowledgedWriter else { return }
+        if let error {
+            let code = (error as NSError).code
+            ConnectionDiagnostics.record("Acknowledged write failed; code=\(code)", link: diagnosticID)
+        } else {
+            ConnectionDiagnostics.record("Write acknowledged", link: diagnosticID)
+        }
+        acknowledgedWriter.didWrite(error: error)
+    }
     func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
         guard !closed else { return }
         guard error == nil, let services = peripheral.services,
-              services.filter({ $0.uuid == GATT.service }).count == 1,
+              (inspectionOnly || services.filter({ $0.uuid == GATT.service }).count == 1),
               services.filter({ $0.uuid == GATT.information }).count == 1 else { fail(AdaptError.unsupportedFirmware); return }
         for service in services {
-            if service.uuid == GATT.service { peripheral.discoverCharacteristics([GATT.write, GATT.notify], for: service) }
+            if !inspectionOnly, service.uuid == GATT.service { peripheral.discoverCharacteristics([GATT.write, GATT.notify], for: service) }
             if service.uuid == GATT.information { peripheral.discoverCharacteristics([GATT.firmware], for: service) }
         }
     }
     func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
         guard !closed else { return }
         guard error == nil, let chars = service.characteristics else { fail(AdaptError.malformedMessage); return }
-        if service.uuid == GATT.service {
+        if !inspectionOnly, service.uuid == GATT.service {
             let writers = chars.filter { $0.uuid == GATT.write && $0.properties.contains(.writeWithoutResponse) }
             let notifiers = chars.filter { $0.uuid == GATT.notify && $0.properties.contains(.notify) }
             guard writers.count == 1, notifiers.count == 1 else { fail(AdaptError.malformedMessage); return }
             writer = writers[0]; notifier = notifiers[0]
+            // Choose once per connection. Never replay an unconfirmed packet
+            // using another transport. AutoMax advertises both write types.
+            writeType = writers[0].properties.contains(.write) ? .withResponse : .withoutResponse
+            if writeType == .withResponse {
+                acknowledgedWriter = AcknowledgedShoeWriter(send: { [weak self] packet in
+                    guard let self, !closed, let writer else { return }
+                    ConnectionDiagnostics.record("Acknowledged write sent", link: diagnosticID)
+                    peripheral.writeValue(packet, for: writer, type: .withResponse)
+                }, onFailure: { [weak self] error in
+                    guard let self else { return }
+                    ConnectionDiagnostics.record("Acknowledged write stopped", link: diagnosticID)
+                    fail(error)
+                })
+            }
+            ConnectionDiagnostics.record("Writer uses \(writeType == .withResponse ? "acknowledged" : "unacknowledged") writes", link: diagnosticID)
         } else if service.uuid == GATT.information {
             let revisions = chars.filter { $0.uuid == GATT.firmware && $0.properties.contains(.read) }
             guard revisions.count == 1 else { fail(AdaptError.unsupportedFirmware); return }
             revision = revisions[0]
         }
         discovered.insert(service.uuid)
-        if discovered.contains(GATT.service), discovered.contains(GATT.information), let revision {
+        if (inspectionOnly || discovered.contains(GATT.service)), discovered.contains(GATT.information), let revision {
             peripheral.readValue(for: revision)
         }
     }
@@ -303,15 +433,25 @@ final class PeripheralLink: NSObject, @preconcurrency CBPeripheralDelegate {
         guard error == nil, let value = characteristic.value else { fail(AdaptError.disconnected); return }
         if characteristic.uuid == GATT.firmware {
             do {
+                firmware = try ShoeFirmware(data: value)
+                if inspectionOnly {
+                    timeoutTask?.cancel(); let pending = ready; ready = nil; pending?.resume()
+                    return
+                }
                 try ShoeCrypto.verifyFirmware(value)
+                ConnectionDiagnostics.record("Firmware accepted", link: diagnosticID)
                 guard let notifier else { throw AdaptError.malformedMessage }
                 peripheral.setNotifyValue(true, for: notifier)
             } catch { fail(error) }
-        } else if characteristic.uuid == GATT.notify { session?.channel.receive(value) }
+        } else if characteristic.uuid == GATT.notify {
+            ConnectionDiagnostics.record("Notification received", link: diagnosticID)
+            session?.channel.receive(value)
+        }
     }
     func peripheral(_ peripheral: CBPeripheral, didUpdateNotificationStateFor characteristic: CBCharacteristic, error: Error?) {
-        guard !closed, characteristic.uuid == GATT.notify else { return }
+        guard !inspectionOnly, !closed, characteristic.uuid == GATT.notify else { return }
         guard error == nil, characteristic.isNotifying, session == nil else { fail(AdaptError.disconnected); return }
+        ConnectionDiagnostics.record("Notifications enabled", link: diagnosticID)
         let channel = ShoeChannel { [weak self] packet in
             guard let self else { throw AdaptError.disconnected }
             try await self.write(packet)

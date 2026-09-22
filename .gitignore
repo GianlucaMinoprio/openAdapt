@@ -39,6 +39,7 @@ xcuserdata/
 *.xcarchive
 *.xcresult
 .DS_Store
+._*
 # Siri downloads are signed for a specific app distribution.
 apps/ios/Config/SiriShortcuts/*.shortcut
 apps/ios/Config/SiriShortcuts/manifest.json

@@ -5,7 +5,7 @@ public struct WireMessage: Equatable {
     public let action: UInt8
     public let payload: Data
     public init(opcode: UInt8, action: UInt8, payload: Data = Data()) throws {
-        guard [0, 3, 4, 5, 20, 81, 112, 113, 222, 237].contains(opcode), action < 4,
+        guard [0, 3, 4, 5, 20, 81, 82, 110, 111, 112, 113, 178, 179, 222, 237].contains(opcode), action < 4,
               payload.count <= 513 else { throw AdaptError.malformedMessage }
         self.opcode = opcode; self.action = action; self.payload = payload
     }
@@ -31,6 +31,16 @@ public struct WireMessage: Equatable {
         case 3:
             guard value.count == 1, value[0] <= 100 else { throw AdaptError.malformedMessage }
             if value[0] != 0 { payload = Data([8, value[0]]) }
+        case 82:
+            // Match captured proto3 encoding: false omits field 1 entirely.
+            guard value.count == 1, value[0] <= 1 else { throw AdaptError.malformedMessage }
+            if value[0] == 1 { payload = Data([8, 1]) }
+        case 178:
+            // On: captured double-tap → Unlace. Off: archived GestureOff
+            // model (none → none), also observed in setting readback.
+            guard value.count == 1, value[0] <= 1 else { throw AdaptError.malformedMessage }
+            let setting: UInt8 = value[0] == 1 ? 2 : 1
+            payload = Data([10, 4, 8, setting, 16, setting])
         case 222:
             guard value.count == 3 else { throw AdaptError.malformedMessage }
             payload = Data([8, 4])
@@ -39,10 +49,10 @@ public struct WireMessage: Equatable {
                 payload.append(contentsOf: varint(UInt32(component) * 256))
             }
         case 20: action = 3
-        case 4, 81, 237: break
+        case 4, 81, 179, 237: break
         default: throw AdaptError.malformedMessage
         }
-        if ![3, 112, 113, 222].contains(opcode), !value.isEmpty { throw AdaptError.malformedMessage }
+        if ![3, 82, 112, 113, 178, 222].contains(opcode), !value.isEmpty { throw AdaptError.malformedMessage }
         return try Self(opcode: opcode, action: action, payload: payload)
     }
     static func varint(_ number: UInt32) -> [UInt8] {
@@ -51,14 +61,21 @@ public struct WireMessage: Equatable {
         output.append(UInt8(number)); return output
     }
     public enum Field: Equatable {
-        case integer(UInt32), bytes(Data), double(Double)
+        case integer(UInt32), bytes(Data), double(Double), gestures(ShoeGestureConfiguration)
         public var integer: Int? { if case let .integer(value) = self { return Int(value) }; return nil }
         public var bytes: Data? { if case let .bytes(value) = self { return value }; return nil }
+        public var gestures: ShoeGestureConfiguration? { if case let .gestures(value) = self { return value }; return nil }
     }
     public func fields() throws -> [Int: Field] {
+        if opcode == 179 { return [1: .gestures(try ShoeGestureConfiguration(payload: payload))] }
+        if opcode == 111, action == 3 {
+            guard payload.isEmpty else { throw AdaptError.malformedMessage }
+            return [:]
+        }
         let schemas: [UInt8: [Int: Int]] = [0: [:], 3: [:], 4: [1: 0], 5: [1: 0, 2: 0],
-            81: [1: 0, 2: 0, 3: 1, 4: 0, 5: 0], 112: [1: 2, 2: 2], 113: [:], 20: [:], 222: [:], 237: [:]]
-        guard let schema = schemas[opcode], payload.count <= 64 else { throw AdaptError.malformedMessage }
+            81: [1: 0, 2: 0, 3: 1, 4: 0, 5: 0], 82: [:], 110: [1: 0], 111: [1: 2],
+            112: [1: 2, 2: 2], 113: [:], 178: [1: 0], 20: [:], 222: [:], 237: [:]]
+        guard let schema = schemas[opcode], payload.count <= (opcode == 111 ? 259 : 64) else { throw AdaptError.malformedMessage }
         let bytes = [UInt8](payload); var index = 0; var result = [Int: Field]()
         func integer() throws -> UInt32 {
             var result: UInt32 = 0
@@ -81,7 +98,7 @@ public struct WireMessage: Equatable {
             case 0: result[field] = .integer(try integer())
             case 2:
                 let size = Int(try integer())
-                guard size == 16, index + size <= bytes.count else { throw AdaptError.malformedMessage }
+                guard (opcode == 111 ? (1...256).contains(size) : size == 16), index + size <= bytes.count else { throw AdaptError.malformedMessage }
                 result[field] = .bytes(Data(bytes[index..<index + size])); index += size
             case 1:
                 guard index + 8 <= bytes.count else { throw AdaptError.malformedMessage }
@@ -100,6 +117,7 @@ public struct WireMessage: Equatable {
         let positionField = opcode == 4 ? 1 : opcode == 5 ? 2 : opcode == 81 ? 4 : nil
         if let field = positionField, !(0...100).contains(result[field]?.integer ?? -1) { throw AdaptError.malformedMessage }
         if opcode == 81, !(0...3).contains(result[1]?.integer ?? -1) { throw AdaptError.malformedMessage }
+        if opcode == 110, !(0...3).contains(result[1]?.integer ?? -1) { throw AdaptError.malformedMessage }
         return result
     }
 }

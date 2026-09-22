@@ -17,6 +17,7 @@ public final class ShoeChannel {
     private var failure: Error?
     private var pump: Task<Void, Never>?
     private var input: AsyncStream<Data>.Continuation!
+    private var captureEnrollmentPeer: ((Data) throws -> Void)?
     public var onIdlePosition: ((Int) -> Void)?
     public var onFailure: ((Error) -> Void)?
     public var isClosed: Bool { failure != nil }
@@ -61,6 +62,16 @@ public final class ShoeChannel {
             signal(); return
         }
         let result = try receiver.feed(packet)
+        // Save the peer value/candidate before acknowledging its final fragment.
+        // A failed durable write closes the channel without sending that ACK.
+        if let message = result.message, message.opcode == 111, message.action == 1,
+           let capture = captureEnrollmentPeer {
+            guard active, responseAllowed, let peer = try message.fields()[1]?.bytes else {
+                throw AdaptError.malformedMessage
+            }
+            try capture(peer)
+            captureEnrollmentPeer = nil
+        }
         if let ack = result.acknowledgement { try await write(ack); try check() }
         guard let message = result.message else { return }
         if !active {
@@ -82,6 +93,21 @@ public final class ShoeChannel {
     public func request(_ opcode: UInt8, value: Data = Data()) async throws -> [Int: WireMessage.Field] {
         try await exchange(opcode, value: value, movementTarget: nil)
     }
+    /// These operations are only used by the explicit enrollment coordinator.
+    /// The normal request API still rejects opcodes 110/111.
+    public func enrollmentGroup() async throws -> Int {
+        let reply = try await perform(try WireMessage(opcode: 110, action: 0), movementTarget: nil)
+        guard let group = reply[1]?.integer else { throw AdaptError.malformedMessage }
+        return group
+    }
+    public func exchangeEnrollmentKey(_ publicKey: Data, timeout: TimeInterval = 33,
+                                     onReady: @escaping () -> Void,
+                                     capturePeer: @escaping (Data) throws -> Void) async throws {
+        guard (1...256).contains(publicKey.count) else { throw AdaptError.malformedMessage }
+        let payload = Data([10] + WireMessage.varint(UInt32(publicKey.count))) + publicKey
+        _ = try await perform(try WireMessage(opcode: 111, action: 0, payload: payload), movementTarget: nil,
+            enrollmentReady: onReady, capturePeer: capturePeer, timeout: timeout)
+    }
     public func move(raw: Int) async throws -> Int {
         guard (0...100).contains(raw) else { throw AdaptError.calibration }
         _ = try await request(0)
@@ -99,15 +125,24 @@ public final class ShoeChannel {
         }
     }
     private func exchange(_ opcode: UInt8, value: Data, movementTarget: Int?) async throws -> [Int: WireMessage.Field] {
+        try await perform(WireMessage.request(opcode, value: value), movementTarget: movementTarget)
+    }
+    private func perform(_ request: WireMessage, movementTarget: Int?,
+                         enrollmentReady: (() -> Void)? = nil,
+                         capturePeer: ((Data) throws -> Void)? = nil,
+                         timeout: TimeInterval? = nil) async throws -> [Int: WireMessage.Field] {
         try check()
         guard !active else { throw AdaptError.busy }
-        let packets = FragmentReceiver.fragments(try WireMessage.request(opcode, value: value), sequence: sent % 64)
+        let opcode = request.opcode
+        let packets = FragmentReceiver.fragments(request, sequence: sent % 64)
         active = true; responseAllowed = false
-        let timer = Task { [weak self, timeoutNanoseconds] in
-            do { try await Task.sleep(nanoseconds: timeoutNanoseconds) } catch { return }
+        captureEnrollmentPeer = capturePeer
+        let duration = timeout.map { UInt64(max(0.01, min(33, $0)) * 1_000_000_000) } ?? timeoutNanoseconds
+        let timer = Task { [weak self] in
+            do { try await Task.sleep(nanoseconds: duration) } catch { return }
             self?.close(AdaptError.timeout)
         }
-        defer { timer.cancel(); active = false; responseAllowed = false }
+        defer { timer.cancel(); active = false; responseAllowed = false; captureEnrollmentPeer = nil }
         return try await withTaskCancellationHandler {
             do {
                 guard messages.isEmpty else { throw AdaptError.malformedMessage }
@@ -119,8 +154,16 @@ public final class ShoeChannel {
                     try await write(packet)
                     try check()
                 }
-                let reply = try await nextMessage()
+                var reply = try await nextMessage()
+                var sawReady = false
+                while opcode == 111, reply.opcode == 111, reply.action == 3 {
+                    guard let enrollmentReady, !sawReady else { throw AdaptError.malformedMessage }
+                    _ = try reply.fields()
+                    sawReady = true; enrollmentReady()
+                    reply = try await nextMessage()
+                }
                 guard reply.opcode == opcode, reply.action == 1 else { throw AdaptError.malformedMessage }
+                if opcode == 111, !sawReady { throw AdaptError.malformedMessage }
                 let fields = try reply.fields()
                 guard let target = movementTarget else { return fields }
                 let completion = try await nextMessage()
@@ -191,5 +234,43 @@ public final class ShoeSession {
         _ = try await channel.request(237)
         _ = try await channel.request(222, value: rgb)
         if preview { _ = try await channel.request(20) }
+    }
+    public func setAutoLace(enabled: Bool) async throws {
+        try begin(); defer { active = false }
+        // This changes the foot-presence setting only. It does not overwrite
+        // the shoe-stored preset or issue a motor target.
+        _ = try await channel.request(82, value: Data([enabled ? 1 : 0]))
+    }
+    public func readGestures() async throws -> ShoeGestureConfiguration {
+        try begin(); defer { active = false }
+        return try await gestureConfiguration()
+    }
+    private func gestureConfiguration() async throws -> ShoeGestureConfiguration {
+        let result = try await channel.request(179)
+        guard let configuration = result[1]?.gestures else { throw AdaptError.malformedMessage }
+        return configuration
+    }
+    public func enableDoubleTapUntie() async throws {
+        try await setQuickUnlace(enabled: true)
+    }
+    public func setQuickUnlace(enabled: Bool) async throws {
+        try begin(); defer { active = false }
+        do {
+            let before = try await gestureConfiguration()
+            // Replacement semantics are unknown: never overwrite additional or
+            // unfamiliar mappings. Already-enabled shoes need no setting write.
+            guard let current = before.doubleTapEnabled else { throw ShoeGestureError.unsupportedConfiguration }
+            if current == enabled { return }
+            let reply = try await channel.request(178, value: Data([enabled ? 1 : 0]))
+            switch reply[1]?.integer {
+            case 3: break
+            case 1: throw ShoeGestureError.criticalBattery
+            case 2: throw ShoeGestureError.activeSession
+            default: throw ShoeGestureError.notConfirmed
+            }
+            guard try await gestureConfiguration().doubleTapEnabled == enabled else {
+                throw ShoeGestureError.notConfirmed
+            }
+        } catch { channel.close(error); throw error }
     }
 }

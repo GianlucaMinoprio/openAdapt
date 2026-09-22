@@ -8,21 +8,29 @@ At the owner's request, the installed Razer theme's blue accent was changed to t
 
 ## Controls
 
-- Separate left and right vertical lacing sliders, 0–100% in steps of 5. A drag sends one target when released; arrow keys and the wheel also move in 5% steps. Closing the panel cancels an unfinished drag.
-- Twelve base colors, applied to the left shoe, right shoe or both.
-- Battery readings for each shoe, with the actual reading time in the tooltip.
-- Lights off, which stops a running effect and sets the base color to zero.
-- Pair shoes, with current-pair connection controls and an explanation of the remaining new-shoe setup work.
+The compact panel has **Fit / Lights / Battery / Modes** tabs. Opening it selects the last fully connected pair but never starts Bluetooth discovery or authentication.
+
+- **Fit:** the original rounded vertical bars, with a tick at every 5%. The chain-link icon sits vertically centered between the bars and is highlighted while linked. Link fit starts on: dragging either bar previews both shoes and releases one paired command. Turn it off for independent control. Battery information appears only in the Battery tab.
+- **Progress:** the target marker follows input immediately. The stronger fill catches up over a 2.8-second estimate, stopping at 90% of the journey until completion and readback. A queued shoe does not animate before its own movement starts.
+- **Tie / Untie:** Tie uses the last saved fit successfully applied to both shoes, or the first mode initially (Move 60/60). Untie requests 0/0 without replacing that remembered mode.
+- **Lights:** twelve colors and Lights off, always targeting both shoes.
+- **Battery:** read-only battery silhouettes with terminal caps, percentage and reading age. They have no fit ticks or drag handles. Refresh reads connected shoes only.
+- **Modes:** save the current confirmed left/right fit, apply, rename and remove. Each pair starts with Move 60/60 and Chill 30/30; up to 20 modes with 40-character names are supported. These modes stay on this computer and are not included in credential exports.
+- **Shoes:** opens Your shoes directly. The selector contains Connect, Disconnect and New shoes/import; no intermediate menu.
+
+Mouse release commits once. Arrow keys and focused-wheel input debounce for 180 ms; Escape or leaving Fit cancels uncommitted changes. Closing the panel keeps existing shoe connections, but does not send unfinished input. Buttons, spacing, fonts and colors use the installed Omarchy shell's native controls and theme values.
+
+The optional `reduceMotion: true` setting in this widget's `settings` object disables the animated movement estimate and settling. The selected target remains visible and the fill changes with confirmed readings. Native shell control feedback remains theme-owned.
 
 The percentage is a target relative to each shoe's saved fit maximum, not a measurement of force. The controller maps it to a raw position with explicit nearest-integer rounding. Exact Nike iPhone display rounding remains unresolved.
 
 ## Saved shoes and live connections
 
-Opening the panel shows the saved-pair list when no shoes are connected. Choose **Connect** beside the pair to use. **New shoes** appears below saved pairs, or in the center when the list is empty. It currently explains the pending fresh-enrollment validation; it does not reset or enroll shoes.
+Opening the panel shows Fit for the last pair that completed authentication and status reads on **both** shoes. Before any such connection, the first saved pair is the default. Temporary selection and failed/partial attempts do not change the remembered pair. Existing live connections are preserved when reopening. **Shoes** selects an alternative pair, and **New shoes** imports a completed iPhone pairing; it does not reset or enroll shoes.
 
-Connect performs one bounded discovery/authentication attempt per shoe and reads battery and position. The connections then stay open while using or closing the panel. Sliders, colors and Battery reuse those authenticated links, avoiding the previous five-second scan, reconnect and handshake on every click. **Disconnect** releases both owned connections and returns to the list. If only one shoe connects, its controls work independently and **Connect missing shoe** retries only the missing side when selected.
+**Connect** makes one bounded attempt per shoe and retains an already authenticated partner. A partial connection keeps individual controls available with Link fit off, while paired fit and light actions require both shoes. **Disconnect** in Your shoes releases the links. No automatic reconnect or command replay is implemented.
 
-Preview and its enable-live switch have been removed. Opening the panel or starting its local backend does not scan or connect automatically. Connection state comes from the running BLE links, never a persisted connection flag. A lost connection returns to the list when both shoes are gone. Requests made while disconnected are rejected rather than saved for later; there is no automatic reconnect or command replay.
+Cached readings never restore connection state. Freshly imported pairs with unknown fit calibration can use battery/lights after connecting, but cannot issue fit commands. Existing calibration, charging, battery and fit-limit checks remain in force.
 
 The native shell owns a local process with JSON-line stdin/stdout. It keeps credentials private and serializes operations. Closing the shell or its input cancels the current action and runs the existing disconnect cleanup. The older one-shot command bridge remains for compatibility and is excluded by the shared operation lock while the new backend runs.
 
@@ -30,7 +38,7 @@ The native shell owns a local process with JSON-line stdin/stdout. It keeps cred
 
 ## Install or update locally
 
-Requires the installed Omarchy shell, Qt Quick Controls, Python and the enrollment spike's locked virtual environment. From the repository root:
+Requires the installed Omarchy shell, Qt Quick Controls and Dialogs, Python and the enrollment spike's locked virtual environment. From the repository root:
 
 ```sh
 cd spikes/002-local-enrollment
@@ -45,10 +53,15 @@ The launcher points to this working copy and its virtual environment. Re-run the
 
 An installation can import a prepared, verified local profile with `--profile /absolute/path/profiles.private.json` and optional `--state /absolute/path/state.json`. Imports require owner-only files and do not overwrite existing profile or state files. Missing profiles keep live controls unavailable.
 
+### Import a pairing from iPhone
+
+After saving both shoes on iPhone, use **Settings → Developer mode → Your shoes → Export pairing file**. Transfer it privately, then use Omarchy's **New shoes → Import pairing file** with shoe sessions disconnected. Import keeps other pairs and backs up an existing entry before updating it. It never connects or enrolls automatically. Native iPhone profiles use advertised shoe identities to discover Linux devices; a local Bluetooth bond is still required. New pairs have unknown calibration, so percentage lacing remains disabled while battery/lights can work after authentication. See [pairing transfer](../../docs/ios/PAIRING-TRANSFER.md) for validation limits.
+
 Private storage:
 
 - `~/.config/openadapt/profiles.private.json`: current credentials and calibration, mode 0600 inside a 0700 directory.
 - `~/.local/state/openadapt/readings.json`: current per-pair readings. The original `state.json` is read as a migration source and retained. Connection state is never restored from either file.
+- `~/.local/state/openadapt/panel-preferences.json`: preferred pair and per-pair saved modes; separate from credentials.
 - `~/.local/state/openadapt/backend.private.log`: private failure details. UI responses omit addresses, identifiers and keys.
 - `~/.local/state/openadapt/sessions/`: bounded private protocol transcripts, owner-only.
 
@@ -68,11 +81,14 @@ To remove the widget, remove only its entry from the bar layout, then its instal
 cd spikes/002-local-enrollment
 .venv/bin/python -m pytest -q tests ../../apps/omarchy/tests
 cd ../..
-QT_QPA_PLATFORM=offscreen /usr/lib/qt6/bin/qmltestrunner -input apps/omarchy/tests/qml -o -,txt
+QT_QPA_PLATFORM=offscreen QT_QUICK_BACKEND=software /usr/lib/qt6/bin/qmltestrunner \
+  -import apps/omarchy/tests/qml/imports -input apps/omarchy/tests/qml -o -,txt
 omarchy plugin validate apps/omarchy/plugin
 ```
 
-Recorded result: **337 Python tests passed; 14 Qt test results passed**. Coverage includes the existing authentication/control lifecycle, persistent connections beyond the handshake deadline, repeated reads across sequence-number wraparound, two explicit movements on one connection, idle movement notifications, disconnect/cancellation, command failure without replay, profile selection, multiple saved pairs and startup without radio access. Qt tests exercise slider behavior, empty-list button placement, selection routing and busy state. A separate real-process stdin/status/EOF check completed without radio access.
+The September 22 panel revision passes **386 Python tests**. UI checks and native verification are recorded in [panel polish](../../docs/omarchy/PANEL-POLISH.md). The QtTest imports are explicitly test-only adapters: standalone QtTest cannot load Quickshell’s statically linked plugin. The actual shell supplies the production controls.
+
+The earlier V0 checkpoint passed 337 Python tests and 14 Qt results. Coverage includes the existing authentication/control lifecycle, persistent connections beyond the handshake deadline, repeated reads across sequence-number wraparound, two explicit movements on one connection, idle movement notifications, disconnect/cancellation, command failure without replay, profile selection, multiple saved pairs and startup without radio access. Qt tests exercise slider behavior, empty-list button placement, selection routing and busy state. A separate real-process stdin/status/EOF check completed without radio access.
 
 The installed panel successfully connected both owned Auto Max shoes. Private transcript review verified one existing-key handshake per shoe and reuse for further battery, color and owner-requested motor operations. No new key or bond was created. The new session traces replace the previous Preview-only verification as the latest app checkpoint.
 
@@ -82,6 +98,7 @@ The light codec independently matches **858 original-app messages** across seven
 
 - `plugin/`: native QML UI, saved-shoe list and theme-reactive sneaker drawing.
 - `backend/openadapt_session.py`: persistent local controller and sanitized connection state.
+- `backend/panel_preferences.py`: local saved modes and successful-pair history.
 - `backend/openadapt_app.py`: shared private-storage helpers and older one-shot bridge.
 - `../../spikes/002-local-enrollment/live.py`: persistent authenticated sessions with explicit serialized controls.
 - `../../spikes/002-local-enrollment/control.py`: existing-key status and motor operations.

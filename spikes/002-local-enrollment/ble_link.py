@@ -38,9 +38,14 @@ class OwnedTarget:
     address: str = field(repr=False)
     advertised_name: str
     confirmed_owned: bool = False
+    shoe_identity: bytes | None = field(default=None, repr=False)
 
     def __post_init__(self):
-        if not isinstance(self.address, str) or not re.fullmatch(
+        if self.shoe_identity is not None:
+            if (self.address != "" or not isinstance(self.shoe_identity, bytes)
+                    or len(self.shoe_identity) != 6 or self.shoe_identity[-1] not in (0, 1)):
+                raise ValueError("a complete saved shoe identity is required")
+        elif not isinstance(self.address, str) or not re.fullmatch(
             r"(?:[0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}", self.address
         ):
             raise ValueError("an exact Bluetooth address is required")
@@ -159,14 +164,18 @@ class ExistingKeyLink:
             raise cancellation
 
     async def _scan(self):
-        found = None
+        matches = {}
 
         def observed(device, advertisement):
-            nonlocal found
-            if (device.address.upper() == self.target.address.upper()
-                    and advertisement.local_name == self.target.advertised_name
-                    and 0x78 in advertisement.manufacturer_data):
-                found = device
+            payload = advertisement.manufacturer_data.get(0x78)
+            if self.target.shoe_identity is not None:
+                match = (isinstance(payload, (bytes, bytearray)) and len(payload) >= 8
+                         and payload[:2] == b"\xaf\x28"
+                         and bytes(payload[2:7]) + bytes([payload[7] & 1]) == self.target.shoe_identity)
+            else:
+                match = device.address.upper() == self.target.address.upper() and payload is not None
+            if match and advertisement.local_name == self.target.advertised_name:
+                matches[device.address.upper()] = device
 
         scanner = self.scanner_factory(detection_callback=observed)
         try:
@@ -176,8 +185,11 @@ class ExistingKeyLink:
             await self._finish([("scan-stopped", scanner.stop)])
         if self.cleanup_errors:
             raise CleanupError("scanner cleanup failed; connection was not attempted")
-        if found is None:
+        if not matches:
             raise LookupError("owned target absent from fresh matching advertisements")
+        if len(matches) != 1:
+            raise PermissionError("ambiguous shoe identity; no connection attempted")
+        found = next(iter(matches.values()))
         # The BlueZ scanner supplies its current Device1 properties in details.
         # Require a pre-existing local bond before any protected subscription;
         # pair=False alone is not a security-policy boundary on every backend.

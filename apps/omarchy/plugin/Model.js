@@ -15,14 +15,14 @@ function color(id) {
   return "#9bdacb";
 }
 function blank() {
-  return {saved_pairs:[], selected_id:null, connected:false, busy:false, operation:"", pair_name:"", message:"", failed:false, feet:{
-    left:{connected:false,connection:"disconnected",percent:0,battery:null,color:null,lights:"unknown",status:"saved",checked_at:null,battery_checked_at:null},
-    right:{connected:false,connection:"disconnected",percent:0,battery:null,color:null,lights:"unknown",status:"saved",checked_at:null,battery_checked_at:null}}};
+  return {saved_pairs:[], modes:[], tie_mode_id:null, preferred_pair_id:null, operation_id:0, selected_id:null, connected:false, busy:false, operation:"", pair_name:"", message:"", failed:false, feet:{
+    left:{movement:null,fit_calibrated:false,connected:false,connection:"disconnected",percent:0,battery:null,color:null,lights:"unknown",status:"saved",checked_at:null,battery_checked_at:null},
+    right:{movement:null,fit_calibrated:false,connected:false,connection:"disconnected",percent:0,battery:null,color:null,lights:"unknown",status:"saved",checked_at:null,battery_checked_at:null}}};
 }
 function disconnected(value) {
   var next = clone(value);
   next.connected = false; next.busy = false; next.operation = "";
-  ["left", "right"].forEach(function(side) { next.feet[side].connected = false; next.feet[side].connection = "disconnected"; });
+  ["left", "right"].forEach(function(side) { next.feet[side].connected = false; next.feet[side].connection = "disconnected"; next.feet[side].movement = null; });
   return next;
 }
 function lastChecked(value) {
@@ -32,4 +32,11 @@ function lastChecked(value) {
   if (mins < 60) return "Checked " + mins + "m ago";
   if (mins < 1440) return "Checked " + Math.floor(mins/60) + "h ago";
   return "Last saved reading";
+}
+
+// The estimate never claims completion. Measured position wins after confirmation.
+function progress(movement, measured, now, reduceMotion) {
+  if (!movement || movement.phase !== "moving" || reduceMotion || movement.started_at === null) return measured;
+  var fraction = Math.max(0, Math.min(1, (now - movement.started_at) / 2.8)) * 0.9;
+  return movement.start + (movement.target - movement.start) * fraction;
 }

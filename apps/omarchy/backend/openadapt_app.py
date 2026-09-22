@@ -46,7 +46,7 @@ def read_json(path):
     with os.fdopen(fd) as stream:
         info = os.fstat(stream.fileno())
         if (not stat.S_ISREG(info.st_mode) or info.st_uid != os.getuid()
-                or stat.S_IMODE(info.st_mode) != 0o600 or info.st_nlink != 1 or info.st_size > 65536):
+                or stat.S_IMODE(info.st_mode) != 0o600 or info.st_nlink != 1 or info.st_size > 262144):
             raise UserError("OpenAdapt's private file permissions need attention.")
         return json.load(stream)
 
@@ -149,14 +149,22 @@ def load_profiles(data=None):
         row = data["shoes"][side]
         if row.get("profile") != "auto-max-2.4.3M" or row.get("credential_status") != "hardware-verified":
             raise UserError("This shoe profile has not been verified for live control.")
-        target = OwnedTarget(row["address"], row["advertised_name"], True)
+        native_identity = None
+        if row.get("shoe_identity") is not None:
+            from pairing_transfer import identity
+            native_identity = identity(row, side)
+        target = OwnedTarget(row["address"], row["advertised_name"], True, native_identity)
         if not target.advertised_name.startswith("004-"):
             raise UserError("This version supports the verified Auto Max pair.")
         key = validate_key(bytes.fromhex(row["key_hex"]))
         maximum = row["fit_maximum"]
-        relative_target(100, maximum)
+        if not (native_identity is not None and type(maximum) is int and maximum == 0):
+            relative_target(100, maximum)
         result[side] = (target, key, maximum)
-    if result["left"][0].address.upper() == result["right"][0].address.upper():
+    left, right = result["left"][0], result["right"][0]
+    if (left.shoe_identity is None) != (right.shoe_identity is None):
+        raise UserError("The two shoe profiles use different identity formats.")
+    if left.shoe_identity is None and left.address.upper() == right.address.upper():
         raise UserError("The two shoe profiles refer to the same shoe.")
     return result
 
@@ -193,7 +201,7 @@ def friendly_error(error):
     if isinstance(error, TimeoutError):
         return "The shoe did not finish in time. Check it before trying again."
     if isinstance(error, PermissionError):
-        return "Close other shoe apps and check the existing Bluetooth pairing."
+        return "Disconnect other shoe apps and pair both shoes in Omarchy’s Bluetooth settings, then try again."
     if isinstance(error, asyncio.CancelledError):
         return "Operation stopped. Check the shoe before trying again."
     if isinstance(error, ConnectionError):
@@ -212,6 +220,8 @@ async def hardware(command, state, *, profiles_loader=load_profiles, links=None)
     action = command["action"]
     selected = command.get("side", "both")
     sides = SIDES if selected == "both" else (selected,)
+    if action == "lace" and any(profiles[side][2] <= 0 for side in sides):
+        raise UserError("Fit calibration is not available for this pair. Use the shoe buttons for now.")
     completed = []
     for side in sides:
         if state.get("enabled_until",0) <= time.time():
@@ -223,7 +233,7 @@ async def hardware(command, state, *, profiles_loader=load_profiles, links=None)
             if action in ("connect", "battery"):
                 result = await link.read_status(key)
                 current = result["before"]
-                foot.update(percent=max(0,min(100,round(current["raw_position"]/maximum*20)*5)),
+                foot.update(percent=max(0,min(100,round(current["raw_position"]/maximum*20)*5)) if maximum else 0,
                             battery=current["battery_percent"], raw_position=current["raw_position"],
                             battery_checked_at=int(time.time()))
             elif action == "lace":

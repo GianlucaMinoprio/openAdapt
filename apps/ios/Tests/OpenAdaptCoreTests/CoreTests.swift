@@ -2,6 +2,42 @@ import XCTest
 @testable import OpenAdaptCore
 
 final class WireTests: XCTestCase {
+    func testCapturedAutoLaceAndGestureEnvelopes() throws {
+        // Exact sanitized application-message vectors from the Omarchy report.
+        XCTAssertEqual(try WireMessage.request(82, value: Data([0])).encoded, Data(hex: "520000"))
+        XCTAssertEqual(try WireMessage.request(82, value: Data([1])).encoded, Data(hex: "5202000801"))
+        XCTAssertTrue(try WireMessage.decode(Data(hex: "520040")!).fields().isEmpty)
+        XCTAssertEqual(try WireMessage.request(178, value: Data([1])).encoded, Data(hex: "b206000a0408021002"))
+        XCTAssertEqual(try WireMessage.decode(Data(hex: "b202400803")!).fields()[1]?.integer, 3)
+        XCTAssertEqual(try WireMessage.request(179).encoded, Data(hex: "b30000"))
+        XCTAssertEqual(try WireMessage.decode(Data(hex: "b306400a0408021002")!).fields()[1]?.gestures?.doubleTapEnabled, true)
+        XCTAssertEqual(try WireMessage.decode(Data(hex: "b306400a0408011001")!).fields()[1]?.gestures?.doubleTapEnabled, false)
+        XCTAssertThrowsError(try WireMessage.request(82, value: Data([2])))
+        XCTAssertEqual(try WireMessage.request(178, value: Data([0])).encoded, Data(hex: "b206000a0408011001"))
+        XCTAssertThrowsError(try WireMessage.request(178))
+        XCTAssertThrowsError(try WireMessage.request(178, value: Data([2])))
+        XCTAssertThrowsError(try WireMessage.request(179, value: Data([1])))
+    }
+    func testGestureReadbackPreservesRepeatedAndUnknownEntries() throws {
+        let repeated = try ShoeGestureConfiguration(payload: Data(hex: "0a04080210020a0408031002")!)
+        XCTAssertEqual(repeated.entries.count, 2)
+        XCTAssertNil(repeated.doubleTapEnabled)
+        XCTAssertNil(try ShoeGestureConfiguration(payload: Data()).doubleTapEnabled)
+        let missing = try ShoeGestureConfiguration(payload: Data(hex: "0a020802")!)
+        XCTAssertEqual(missing.entries.first?.action, 0)
+        XCTAssertNil(missing.doubleTapEnabled)
+        let unknown = try ShoeGestureConfiguration(payload: Data(hex: "0a0408631002")!)
+        XCTAssertEqual(unknown.entries.first?.classification, 99)
+        XCTAssertNil(unknown.doubleTapEnabled)
+        XCTAssertEqual(try ShoeGestureConfiguration(payload: Data(hex: "0a0410020802")!).doubleTapEnabled, true)
+    }
+    func testGestureReadbackRejectsMalformedNesting() {
+        for hex in ["08", "0a", "0a0508021002", "0a03080210", "0a06080208021002", "0a021802", "0a020880", "0a03088200", "0a02080210", "0a0608ffffffff1f", "0a020001"] {
+            XCTAssertThrowsError(try ShoeGestureConfiguration(payload: Data(hex: hex)!))
+        }
+        XCTAssertThrowsError(try ShoeGestureConfiguration(payload: Data(repeating: 0, count: 65)))
+    }
+
     func testKnownRequestVectors() throws {
         XCTAssertEqual(try WireMessage.request(0).encoded, Data([0, 2, 0, 8, 8]))
         XCTAssertEqual(try WireMessage.request(3, value: Data([49])).encoded, Data([3, 2, 0, 8, 49]))
@@ -100,6 +136,15 @@ private final class SyntheticShoe {
     var omitCompletion = false
     var wrongReadback = false
     var moved = false
+    var autoLaceReply: Data? = Data()
+    var autoLaceRequests: [Data] = []
+    var autoLaceAction: UInt8 = 1
+    var gestureConfiguration = Data(hex: "0a0408011001")!
+    var gestureSetReply: Data? = Data([8, 3])
+    var gestureSetAction: UInt8 = 1
+    var gestureRequests: [Data] = []
+    var gestureReadbackOverride: Data?
+    var omitGestureReadback = false
     lazy var channel = ShoeChannel(timeout: 0.15) { [weak self] packet in try self?.write(packet) }
     lazy var session = ShoeSession(channel: channel)
     func reply(_ op: UInt8, action: UInt8 = 1, payload: Data = Data()) throws {
@@ -131,12 +176,166 @@ private final class SyntheticShoe {
             try reply(3)
             if !omitCompletion && !earlyCompletion { try reply(5, action: 3, payload: Data([16, UInt8(raw)])) }
         case 0, 20, 222, 237: try reply(message.opcode)
+        case 82:
+            autoLaceRequests.append(message.payload)
+            if let autoLaceReply { try reply(82, action: autoLaceAction, payload: autoLaceReply) }
+        case 178:
+            gestureRequests.append(message.payload)
+            if let gestureSetReply {
+                try reply(178, action: gestureSetAction, payload: gestureSetReply)
+                gestureConfiguration = gestureReadbackOverride ?? message.payload
+            }
+        case 179:
+            if !omitGestureReadback || gestureRequests.isEmpty {
+                try reply(179, payload: gestureConfiguration)
+            }
         default: XCTFail("Unexpected opcode")
         }
     }
 }
 
 final class SessionTests: XCTestCase {
+    @MainActor func testGestureEnableReadsBeforeAndAfterAndDoesNotChangeFit() async throws {
+        let peer = SyntheticShoe(); defer { peer.channel.close() }
+        do { _ = try await peer.session.readGestures(); XCTFail("Expected authentication") } catch {}
+        do { try await peer.session.enableDoubleTapUntie(); XCTFail("Expected authentication") } catch {}
+        XCTAssertTrue(peer.commands.isEmpty)
+        try await peer.session.authenticate(key: peer.key)
+        let before = try await peer.session.readGestures()
+        XCTAssertEqual(before.doubleTapEnabled, false)
+        try await peer.session.enableDoubleTapUntie()
+        let after = try await peer.session.readGestures()
+        XCTAssertEqual(after.doubleTapEnabled, true)
+        XCTAssertEqual(peer.commands, [112, 113, 179, 179, 178, 179, 179])
+        XCTAssertEqual(peer.gestureRequests, [Data(hex: "0a0408021002")!])
+        XCTAssertFalse(peer.moved)
+        // Refreshing/re-enabling an enabled shoe issues no setting write.
+        try await peer.session.enableDoubleTapUntie()
+        XCTAssertEqual(peer.commands.filter { $0 == 178 }.count, 1)
+        XCTAssertEqual(peer.commands.last, 179)
+    }
+    @MainActor func testQuickUnlaceOffRequiresAuthenticationAndMatchingReadback() async throws {
+        let peer = SyntheticShoe(); defer { peer.channel.close() }
+        peer.gestureConfiguration = Data(hex: "0a0408021002")!
+        do { try await peer.session.setQuickUnlace(enabled: false); XCTFail("Expected authentication") } catch {}
+        XCTAssertTrue(peer.commands.isEmpty)
+        try await peer.session.authenticate(key: peer.key)
+        try await peer.session.setQuickUnlace(enabled: false)
+        XCTAssertEqual(peer.commands, [112, 113, 179, 178, 179])
+        XCTAssertEqual(peer.gestureRequests, [Data(hex: "0a0408011001")!])
+        XCTAssertFalse(peer.moved)
+        try await peer.session.setQuickUnlace(enabled: false)
+        XCTAssertEqual(peer.gestureRequests.count, 1)
+        try await peer.session.setQuickUnlace(enabled: true)
+        XCTAssertEqual(peer.gestureRequests.last, Data(hex: "0a0408021002")!)
+    }
+    @MainActor func testQuickUnlaceOffRejectsUnconfirmedResultsWithoutReplay() async throws {
+        for condition in 0..<6 {
+            let peer = SyntheticShoe(); defer { peer.channel.close() }
+            peer.gestureConfiguration = Data(hex: "0a0408021002")!
+            if condition == 0 { peer.gestureSetReply = Data([8, 1]) }
+            if condition == 1 { peer.gestureSetReply = Data([8, 2]) }
+            if condition == 2 { peer.gestureSetReply = nil }
+            if condition == 3 { peer.gestureReadbackOverride = Data(hex: "0a0408021002")! }
+            if condition == 4 { peer.gestureReadbackOverride = Data(hex: "0a04080110010a0408021002")! }
+            if condition == 5 { peer.omitGestureReadback = true }
+            try await peer.session.authenticate(key: peer.key)
+            do { try await peer.session.setQuickUnlace(enabled: false); XCTFail("Expected failure") } catch {}
+            XCTAssertTrue(peer.channel.isClosed)
+            do { try await peer.session.setQuickUnlace(enabled: false); XCTFail("Expected closed stream") } catch {}
+            XCTAssertEqual(peer.gestureRequests.count, 1)
+            XCTAssertFalse(peer.moved)
+        }
+    }
+    @MainActor func testQuickUnlaceOffPreservesUnfamiliarConfigurations() async throws {
+        for hex in ["", "0a0408631002", "0a04080210020a0408011001"] {
+            let peer = SyntheticShoe(); defer { peer.channel.close() }
+            peer.gestureConfiguration = Data(hex: hex)!
+            try await peer.session.authenticate(key: peer.key)
+            do { try await peer.session.setQuickUnlace(enabled: false); XCTFail("Expected unsupported configuration") }
+            catch { XCTAssertEqual(error as? ShoeGestureError, .unsupportedConfiguration) }
+            XCTAssertTrue(peer.gestureRequests.isEmpty)
+        }
+    }
+    @MainActor func testGestureEnableNeverOverwritesUnfamiliarOrMultipleMappings() async throws {
+        for hex in ["", "0a00", "0a0408031002", "0a0408631002", "0a0408021001", "0a04080110010a0408021002"] {
+            let peer = SyntheticShoe(); defer { peer.channel.close() }
+            peer.gestureConfiguration = Data(hex: hex)!
+            try await peer.session.authenticate(key: peer.key)
+            do { try await peer.session.enableDoubleTapUntie(); XCTFail("Expected unsupported setting") }
+            catch { XCTAssertEqual(error as? ShoeGestureError, .unsupportedConfiguration) }
+            XCTAssertEqual(peer.commands, [112, 113, 179])
+            XCTAssertTrue(peer.gestureRequests.isEmpty)
+        }
+    }
+    @MainActor func testGestureRejectsUnknownNegativeMissingAndMalformedSetResponsesWithoutReplay() async throws {
+        for condition in 0..<9 {
+            let peer = SyntheticShoe(); defer { peer.channel.close() }
+            let replies: [Data?] = [Data(), Data([8, 1]), Data([8, 2]), Data([8, 4]), Data([8, 127]), nil, Data([8]), Data([8, 3, 8, 3]), Data([8, 3])]
+            peer.gestureSetReply = replies[condition]
+            if condition == 8 { peer.gestureSetAction = 2 }
+            try await peer.session.authenticate(key: peer.key)
+            do { try await peer.session.enableDoubleTapUntie(); XCTFail("Expected rejected setting") }
+            catch {
+                if condition == 1 { XCTAssertEqual(error as? ShoeGestureError, .criticalBattery) }
+                if condition == 2 { XCTAssertEqual(error as? ShoeGestureError, .activeSession) }
+            }
+            XCTAssertTrue(peer.channel.isClosed)
+            do { try await peer.session.enableDoubleTapUntie(); XCTFail("Expected closed channel") } catch {}
+            XCTAssertEqual(peer.commands, [112, 113, 179, 178])
+            XCTAssertEqual(peer.gestureRequests.count, 1)
+        }
+    }
+    @MainActor func testGestureSetRequiresMatchingReadback() async throws {
+        for condition in 0..<5 {
+            let peer = SyntheticShoe(); defer { peer.channel.close() }
+            let values = ["0a0408011001", "0a0408031002", "0a04080210020a0408011001", "0a04", ""]
+            peer.gestureReadbackOverride = Data(hex: values[condition])!
+            peer.omitGestureReadback = condition == 4
+            try await peer.session.authenticate(key: peer.key)
+            do { try await peer.session.enableDoubleTapUntie(); XCTFail("Expected unconfirmed readback") } catch {}
+            XCTAssertTrue(peer.channel.isClosed)
+            XCTAssertEqual(peer.commands, [112, 113, 179, 178, 179])
+            XCTAssertEqual(peer.gestureRequests.count, 1)
+        }
+    }
+    @MainActor func testGestureCancellationDoesNotReplayOrConfirm() async throws {
+        let peer = SyntheticShoe(); defer { peer.channel.close() }
+        peer.gestureSetReply = nil
+        try await peer.session.authenticate(key: peer.key)
+        let task = Task { try await peer.session.enableDoubleTapUntie() }
+        for _ in 0..<100 where peer.gestureRequests.isEmpty { await Task.yield() }
+        XCTAssertEqual(peer.gestureRequests.count, 1)
+        task.cancel()
+        do { try await task.value; XCTFail("Expected cancellation") } catch {}
+        XCTAssertTrue(peer.channel.isClosed)
+        XCTAssertEqual(peer.commands, [112, 113, 179, 178])
+    }
+
+    @MainActor func testAutoLaceRequiresAuthenticationAndDoesNotChangeFit() async throws {
+        let peer = SyntheticShoe(); defer { peer.channel.close() }
+        do { try await peer.session.setAutoLace(enabled: true); XCTFail("Expected authentication requirement") } catch {}
+        XCTAssertTrue(peer.commands.isEmpty)
+        try await peer.session.authenticate(key: peer.key)
+        try await peer.session.setAutoLace(enabled: true)
+        try await peer.session.setAutoLace(enabled: false)
+        XCTAssertEqual(peer.commands, [112, 113, 82, 82])
+        XCTAssertEqual(peer.autoLaceRequests, [Data([8, 1]), Data()])
+        XCTAssertFalse(peer.moved)
+    }
+    @MainActor func testAutoLaceRejectsMissingNegativeAndMalformedAcknowledgementWithoutReplay() async throws {
+        for condition in 0..<3 {
+            let peer = SyntheticShoe(); defer { peer.channel.close() }
+            try await peer.session.authenticate(key: peer.key)
+            if condition == 0 { peer.autoLaceReply = nil }
+            if condition == 1 { peer.autoLaceAction = 2 }
+            if condition == 2 { peer.autoLaceReply = Data([8, 9]) }
+            do { try await peer.session.setAutoLace(enabled: true); XCTFail("Expected unconfirmed setting") } catch {}
+            XCTAssertTrue(peer.channel.isClosed)
+            do { try await peer.session.setAutoLace(enabled: true); XCTFail("Expected closed channel") } catch {}
+            XCTAssertEqual(peer.commands.filter { $0 == 82 }.count, 1)
+        }
+    }
     @MainActor func testAuthenticatedPersistentControlAndSequenceWrap() async throws {
         let peer = SyntheticShoe(); defer { peer.channel.close() }
         try await peer.session.authenticate(key: peer.key)

@@ -10,7 +10,7 @@ public enum ShoeConnectionError: LocalizedError, Equatable {
         switch self {
         case .rediscoveryRequired: return "This iPhone needs to find the shoe again. Open OpenAdapt and tap Connect shoes."
         case .notFound: return "Your saved shoe was not found. Wake it, bring it closer, and close other shoe apps."
-        case .ambiguousShoes: return "These shoes share a Bluetooth name. In My shoes, choose Connect individually to identify each shoe."
+        case .ambiguousShoes: return "OpenAdapt couldn’t identify the left and right shoes automatically. Your saved pair is unchanged."
         case .bluetooth(let message): return message
         }
     }

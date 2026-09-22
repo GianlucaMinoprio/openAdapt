@@ -10,8 +10,11 @@ struct FootState {
     var movementStartedAt: Date?
     var movementStart: Double = 0
     var battery: Int?
+    var firmware: String?
+    var features: [ShoeFeature: ShoeFeatureConfirmation] = [:]
     var lightColorID: String?
     var connected = false
+    var hasFitCalibration = true
     var connecting = false
     var busy = false
     var lacing = false
@@ -79,11 +82,8 @@ final class AppStore: ObservableObject {
     private var shortcutGeneration: UUID?
 
     @Published var pairs: [ShoePair] = []
-    @Published var selectedID: String? {
-        didSet { if !demo && !localSetupPreview { UserDefaults.standard.set(selectedID, forKey: "selectedPair") } }
-    }
+    @Published var selectedID: String?
     @Published var feet: [ShoeSide: FootState] = [.left: FootState(), .right: FootState()]
-    @Published var linked = false
     @Published var errorMessage: String?
     @Published var demo = false
     @Published var reconnecting = false
@@ -91,10 +91,17 @@ final class AppStore: ObservableObject {
     @Published var connectionMessage = "Wake your shoes to connect."
     @Published var selectedColor = "green"
     @Published var modes: [FitMode] = []
+    @Published private(set) var shoeColorways: [String: ShoeColorway] = [:]
     @Published private(set) var lastUsedModeID: UUID?
     var lastUsedMode: FitMode? { modes.first { $0.id == lastUsedModeID } }
     var tieMode: FitMode? { lastUsedMode ?? modes.first }
     private let fitHistory = SavedFitHistory()
+    private let autoLaceHistory = SavedAutoLacePreference()
+    private let pairHistory = SavedPairHistory()
+    private var demoAutoLacePreference = false
+    func autoLacePreference(for pairID: String) -> Bool {
+        demo ? demoAutoLacePreference : autoLaceHistory.isEnabled(forPair: pairID)
+    }
     @Published var hapticsEnabled = UserDefaults.standard.object(forKey: "haptics") as? Bool ?? true {
         didSet { haptics.enabled = hapticsEnabled; UserDefaults.standard.set(hapticsEnabled, forKey: "haptics") }
     }
@@ -109,16 +116,23 @@ final class AppStore: ObservableObject {
     private var connectionFailures: [ShoeSide: String] = [:]
     private var reconnectDeadline: Task<Void, Never>?
     private var reconnectSuppressed = false
+    private var settingUpNewShoes = false
     var pair: ShoePair? { pairs.first { $0.id == selectedID } }
-    var name: String { demo ? "Auto Max" : pair?.name ?? "Your shoes" }
+    private var preferredPairID: String? { pairHistory.preferredPairID(among: pairs.map(\.id)) }
+    var name: String { pair?.displayName ?? (demo ? "Auto Max" : "Your shoes") }
     var connected: Bool { ShoeSide.allCases.allSatisfy { feet[$0]?.connected == true } }
     var anyConnected: Bool { feet.values.contains { $0.connected || $0.connecting } }
     var anyBusy: Bool { shortcutRunning || feet.values.contains { $0.busy || $0.connecting } }
     var canControlBoth: Bool { connected && !anyBusy }
+    var canAdjustBoth: Bool { canControlBoth && feet.values.allSatisfy(\.hasFitCalibration) }
     var hasReadyShoe: Bool { feet.values.contains { $0.connected } }
     var connectionInProgress: Bool { reconnecting || feet.values.contains { $0.connecting } }
     private var bindingKey: String { "peripherals.\(selectedID ?? "none")" }
-    private var bindings: [String: String] { UserDefaults.standard.dictionary(forKey: bindingKey) as? [String: String] ?? [:] }
+    private var bindings: [String: String] {
+        var result = pair?.shoes.compactMapValues { $0.peripheralID?.uuidString } ?? [:]
+        for (side, id) in UserDefaults.standard.dictionary(forKey: bindingKey) as? [String: String] ?? [:] { result[side] = id }
+        return result
+    }
     var canReconnect: Bool { !demo && pair != nil && !connected }
     var connectionTitle: String { connectionInProgress ? "Connecting" : connectionFailed ? "Couldn’t connect" : "Not connected" }
     // LED color is not part of status readback. Only an acknowledged color
@@ -155,20 +169,30 @@ final class AppStore: ObservableObject {
             } }]}
             """
             pairs = (try? ProfileImport.decode(Data(sample.utf8))) ?? []
+            if ProcessInfo.processInfo.arguments.contains("--ui-multiple-pairs") {
+                let other = sample.replacingOccurrences(of: "connection-test", with: "other-test")
+                    .replacingOccurrences(of: "\"name\":\"Auto Max\"", with: "\"name\":\"Weekend shoes\"")
+                pairs += (try? ProfileImport.decode(Data(other.utf8))) ?? []
+            }
             selectedID = pairs.first?.id; loadModes(); return
         }
         #endif
         do {
             pairs = try vault.loadWithLocalDefault()
-            let saved = UserDefaults.standard.string(forKey: "selectedPair")
-            selectedID = pairs.first(where: { $0.id == saved })?.id ?? pairs.first?.id
+            selectedID = preferredPairID
         } catch { report(error) }
         loadModes()
     }
     func foreground() {
-        guard UIApplication.shared.applicationState == .active, !localSetupPreview else { return }
+        guard UIApplication.shared.applicationState == .active, !localSetupPreview, !settingUpNewShoes else { return }
         if !demo && !shortcutRunning {
             do { try reloadShortcutProfiles() } catch { report(error); return }
+            // Opening the app returns to the last complete connection. Browsing
+            // or a failed attempt at another pair must not replace that default.
+            if !anyConnected && !anyBusy, let preferred = pairs.first(where: { $0.id == preferredPairID }),
+               selectedID != preferred.id {
+                select(preferred)
+            }
             reconnectSuppressed = false
         }
         reconnectSavedPair(automatically: true)
@@ -237,14 +261,73 @@ final class AppStore: ObservableObject {
         disconnect(); demo = false; selectedID = pair.id; loadModes()
         OpenAdaptShortcuts.updateAppShortcutParameters()
     }
+    func beginNewShoeSetup() {
+        settingUpNewShoes = true
+        disconnect()
+    }
+    func endNewShoeSetup() { settingUpNewShoes = false }
+    func saveEnrolledShoes(_ records: [ShoeEnrollmentRecord]) throws {
+        let incoming = try ShoePair.enrolled(records)
+        let existing = pairs.first { pair in ShoeSide.allCases.allSatisfy { side in
+            pair.credential(side).shoeIdentity == incoming.credential(side).shoeIdentity
+                && pair.credential(side).key == incoming.credential(side).key
+        } }
+        let saved = existing ?? incoming
+        if existing == nil {
+            let updated = pairs + [incoming]
+            if !localSetupPreview { try vault.save(updated) }
+            pairs = updated
+        }
+        disconnect(); selectedID = saved.id; loadModes()
+        if !localSetupPreview {
+            // A recovered peripheral can have a new CoreBluetooth UUID even
+            // when this verified identity/key pair was already published.
+            UserDefaults.standard.set(Dictionary(uniqueKeysWithValues: records.map {
+                ($0.side.rawValue, $0.peripheralID.uuidString)
+            }), forKey: bindingKey)
+        }
+        settingUpNewShoes = false
+        if !localSetupPreview {
+            // Pair publication is the commit point; cleanup failure cannot lose it.
+            try? EnrollmentVault().removeSaved(Set(records.map(\.id)))
+            reconnectSavedPair()
+        }
+        haptics.success()
+    }
+    func colorway(for id: String) -> ShoeColorway {
+        if let saved = shoeColorways[id] { return saved }
+        guard !demo else { return .blackBlue }
+        return UserDefaults.standard.string(forKey: "shoeAppearance.\(id)").flatMap(ShoeColorway.init(rawValue:)) ?? .blackBlue
+    }
+    func setColorway(_ colorway: ShoeColorway, for id: String) {
+        guard pairs.contains(where: { $0.id == id }) else { return }
+        shoeColorways[id] = colorway
+        if !demo { UserDefaults.standard.set(colorway.rawValue, forKey: "shoeAppearance.\(id)") }
+    }
+    @discardableResult func renamePair(_ id: String, nickname: String) -> Bool {
+        let name = nickname.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !name.isEmpty, name.count <= 60, let index = pairs.firstIndex(where: { $0.id == id }) else { return false }
+        var updated = pairs; updated[index].name = name
+        do {
+            if !demo { try vault.save(updated) }
+            pairs = updated; return true
+        } catch { report(error); return false }
+    }
     func removePair(_ id: String) {
-        guard !shortcutRunning else { return }
-        if selectedID == id { disconnect() }
+        guard !anyBusy, pairs.contains(where: { $0.id == id }) else { return }
         do {
             let remaining = pairs.filter { $0.id != id }
-            try vault.save(remaining); pairs = remaining
-            fitHistory.clear(forPair: id)
-            if selectedID == id { selectedID = pairs.first?.id; loadModes() }
+            if !demo { try vault.save(remaining) }
+            // Persist first: a Keychain failure must not remove the working UI pair.
+            if selectedID == id { disconnect() }
+            pairs = remaining; shoeColorways[id] = nil
+            if !demo {
+                fitHistory.clear(forPair: id)
+                autoLaceHistory.clear(forPair: id)
+                pairHistory.removePair(id)
+                for key in ["shoeAppearance.\(id)", "peripherals.\(id)", "modes.\(id)"] { UserDefaults.standard.removeObject(forKey: key) }
+            }
+            if selectedID == id { selectedID = preferredPairID; loadModes() }
         } catch { report(error) }
     }
     func connect(_ side: ShoeSide, device: NearbyShoe) {
@@ -255,6 +338,7 @@ final class AppStore: ObservableObject {
         startConnection(side, id: device.id, credential: credential, remembered: false)
     }
     private func startConnection(_ side: ShoeSide, id: UUID?, credential: ShoeCredential, remembered: Bool) {
+        ConnectionDiagnostics.record("Saved connection requested: \(side.rawValue)")
         let token = generation
         let attempt = UUID(); connectionAttempts[side] = attempt
         feet[side]!.connecting = true; feet[side]!.note = "Connecting…"
@@ -328,17 +412,24 @@ final class AppStore: ObservableObject {
             if !feet[side]!.dragging && !feet[side]!.lacing { feet[side]!.target = FitScale.snapped(value) }
         }
         guard let session = link.session else { throw AdaptError.disconnected }
+        ConnectionDiagnostics.record("Authentication started: \(side.rawValue)", link: link.diagnosticID)
         feet[side]!.note = "Checking saved key…"
         try await session.authenticate(key: credential.key)
         try Task.checkCancellation()
         guard generation == token, links[side] === link else { throw CancellationError() }
+        ConnectionDiagnostics.record("Authentication succeeded: \(side.rawValue)", link: link.diagnosticID)
         let status = try await session.readStatus()
         try Task.checkCancellation()
         guard generation == token, links[side] === link else { throw CancellationError() }
         apply(status, side: side, maximum: credential.fitMaximum, syncTarget: true)
         feet[side]!.connecting = false; feet[side]!.connected = true; feet[side]!.note = "Connected"
+        feet[side]!.hasFitCalibration = credential.hasFitCalibration
+        feet[side]!.firmware = link.firmware?.version
         var remembered = bindings; remembered[side.rawValue] = link.peripheral.identifier.uuidString
         UserDefaults.standard.set(remembered, forKey: bindingKey)
+        if !demo && !localSetupPreview, let selectedID {
+            pairHistory.recordConnectedPair(selectedID, confirmedSides: Set(ShoeSide.allCases.filter { feet[$0]!.connected }))
+        }
     }
     private func lost(_ side: ShoeSide) {
         feet[side]!.movementStartedAt = nil
@@ -346,6 +437,7 @@ final class AppStore: ObservableObject {
         feet[side]!.busy = false; feet[side]!.lacing = false; feet[side]!.dragging = false
         feet[side]!.dragPosition = nil
         feet[side]!.lightColorID = nil
+        feet[side]!.features = [:]
         feet[side]!.note = "Not connected"
         // Last readback remains distinct from an unconfirmed requested target.
         feet[side]!.progress = feet[side]!.measured ?? 0
@@ -376,38 +468,32 @@ final class AppStore: ObservableObject {
         let saved = try vault.loadWithLocalDefault()
         guard saved != pairs || pair == nil else { return }
         pairs = saved
-        let selected = selectedID ?? UserDefaults.standard.string(forKey: "selectedPair")
-        selectedID = pairs.first(where: { $0.id == selected })?.id ?? pairs.first?.id
+        selectedID = pairs.first(where: { $0.id == selectedID })?.id ?? preferredPairID
         loadModes()
     }
-    func toggleLink() { linked.toggle(); haptics.tick() }
     func change(_ side: ShoeSide, value: Double) {
-        let sides = linked ? ShoeSide.allCases : [side]
-        guard !shortcutRunning, sides.allSatisfy({ feet[$0]!.connected && !feet[$0]!.busy }) else { return }
+        guard !shortcutRunning, feet[side]!.connected, feet[side]!.hasFitCalibration, !feet[side]!.busy else { return }
         let target = FitScale.snapped(value)
         if feet[side]!.target != target { haptics.tick() }
-        for side in sides {
-            feet[side]!.target = target; feet[side]!.dragging = true
-            feet[side]!.directAdjustment = false
-            feet[side]!.dragPosition = min(100, max(0, value))
-        }
+        feet[side]!.target = target; feet[side]!.dragging = true
+        feet[side]!.directAdjustment = false
+        feet[side]!.dragPosition = min(100, max(0, value))
     }
     func cancelDrag(_ originals: [ShoeSide: Int]) {
         for (side, target) in originals { feet[side]!.target = target; feet[side]!.dragging = false; feet[side]!.dragPosition = nil }
     }
     func commit(_ side: ShoeSide) {
-        let sides = linked ? ShoeSide.allCases : [side]
-        guard !shortcutRunning, sides.allSatisfy({ feet[$0]!.connected && !feet[$0]!.busy }) else { return }
+        guard !shortcutRunning, feet[side]!.connected, feet[side]!.hasFitCalibration, !feet[side]!.busy else { return }
         haptics.commit()
-        for side in sides { move(side, target: feet[side]!.target) }
+        move(side, target: feet[side]!.target)
     }
     func adjust(_ side: ShoeSide, by amount: Int) {
         change(side, value: Double(feet[side]!.target + amount))
-        for item in linked ? ShoeSide.allCases : [side] { feet[item]!.directAdjustment = true }
+        feet[side]!.directAdjustment = true
         commit(side)
     }
     private func move(_ side: ShoeSide, target: Int, onConfirmed: @escaping () -> Void = {}) {
-        guard feet[side]!.connected, !feet[side]!.busy else { return }
+        guard feet[side]!.connected, feet[side]!.hasFitCalibration, !feet[side]!.busy else { return }
         feet[side]!.target = target; feet[side]!.dragging = false; feet[side]!.dragPosition = nil
         feet[side]!.busy = true; feet[side]!.lacing = true; feet[side]!.note = "Lacing…"
         let token = generation
@@ -459,25 +545,71 @@ final class AppStore: ObservableObject {
             }
         }
     }
-    func setColor(_ color: ShoeColor, sides: [ShoeSide] = ShoeSide.allCases) {
-        guard !shortcutRunning else { return }
+    func setColor(_ color: ShoeColor) {
+        guard canControlBoth, !feet.values.contains(where: \.dragging) else { return }
         selectedColor = color.id; haptics.tick()
-        for side in sides where feet[side]!.connected && !feet[side]!.busy {
+        for side in ShoeSide.allCases {
             perform(side, operation: { session in
                 try await session?.setColor(Data(color.rgb))
             }, onSuccess: { self.feet[side]!.lightColorID = color.id })
         }
     }
     func lightsOff() {
-        guard !shortcutRunning else { return }
-        for side in ShoeSide.allCases where feet[side]!.connected && !feet[side]!.busy {
+        guard canControlBoth, !feet.values.contains(where: \.dragging) else { return }
+        for side in ShoeSide.allCases {
             perform(side, operation: { session in
                 try await session?.setColor(Data([0, 0, 0]), preview: false)
             }, onSuccess: { self.feet[side]!.lightColorID = nil })
         }
     }
+    func setFeature(_ feature: ShoeFeature, enabled: Bool) {
+        guard let pairID = selectedID, canControlBoth, !feet.values.contains(where: \.dragging) else { return }
+        haptics.tick()
+        for side in ShoeSide.allCases {
+            feet[side]!.features[feature] = .applying
+            perform(side, operation: { session in
+                guard let session else { throw AdaptError.disconnected }
+                switch feature {
+                case .autoLace: try await session.setAutoLace(enabled: enabled)
+                case .doubleTapUntie: try await session.setQuickUnlace(enabled: enabled)
+                }
+            }, onSuccess: {
+                guard self.feet[side]!.connected else { return }
+                self.feet[side]!.features[feature] = .confirmed(enabled)
+                if feature == .autoLace {
+                    let confirmations = ShoeSide.allCases.map { self.feet[$0]!.features[feature] ?? .unknown }
+                    if self.demo {
+                        if ShoePairFeatureState(confirmations) == .confirmed(enabled) { self.demoAutoLacePreference = enabled }
+                    } else {
+                        self.autoLaceHistory.record(enabled, forPair: pairID, confirmations: confirmations)
+                    }
+                }
+            }, onFailure: { error in
+                self.feet[side]!.features[feature] = .unconfirmed(error.localizedDescription)
+                self.haptics.error()
+            })
+        }
+    }
+    func refreshGestureSettings() {
+        guard !shortcutRunning else { return }
+        for side in ShoeSide.allCases where feet[side]!.connected && !feet[side]!.busy && !feet[side]!.dragging {
+            let previous = feet[side]!.features[.doubleTapUntie]
+            var result: ShoeFeatureConfirmation = .confirmed(previous == .confirmed(true))
+            feet[side]!.features[.doubleTapUntie] = .reading
+            perform(side, operation: { session in
+                guard let session else { throw AdaptError.disconnected }
+                let configuration = try await session.readGestures()
+                result = configuration.doubleTapEnabled.map(ShoeFeatureConfirmation.confirmed) ?? .unsupported
+            }, onSuccess: {
+                guard self.feet[side]!.connected else { return }
+                self.feet[side]!.features[.doubleTapUntie] = result
+            }, onFailure: { error in
+                self.feet[side]!.features[.doubleTapUntie] = .unconfirmed(error.localizedDescription)
+            })
+        }
+    }
     private func perform(_ side: ShoeSide, operation: @escaping (ShoeSession?) async throws -> Void,
-                         onSuccess: @escaping () -> Void = {}) {
+                         onSuccess: @escaping () -> Void = {}, onFailure: ((Error) -> Void)? = nil) {
         guard !feet[side]!.busy else { return }
         let token = generation
         feet[side]!.busy = true
@@ -489,6 +621,7 @@ final class AppStore: ObservableObject {
                     guard let session = links[side]?.session else { throw AdaptError.disconnected }
                     try await operation(session)
                 }
+                try Task.checkCancellation()
                 guard generation == token else { return }
                 onSuccess()
                 feet[side]!.busy = false
@@ -496,19 +629,21 @@ final class AppStore: ObservableObject {
                 guard generation == token else { return }
                 if let link = links[side] { bluetooth.disconnect(id: link.peripheral.identifier) }
                 feet[side]!.busy = false
-                if !Task.isCancelled { report(error) }
+                if !Task.isCancelled {
+                    if let onFailure { onFailure(error) } else { report(error) }
+                }
             }
             tasks[side] = nil
         }
     }
     func saveMode(name: String) {
         let clean = String(name.trimmingCharacters(in: .whitespacesAndNewlines).prefix(40))
-        guard !clean.isEmpty, modes.count < 20 else { return }
+        guard canAdjustBoth, !clean.isEmpty, modes.count < 20 else { return }
         modes.append(FitMode(name: clean, left: feet[.left]!.target, right: feet[.right]!.target, colorID: nil))
         persistModes(); haptics.success()
     }
     func applyMode(_ mode: FitMode) {
-        guard canControlBoth, modes.contains(where: { $0.id == mode.id }) else { return }
+        guard canAdjustBoth, modes.contains(where: { $0.id == mode.id }) else { return }
         let token = generation
         let pairID = selectedID
         var confirmedSides: Set<ShoeSide> = []
@@ -554,6 +689,13 @@ final class AppStore: ObservableObject {
     #if DEBUG
     private func startDemo() {
         demo = true
+        // An in-memory pair lets UI checks exercise editing/removal without Keychain.
+        let sample = """
+        {"version":2,"pairs":[{"id":"demo-pair","name":"Auto Max","shoes":{
+          "left":{"profile":"auto-max-2.4.3M","credential_status":"hardware-verified","advertised_name":"004-TESTL-001","key_hex":"000102030405060708090a0b0c0d0e0f","fit_maximum":61,"address":"00:00:00:00:00:01"},
+          "right":{"profile":"auto-max-2.4.3M","credential_status":"hardware-verified","advertised_name":"004-TESTR-002","key_hex":"101112131415161718191a1b1c1d1e1f","fit_maximum":65,"address":"00:00:00:00:00:02"}}}]}
+        """
+        pairs = (try? ProfileImport.decode(Data(sample.utf8))) ?? []; selectedID = pairs.first?.id
         for side in ShoeSide.allCases {
             feet[side] = FootState(target: 30, measured: 30, progress: 30,
                                    battery: side == .left ? 100 : 93, lightColorID: "green", connected: true, note: "Demo")

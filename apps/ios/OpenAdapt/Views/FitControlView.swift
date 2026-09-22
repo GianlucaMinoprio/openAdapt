@@ -14,7 +14,7 @@ struct FitControlView: View {
                 HStack(spacing: 0) {
                     ForEach(ShoeSide.allCases) { side in
                         let foot = store.feet[side]!
-                        let shown = foot.connected ? foot.dragPosition ?? Double(foot.target) : 35
+                        let shown = foot.connected && foot.hasFitCalibration ? foot.dragPosition ?? Double(foot.target) : 35
                         let displacement = travel * (1 - CGFloat(shown) / 100)
                         ZStack(alignment: .top) {
                             VStack(spacing: 0) {
@@ -25,7 +25,7 @@ struct FitControlView: View {
                                 }
                             }.frame(width: 16, height: travel)
                                 .position(x: side == .left ? 9 : geometry.size.width / 2 - 9, y: top + travel / 2)
-                                .opacity(foot.connected ? 1 : 0)
+                                .opacity(foot.connected && foot.hasFitCalibration ? 1 : 0)
                             // The selection follows the finger without lag, then
                             // holds its level while the separate lacing mark arrives.
                             RoundedRectangle(cornerRadius: 1).fill(store.canvasInk)
@@ -36,11 +36,11 @@ struct FitControlView: View {
                                 .animation(reduceMotion || foot.dragging || foot.directAdjustment ? nil : AdaptMotion.settle, value: shown)
                             FitProgressMark(foot: foot, ink: store.canvasInk, travel: travel)
                                 .position(x: side == .left ? 12 : geometry.size.width / 2 - 12, y: top)
-                                .opacity(foot.connected && !foot.dragging ? 0.95 : 0)
+                                .opacity(foot.connected && foot.hasFitCalibration && !foot.dragging ? 0.95 : 0)
                             Text(side.letter)
                                 .font(.system(size: min(230, geometry.size.width * 0.56), weight: .black).italic())
                                 .fontWidth(.condensed).tracking(-14)
-                                .foregroundStyle(store.canvasInk).opacity(foot.connected ? 1 : 0.16)
+                                .foregroundStyle(store.canvasInk).opacity(foot.connected && foot.hasFitCalibration ? 1 : 0.16)
                                 .animation(AdaptMotion.state, value: foot.connected)
                                 .position(x: geometry.size.width / 4 - (side == .left ? -9 : 7), y: top)
                                 .offset(y: displacement)
@@ -48,7 +48,7 @@ struct FitControlView: View {
                         }.frame(width: geometry.size.width / 2, height: geometry.size.height)
                     }
                 }.accessibilityHidden(true)
-                MultiTouchFitInput(feet: store.feet, linked: store.linked, travel: travel,
+                MultiTouchFitInput(feet: store.feet, travel: travel,
                                    change: store.change, commit: store.commit, cancel: store.cancelDrag,
                                    adjust: store.adjust, prepare: store.haptics.prepare)
             }
@@ -84,7 +84,6 @@ private struct FitProgressMark: View {
 /// cross the center. A finger retains ownership of the side where it began.
 private struct MultiTouchFitInput: UIViewRepresentable {
     let feet: [ShoeSide: FootState]
-    let linked: Bool
     let travel: CGFloat
     let change: (ShoeSide, Double) -> Void
     let commit: (ShoeSide) -> Void
@@ -93,7 +92,7 @@ private struct MultiTouchFitInput: UIViewRepresentable {
     let prepare: () -> Void
     func makeUIView(context: Context) -> FitTouchSurface { FitTouchSurface() }
     func updateUIView(_ view: FitTouchSurface, context: Context) {
-        view.feet = feet; view.linked = linked; view.travel = travel
+        view.feet = feet; view.travel = travel
         view.change = change; view.commit = commit; view.cancel = cancel; view.adjust = adjust; view.prepare = prepare
         view.updateAccessibility()
     }
@@ -108,7 +107,6 @@ private final class FitAccessibilityElement: UIAccessibilityElement {
 
 private final class FitTouchSurface: UIView {
     var feet: [ShoeSide: FootState] = [:]
-    var linked = false
     var travel: CGFloat = 1
     var change: ((ShoeSide, Double) -> Void)?
     var commit: ((ShoeSide) -> Void)?
@@ -138,9 +136,9 @@ private final class FitTouchSurface: UIView {
     func updateAccessibility() {
         for (side, element) in [(ShoeSide.left, leftElement), (.right, rightElement)] {
             let foot = feet[side] ?? FootState()
-            element.accessibilityValue = foot.connected ? "\(foot.target) percent\(foot.lacing ? ", lacing" : "")" : "Not connected"
-            element.accessibilityHint = linked ? "Adjusts both shoes in steps of five percent." : "Adjusts this shoe in steps of five percent."
-            element.accessibilityTraits = foot.busy || !foot.connected ? [.adjustable, .notEnabled] : .adjustable
+            element.accessibilityValue = foot.connected ? (foot.hasFitCalibration ? "\(foot.target) percent\(foot.lacing ? ", lacing" : "")" : "Fit setup needed") : "Not connected"
+            element.accessibilityHint = "Adjusts this shoe in steps of five percent."
+            element.accessibilityTraits = foot.busy || !foot.connected || !foot.hasFitCalibration ? [.adjustable, .notEnabled] : .adjustable
         }
         accessibilityElements = [leftElement, rightElement]
         setNeedsLayout()
@@ -154,10 +152,9 @@ private final class FitTouchSurface: UIView {
         for touch in touches {
             let point = touch.location(in: self)
             let side: ShoeSide = point.x < bounds.midX ? .left : .right
-            let sides = linked ? ShoeSide.allCases : [side]
-            guard sides.allSatisfy({ feet[$0]?.connected == true && feet[$0]?.busy == false }),
-                  !drags.values.contains(where: { linked || $0.side == side }) else { continue }
-            let originals = Dictionary(uniqueKeysWithValues: sides.map { ($0, feet[$0]!.target) })
+            guard feet[side]?.connected == true, feet[side]?.hasFitCalibration == true, feet[side]?.busy == false,
+                  !drags.values.contains(where: { $0.side == side }) else { continue }
+            let originals = [side: feet[side]!.target]
             drags[touch] = Drag(side: side, startY: point.y, originals: originals)
             prepare?()
         }

@@ -10,6 +10,13 @@ struct RootView: View {
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
     private var reduceMotion: Bool { AdaptMotion.reduced(system: systemReduceMotion) }
     @State private var sheet: AppSheet?
+    @State private var dockSelection: AppSheet?
+    @GestureState private var dockDragX: CGFloat?
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+    private let dockOptions: [AppSheet] = [.lights, .battery, .modes]
+    private let dockItemWidth: CGFloat = 74
+    private let dockItemSpacing: CGFloat = 2
+    private let dockInset: CGFloat = 6
     var body: some View {
         ZStack {
             AdaptBackground(lightColor: store.activeLightColor?.color)
@@ -48,6 +55,7 @@ struct RootView: View {
         VStack(spacing: 0) {
             HStack {
                 CircleButton(symbol: "", asset: "Sneaker", label: "My shoes", foreground: store.canvasInk) { sheet = .shoes }
+                    .accessibilityHint("Choose a saved pair or add shoes")
                 Spacer()
                 Text("OpenAdapt").font(.system(size: 20, weight: .bold, design: .rounded)).tracking(-0.7)
                 Spacer()
@@ -68,26 +76,16 @@ struct RootView: View {
             HStack(spacing: 0) {
                 fitReadout(.left)
                 Spacer()
-                Text(store.linked ? "ADJUST\nTOGETHER" : "DRAG TO\nADJUST FIT")
+                Text("DRAG TO\nADJUST FIT")
                     .font(.system(size: 9, weight: .semibold)).tracking(1.6).multilineTextAlignment(.center)
                     .foregroundStyle(store.canvasInk.opacity(0.65))
                     .opacity(store.feet.values.contains(where: \.lacing) ? 0 : 1)
                     .accessibilityHidden(store.feet.values.contains(where: \.lacing))
-                    .accessibilityLabel(store.linked ? "Shoes linked" : "Adjust left and right independently")
+                    .accessibilityLabel("Adjust left and right independently")
                 Spacer()
                 fitReadout(.right)
             }.padding(.horizontal, 32).padding(.bottom, 26)
-            HStack(spacing: 22) {
-                DockButton(symbol: "link", label: "Link", selected: store.linked, foreground: store.canvasInk) { store.toggleLink() }
-                    .accessibilityValue(store.linked ? "On" : "Off").disabled(!store.connected || store.anyBusy || store.feet.values.contains(where: \.dragging))
-                DockButton(symbol: store.activeLightColor == nil ? "circle" : "circle.inset.filled", label: "Lights", dot: store.activeLightColor == nil ? nil : store.canvasInk, foreground: store.canvasInk) { sheet = .lights }
-                    .accessibilityValue(store.activeLightColor?.name ?? "Off")
-                DockButton(symbol: "battery.75percent", label: "Battery", foreground: store.canvasInk) { sheet = .battery }
-                DockButton(symbol: "slider.horizontal.3", label: "Modes", foreground: store.canvasInk) { sheet = .modes }
-            }.padding(.horizontal, 26).padding(.vertical, 16)
-                .background(.ultraThinMaterial, in: Capsule())
-                .overlay(Capsule().stroke(store.canvasInk.opacity(0.13), lineWidth: 0.5))
-                .padding(.bottom, 18)
+            dock.padding(.bottom, 18)
             }.transition(.opacity)
             } else {
                 VStack(spacing: 14) {
@@ -98,6 +96,10 @@ struct RootView: View {
                     }
                     Text(store.connectionInProgress ? "Keep your shoes close to your iPhone." : store.connectionMessage)
                         .font(.subheadline).foregroundStyle(store.canvasInk.opacity(0.55)).multilineTextAlignment(.center)
+                    if store.pairs.count > 1 && !store.connectionInProgress {
+                        Text("Choose another pair in My shoes.")
+                            .font(.footnote).foregroundStyle(store.canvasInk.opacity(0.65))
+                    }
                     Button(store.connectionInProgress ? "Cancel" : "Connect shoes") {
                         if store.connectionInProgress { store.disconnect() }
                         else if store.canReconnect { store.reconnectSavedPair() }
@@ -110,14 +112,110 @@ struct RootView: View {
             }.frame(height: 190).animation(AdaptMotion.state, value: store.hasReadyShoe)
         }.foregroundStyle(store.canvasInk)
     }
+    @ViewBuilder private var dock: some View {
+        if #available(iOS 26.0, *), !reduceTransparency {
+            dockContent
+                // One glass lens moves over a quiet tint, without stacking glass surfaces.
+                .background(store.canvasInk.opacity(0.07), in: Capsule())
+                .overlay(Capsule().stroke(store.canvasInk.opacity(0.10), lineWidth: 0.5))
+        } else {
+            dockContent
+                .background {
+                    if reduceTransparency {
+                        Capsule().fill(Color(uiColor: .secondarySystemBackground))
+                    } else {
+                        Capsule().fill(.ultraThinMaterial)
+                    }
+                }
+                .overlay(Capsule().stroke(store.canvasInk.opacity(0.13), lineWidth: 0.5))
+        }
+    }
+    private var dockContent: some View {
+        dockButtons
+        .background(alignment: .leading) {
+            if dockSelection != nil || dockDragX != nil {
+                dockLens
+                    .frame(width: dockItemWidth, height: 62)
+                    .offset(x: (dockDragX ?? dockCenter(for: dockSelection ?? .lights)) - dockItemWidth / 2)
+                    .animation(dockDragX != nil || reduceMotion ? nil : .smooth(duration: 0.25, extraBounce: 0), value: dockDragX == nil)
+                    .allowsHitTesting(false)
+                    .accessibilityHidden(true)
+            }
+        }
+        .contentShape(Capsule())
+        .highPriorityGesture(
+            DragGesture(minimumDistance: 8)
+                .updating($dockDragX) { value, position, transaction in
+                    // Keep the original finger-to-lens offset; direct tracking has no easing.
+                    transaction.animation = nil
+                    position = dockPosition(for: value)
+                }
+                .onEnded { value in
+                    // Releasing outside the dock cancels without opening any panel.
+                    let bounds = CGRect(x: -20, y: -20, width: 278, height: 114)
+                    guard bounds.contains(value.location) else { return }
+                    let destination = dockOption(at: dockPosition(for: value))
+                    selectDock(destination)
+                    sheet = destination
+                }
+        )
+    }
+    @ViewBuilder private var dockLens: some View {
+        if #available(iOS 26.0, *), !reduceTransparency {
+            Color.clear.glassEffect(.regular, in: Capsule())
+        } else {
+            Capsule().fill(store.canvasInk.opacity(0.12))
+        }
+    }
+    private func dockCenter(for destination: AppSheet) -> CGFloat {
+        dockInset + dockItemWidth / 2 + CGFloat(dockOptions.firstIndex(of: destination) ?? 0) * (dockItemWidth + dockItemSpacing)
+    }
+    private func dockOption(at x: CGFloat) -> AppSheet {
+        let index = Int(((x - dockCenter(for: .lights)) / (dockItemWidth + dockItemSpacing)).rounded())
+        return dockOptions[min(2, max(0, index))]
+    }
+    private func dockPosition(for value: DragGesture.Value) -> CGFloat {
+        let start = dockCenter(for: dockOption(at: value.startLocation.x))
+        return min(dockCenter(for: .modes), max(dockCenter(for: .lights), start + value.translation.width))
+    }
+    private var dockButtons: some View {
+        HStack(spacing: dockItemSpacing) {
+            dockButton(.lights, symbol: store.activeLightColor == nil ? "circle" : "circle.inset.filled", label: "Lights")
+                .accessibilityValue(store.activeLightColor?.name ?? "Off")
+            dockButton(.battery, symbol: "battery.75percent", label: "Battery")
+            dockButton(.modes, symbol: "slider.horizontal.3", label: "Modes")
+        }.padding(dockInset)
+    }
+    private func dockButton(_ destination: AppSheet, symbol: String, label: String) -> some View {
+        Button {
+            selectDock(destination)
+            sheet = destination
+        } label: {
+            VStack(spacing: 5) {
+                Image(systemName: symbol).font(.system(size: 23, weight: .regular))
+                    .frame(height: 29)
+                Text(label).font(.system(size: 10, weight: .medium))
+            }.frame(width: dockItemWidth, height: 62)
+                .foregroundStyle(store.canvasInk)
+                .contentShape(Capsule())
+        }
+        .buttonStyle(DockPressStyle(onPress: { selectDock(destination) }))
+        .accessibilityLabel(label)
+        .accessibilityHint("Opens \(label.lowercased()). You can also slide across the bottom controls.")
+    }
+    private func selectDock(_ destination: AppSheet) {
+        withAnimation(reduceMotion ? nil : .smooth(duration: 0.25, extraBounce: 0)) {
+            dockSelection = destination
+        }
+    }
     private func fitReadout(_ side: ShoeSide) -> some View {
         let foot = store.feet[side]!
         return VStack(alignment: side == .left ? .leading : .trailing, spacing: 3) {
             HStack(alignment: .firstTextBaseline, spacing: 4) {
-                Text(foot.connected ? "\(foot.target)" : "—").font(.system(size: 32, weight: .medium, design: .rounded)).monospacedDigit()
+                Text(foot.connected && foot.hasFitCalibration ? "\(foot.target)" : "—").font(.system(size: 32, weight: .medium, design: .rounded)).monospacedDigit()
                 Text("%").font(.system(size: 13)).opacity(0.6)
             }
-            Text("\(side.title.uppercased()) FIT").font(.system(size: 9, weight: .semibold)).tracking(1.7).opacity(0.65)
+            Text(foot.connected && !foot.hasFitCalibration ? "FIT SETUP NEEDED" : "\(side.title.uppercased()) FIT").font(.system(size: 9, weight: .semibold)).tracking(1.7).opacity(0.65)
         }.accessibilityElement(children: .ignore).accessibilityLabel("\(side.title) requested fit").accessibilityValue("\(foot.target) percent")
     }
 }
@@ -137,40 +235,41 @@ struct AdaptBackground: View {
 }
 
 struct CircleButton: View {
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     let symbol: String
     var asset: String?
     let label: String
     var foreground: Color = .white
     let action: () -> Void
-    var body: some View {
+    @ViewBuilder var body: some View {
+        if #available(iOS 26.0, *), !reduceTransparency {
+            button.buttonStyle(.glass).buttonBorderShape(.circle)
+        } else {
+            button.background(reduceTransparency ? Color(uiColor: .secondarySystemBackground) : foreground.opacity(0.08), in: Circle())
+                .buttonStyle(TactileButtonStyle())
+        }
+    }
+    private var button: some View {
         Button(action: action) {
             Group {
                 if asset == "Sneaker" { SneakerMark().frame(width: 27, height: 27) }
                 else if let asset { Image(asset).resizable().scaledToFit().frame(width: 27, height: 27) }
                 else { Image(systemName: symbol).font(.system(size: 18, weight: .medium)) }
             }.frame(width: 44, height: 44)
-        }.foregroundStyle(foreground).background(foreground.opacity(0.05), in: Circle()).accessibilityLabel(label)
-            .buttonStyle(TactileButtonStyle())
+        }.foregroundStyle(foreground).accessibilityLabel(label)
     }
 }
 
-struct DockButton: View {
-    let symbol: String
-    let label: String
-    var selected = false
-    var dot: Color?
-    var foreground: Color = .white
-    let action: () -> Void
-    var body: some View {
-        Button(action: action) {
-            VStack(spacing: 6) {
-                Image(systemName: symbol).font(.system(size: 23, weight: .regular))
-                    .foregroundStyle(dot ?? foreground).frame(width: 42, height: 29)
-                Text(label).font(.system(size: 10, weight: .medium)).opacity(selected ? 1 : 0.65)
-            }.frame(minWidth: 44, minHeight: 46)
-                .foregroundStyle(foreground)
-                .background(selected ? foreground.opacity(0.12) : .clear, in: RoundedRectangle(cornerRadius: 12))
-        }.buttonStyle(TactileButtonStyle()).accessibilityLabel(label)
+private struct DockPressStyle: ButtonStyle {
+    let onPress: () -> Void
+    @Environment(\.isEnabled) private var isEnabled
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .opacity(isEnabled ? 1 : 0.35)
+            .onChange(of: configuration.isPressed) { _, pressed in
+                if pressed && isEnabled { onPress() }
+            }
     }
 }
 

@@ -137,3 +137,21 @@ async def test_trace_failure_cannot_change_ble_write_outcome():
 def test_persistent_codec_rejects_enrollment_reset_and_uploads(opcode):
     with pytest.raises(ValueError):
         live_wire.request(opcode)
+
+
+async def test_moving_event_occurs_after_preflight_before_motor_write():
+    h, link, changes = live_harness()
+    seen = []
+    original = link.on_change
+    def changed(event, value):
+        if event == "moving":
+            seen.append((value["raw_position"], h.peer.commands.count(3)))
+        original(event, value)
+    link.on_change = changed
+    try:
+        await link.start(KEY)
+        await link.execute("lace", percent=75, maximum=60)
+        assert len(seen) == 1 and seen[0][1] == 0
+        assert h.peer.commands.count(3) == 1 and changes[0][0] == "moving"
+    finally:
+        await link.stop()

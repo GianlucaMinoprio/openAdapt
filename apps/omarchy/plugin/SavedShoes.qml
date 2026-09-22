@@ -1,5 +1,5 @@
 import QtQuick
-import QtQuick.Controls
+import qs.Commons
 
 Column {
   id: root
@@ -7,60 +7,54 @@ Column {
   property bool loaded: true
   property bool busy: false
   property bool connected: false
-  property color ink: "#e2e8e5"
-  property color accent: "#36ab23"
-  property string family: "sans-serif"
+  property bool bothConnected: true
+  property color ink: Color.popups.text
+  property color accent: Color.accent
+  property string family: Style.font.family
   signal connectRequested(string pairId)
   signal openRequested()
   signal newRequested()
-  spacing: 14
+  signal disconnectRequested()
+  spacing: Style.spacing.lg
 
-  Text {
-    visible: root.pairs.length > 0
-    text: "Your shoes"; color:root.ink; font.family:root.family; font.pixelSize:14; font.weight:Font.Medium
-  }
   Repeater {
     model: root.loaded ? root.pairs : []
-    delegate: Rectangle {
+    delegate: ActionButton {
       id: card
       required property var modelData
-      width:root.width; height:86; radius:12
-      color:Qt.rgba(root.ink.r,root.ink.g,root.ink.b,0.045)
-      border.width:1; border.color:Qt.rgba(root.accent.r,root.accent.g,root.accent.b,0.18)
-      ShoeMark { x:13; anchors.verticalCenter:parent.verticalCenter; width:42; height:42; ink:root.accent; lampInk:"#ffffff" }
+      objectName: "connect-" + modelData.id
+      width: root.width; height: Style.space(76)
+      ink: root.ink; accent: root.accent; family: root.family
+      enabled: !root.busy && modelData.connectable
+      emphasized: modelData.selected
+      Accessible.name: modelData.name + ", " + stateLabel.text
+      tooltipText: modelData.name
+      onClicked: {
+        if (modelData.selected && root.connected && root.bothConnected) root.openRequested();
+        else root.connectRequested(modelData.id);
+      }
+      ShoeMark { x: Style.space(12); anchors.verticalCenter: parent.verticalCenter; width: Style.space(44); height: width; ink: root.accent; lampInk: "white" }
       Column {
-        x:68; anchors.verticalCenter:parent.verticalCenter; width:parent.width-176; spacing:6
-        Text { text:card.modelData.name; textFormat:Text.PlainText; width:parent.width; elide:Text.ElideRight
-          color:root.ink; font.family:root.family; font.pixelSize:14; font.weight:Font.DemiBold }
-        Text { text:!card.modelData.connectable ? "Setup not verified" : (card.modelData.selected && root.connected ? "Connected" : "Left + right")
-          color:Qt.rgba(root.ink.r,root.ink.g,root.ink.b,0.55); font.family:root.family; font.pixelSize:10 }
+        x: Style.space(68); anchors.verticalCenter: parent.verticalCenter; width: parent.width - x - Style.space(88); spacing: Style.spacing.sm
+        AppText { width: parent.width; text: card.modelData.name; wrapMode: Text.NoWrap; elide: Text.ElideRight; font.pixelSize: Style.font.subtitle }
+        AppText { id: stateLabel; width: parent.width; text: !card.modelData.connectable ? "Setup not verified" : (card.modelData.selected && root.connected ? (root.bothConnected ? "Connected" : "One shoe connected") : "Not connected"); opacity: 0.7; font.pixelSize: Style.font.bodySmall }
       }
-      ActionButton {
-        objectName:"connect-" + card.modelData.id
-        anchors.right:parent.right; anchors.rightMargin:12; anchors.verticalCenter:parent.verticalCenter
-        text:card.modelData.selected && root.connected ? "Open" : "Connect"
-        compact:true; emphasized:true; ink:root.ink; accent:root.accent; family:root.family
-        enabled:!root.busy && card.modelData.connectable
-        onClicked: {
-          if (card.modelData.selected && root.connected) root.openRequested();
-          else root.connectRequested(card.modelData.id);
-        }
-      }
+      AppText { anchors.right: parent.right; anchors.rightMargin: Style.space(14); anchors.verticalCenter: parent.verticalCenter; text: card.modelData.selected && root.connected && root.bothConnected ? "Open" : "Connect" }
     }
   }
-  Item {
-    width:root.width; height:root.loaded && root.pairs.length > 0 ? 40 : 235
-    Column {
-      anchors.centerIn:parent; width:parent.width; spacing:15
-      ShoeMark { visible:root.pairs.length === 0; width:62; height:62; anchors.horizontalCenter:parent.horizontalCenter; ink:root.accent; lampInk:"#ffffff" }
-      Text { visible:root.pairs.length === 0; anchors.horizontalCenter:parent.horizontalCenter
-        text:root.loaded ? "Your shoes start here" : "Loading your shoes…"
-        color:root.ink; font.family:root.family; font.pixelSize:14 }
-      ActionButton { objectName:"newShoes"; anchors.horizontalCenter:parent.horizontalCenter
-        width:root.pairs.length > 0 ? root.width : 160
-        text:"+  New shoes"; emphasized:root.pairs.length === 0
-        enabled:root.loaded && !root.busy; ink:root.ink; accent:root.accent; family:root.family
-        onClicked:root.newRequested() }
-    }
+  Column {
+    visible: root.pairs.length === 0; width: root.width; spacing: Style.spacing.lg
+    ShoeMark { width: Style.space(92); height: width; anchors.horizontalCenter: parent.horizontalCenter; ink: root.accent; lampInk: "white" }
+    AppText { width: parent.width; horizontalAlignment: Text.AlignHCenter; text: root.loaded ? "Your shoes start here" : "Loading your shoes…"; font.pixelSize: Style.font.title }
+  }
+  ActionButton {
+    objectName: "disconnectShoes"; width: root.width; text: "Disconnect"; visible: root.connected
+    enabled: root.loaded; onClicked: root.disconnectRequested()
+  }
+  ActionButton {
+    objectName: "newShoes"; width: root.pairs.length ? root.width : Style.space(160); anchors.horizontalCenter: parent.horizontalCenter
+    text: "+  New shoes"; emphasized: root.pairs.length === 0
+    enabled: root.loaded && !root.busy; ink: root.ink; accent: root.accent; family: root.family
+    onClicked: root.newRequested()
   }
 }

@@ -18,16 +18,11 @@ struct SheetPage<Content: View>: View {
 
 struct LightsView: View {
     @EnvironmentObject private var store: AppStore
-    @State private var side = "both"
-    private var sides: [ShoeSide] { side == "both" ? ShoeSide.allCases : [side == "left" ? .left : .right] }
-    private var available: Bool { sides.allSatisfy { store.feet[$0]!.connected && !store.feet[$0]!.busy } }
+    private var available: Bool { store.canControlBoth && !store.feet.values.contains(where: \.dragging) }
     var body: some View {
         SheetPage(title: "Lights") {
             ScrollView {
                 VStack(spacing: 28) {
-                    Picker("Shoes", selection: $side) {
-                        Text("Left").tag("left"); Text("Both").tag("both"); Text("Right").tag("right")
-                    }.pickerStyle(.segmented)
                     ZStack {
                         Circle().fill(store.accent.opacity(0.13)).frame(width: 190, height: 190).blur(radius: 24)
                         HStack(spacing: 8) {
@@ -44,8 +39,8 @@ struct LightsView: View {
                     }
                     LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 18), count: 4), spacing: 24) {
                         ForEach(ShoeColor.palette) { color in
-                            let selected = sides.allSatisfy { store.feet[$0]?.lightColorID == color.id }
-                            Button { store.setColor(color, sides: sides) } label: {
+                            let selected = ShoeSide.allCases.allSatisfy { store.feet[$0]?.lightColorID == color.id }
+                            Button { store.setColor(color) } label: {
                                 Circle().fill(color.color).frame(width: 46, height: 46)
                                     .padding(6).overlay(Circle().stroke(selected ? Color.primary : Color.primary.opacity(0.12), lineWidth: selected ? 2 : 1))
                                     .overlay { if selected { Image(systemName: "checkmark").font(.system(size: 17, weight: .bold)).foregroundStyle(color.usesDarkInk ? .black : .white) } }
@@ -54,7 +49,7 @@ struct LightsView: View {
                         }
                     }
                     Button { store.lightsOff() } label: { Label("Lights off", systemImage: "lightbulb.slash").frame(maxWidth: .infinity).padding(.vertical, 7) }
-                        .buttonStyle(.bordered).disabled(!store.canControlBoth)
+                        .buttonStyle(.bordered).disabled(!available)
                     VStack(alignment: .leading, spacing: 8) {
                         HStack { Image(systemName: "waveform.path"); Text("Effects").fontWeight(.medium); Spacer(); Text("Coming later").font(.caption).foregroundStyle(.secondary) }
                         Text("Pulsing, strobe, and gradient effects are still being verified for Auto Max. Base colors are available now.")
@@ -134,10 +129,13 @@ struct ModesView: View {
                                     Text("LEFT / RIGHT").font(.system(size: 8, weight: .medium)).tracking(1).foregroundStyle(.secondary)
                                 }
                             }.padding(.vertical, 12)
-                        }.disabled(!store.canControlBoth)
+                        }.disabled(!store.canAdjustBoth)
                     }.onDelete(perform: store.deleteModes)
                     Button { adding = true } label: { Label("Save current fit", systemImage: "plus") }
-                        .disabled(!store.canControlBoth || store.modes.count >= 20)
+                        .disabled(!store.canAdjustBoth || store.modes.count >= 20)
+                }
+                if store.connected && !store.canAdjustBoth && !store.anyBusy {
+                    Section { Text("Use the shoe buttons to adjust fit. Fit calibration isn’t available yet for newly paired shoes.").font(.subheadline).foregroundStyle(.secondary) }
                 }
                 Section { Text("Tie Shoes uses the last mode you successfully applied to both shoes, or your first saved mode to start. Loosening or adjusting by hand keeps that mode remembered.").font(.caption).foregroundStyle(.secondary) }
             }
@@ -152,45 +150,33 @@ struct ModesView: View {
 }
 
 struct SettingsView: View {
-    @EnvironmentObject private var store: AppStore
     var body: some View {
         SheetPage(title: "Settings") {
             Form {
-                Section("Experience") {
-                    Toggle("Haptic feedback", isOn: $store.hapticsEnabled)
-                    LabeledContent("Control steps", value: "5%")
-                    Text("Drag either letter to set its fit. Link the shoes to adjust them together, or use two fingers for independent control.")
-                        .font(.caption).foregroundStyle(.secondary)
-                }
-                Section("Your shoes") {
-                    LabeledContent("Model", value: "Adapt Auto Max")
-                    LabeledContent("Supported firmware", value: "2.4.3M")
-                    LabeledContent("Connection", value: "Bluetooth · local only")
-                    Text("Your shoes reconnect when you open the app after their first connection. You can cancel at any time.")
-                        .font(.caption).foregroundStyle(.secondary)
-                }
-                Section("Siri & Shortcuts") {
-                    SiriTipView(intent: TieShoesIntent())
-                    NavigationLink {
-                        SiriSetupView()
-                    } label: {
-                        Label("Say “Tie my shoes”", systemImage: "waveform")
+                Section {
+                    NavigationLink { SiriSetupView() } label: {
+                        Label("Siri & Shortcuts", systemImage: "waveform")
                     }.accessibilityIdentifier("siri-voice-setup")
-                    ShortcutsLink().accessibilityIdentifier("siri-shortcuts-link")
-                    Text("Tie Shoes uses your last saved fit mode. Loosen Shoes releases both shoes. You can also control lights and check battery.")
-                        .font(.caption).foregroundStyle(.secondary)
-                    Text("Connect each shoe here once first. Siri can then control your shoes without opening OpenAdapt. Your iPhone must be unlocked, and your shoes awake and nearby.")
-                        .font(.caption).foregroundStyle(.secondary)
+                    NavigationLink { FitHelpView() } label: {
+                        Label("Fit & progress", systemImage: "slider.vertical.3")
+                    }
+                    NavigationLink { ShoeFeaturesView() } label: {
+                        Label("Auto-Lace & Quick Unlace", systemImage: "shoeprints.fill")
+                    }.accessibilityIdentifier("shoe-features")
                 }
-                Section("Fit & progress") {
-                    Text("Percentages use your saved fit calibration. The letters show the requested fit. The side marks show estimated progress during lacing, then the position confirmed by each shoe.")
-                        .font(.subheadline).foregroundStyle(.secondary)
-                    Text("Auto-lace, gestures, calibration changes, and firmware updates are not available in this release.")
-                        .font(.caption).foregroundStyle(.secondary)
+                #if DEBUG
+                Section("Developer mode") {
+                    NavigationLink { DeveloperShoesView() } label: {
+                        Label("Your shoes", systemImage: "wrench.and.screwdriver")
+                    }.accessibilityIdentifier("developer-shoes")
                 }
+                #endif
                 Section("Open by design") {
                     LabeledContent("OpenAdapt", value: "0.1.0")
                     LabeledContent("License", value: "MIT")
+                    Link(destination: URL(string: "https://github.com/GianlucaMinoprio/openAdapt")!) {
+                        Label("View on GitHub", systemImage: "arrow.up.right.square")
+                    }.accessibilityIdentifier("repository-link")
                     Text("An independent, open-source companion for your shoes. No account, no analytics, and no cloud service.")
                         .font(.subheadline).foregroundStyle(.secondary)
                     Text("Not affiliated with or endorsed by Nike. Nike and Adapt are trademarks of their respective owner.")
@@ -201,64 +187,104 @@ struct SettingsView: View {
     }
 }
 
-struct SiriSetupView: View {
+struct FitHelpView: View {
+    var body: some View {
+        Form {
+            Section("Set your fit") {
+                Text("Drag L or R to adjust that shoe, or use two fingers to adjust both at once.")
+            }
+            Section("Follow the movement") {
+                Text("The letter and target mark follow your finger. When you let go, a second mark catches up as the shoe laces.")
+                Text("The moving mark is an estimate. It reaches the target once the shoe confirms its position.")
+                    .foregroundStyle(.secondary)
+            }
+        }.navigationTitle("Fit & progress").navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+struct ShoeFeaturesView: View {
     @EnvironmentObject private var store: AppStore
+    var body: some View {
+        Form {
+            if let pair = store.pair {
+                Section(pair.displayName) {
+                    NavigationLink("Auto-Lace") { ShoeFeatureView(feature: .autoLace, pairID: pair.id) }
+                    NavigationLink("Quick Unlace") { ShoeFeatureView(feature: .doubleTapUntie, pairID: pair.id) }
+                }
+            } else {
+                Text("Connect a saved pair to manage its auto-lace and gesture settings.")
+            }
+        }.navigationTitle("Auto-Lace & Quick Unlace").navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+#if DEBUG
+struct DeveloperShoesView: View {
+    @EnvironmentObject private var store: AppStore
+    var body: some View {
+        Form {
+            Section {
+                LabeledContent("Model", value: store.pair?.model?.name ?? "No pair selected")
+                LabeledContent("Tested firmware", value: ShoeFirmware.testedVersion)
+                ForEach(ShoeSide.allCases) { side in
+                    LabeledContent("\(side.title) firmware", value: store.feet[side]?.firmware ?? "Not read")
+                }
+                LabeledContent("Connection", value: "Bluetooth · local only")
+            }
+            PairingExportSection()
+            Section {
+                NavigationLink("Check a new shoe") { PairingGuideView() }
+                    .accessibilityIdentifier("check-new-shoe")
+                Text("New-shoe setup saves each key after the shoe confirms it. After both shoes are saved, you can export the pair here. Fresh enrollment still needs physical testing; fit controls require verified calibration.")
+                    .font(.footnote).foregroundStyle(.secondary)
+            }
+            Section("Firmware") {
+                Text("2.4.3M is the version tested with OpenAdapt, not a confirmed latest release. Other versions are inspected without enabling shoe commands.")
+                Text("Firmware updates are not available. An update needs a verified image for the exact model, a validated transfer procedure, and a recovery path.")
+            }
+        }.navigationTitle("Your shoes").navigationBarTitleDisplayMode(.inline)
+    }
+}
+#endif
+
+struct SiriSetupView: View {
     @State private var importFailed = false
     var body: some View {
         Form {
-            if let tie = shortcutFile("Tie my shoes"), let untie = shortcutFile("Untie my shoes") {
-                Section {
-                    Button { addShortcut(tie) } label: {
-                        Label("Add “Tie my shoes”", systemImage: "plus.circle")
-                    }.accessibilityIdentifier("add-tie-shortcut")
-                    Button { addShortcut(untie) } label: {
-                        Label("Add “Untie my shoes”", systemImage: "plus.circle")
-                    }.accessibilityIdentifier("add-untie-shortcut")
-                } header: { Text("Your everyday commands") } footer: {
-                    Text("Tap Add Shortcut on Apple’s next screen. Then say “Siri, tie my shoes” or “Siri, untie my shoes.” Add each once; neither shortcut runs during setup.")
-                }
+            Section {
+                shortcutRow("Tie my shoes", symbol: "shoe.fill", identifier: "add-tie-shortcut")
+                shortcutRow("Untie my shoes", symbol: "arrow.down", identifier: "add-untie-shortcut")
+            } header: {
+                Text("Your everyday commands")
+            } footer: {
+                Text("Add each once. Then say “Siri, tie my shoes” or “Siri, untie my shoes.”")
             }
             Section {
-                voiceCommand("Siri, tie my shoes with OpenAdapt", detail: "Uses your last applied mode, or your first saved fit to start.")
-                voiceCommand("Siri, untie my shoes with OpenAdapt", detail: "Releases both shoes and remembers your fit for next time.")
-            } header: { Text("Built-in phrases") } footer: {
-                Text("You can also say “Lace my shoes with OpenAdapt” or “Make my lace with OpenAdapt.” For releasing, “loosen” works too. Neither action needs a percentage or opens the app.")
+                NavigationLink { SiriHelpView() } label: {
+                    Label("Help with Siri", systemImage: "questionmark.circle")
+                }.accessibilityIdentifier("siri-help")
             }
-            Section("Your tie fit") {
-                if let mode = store.tieMode {
-                    LabeledContent(mode.name, value: "L \(mode.left)% · R \(mode.right)%")
-                        .accessibilityElement(children: .ignore)
-                        .accessibilityLabel(mode.name)
-                        .accessibilityValue("Left \(mode.left) percent, right \(mode.right) percent")
-                        .accessibilityIdentifier("siri-remembered-fit")
-                    Text(store.lastUsedMode == nil ? "Starts with your first saved fit. Apply another mode whenever you want to change it." : "Apply another saved mode whenever you want to change it.")
-                        .font(.caption).foregroundStyle(.secondary)
-                } else {
-                    Text("Save a fit in Modes to use Tie Shoes.")
-                        .foregroundStyle(.secondary)
-                }
-            }
-            Section("Make the phrases shorter") {
-                setupStep(1, title: "Open Shortcuts", detail: "Tap + to create a shortcut. Search for OpenAdapt and add Tie Shoes.")
-                setupStep(2, title: "Name it “Tie my shoes”", detail: "Rename the shortcut, then tap Done. That’s the phrase you’ll say to Siri.")
-                setupStep(3, title: "Add “Untie my shoes”", detail: "Create another shortcut with Loosen Shoes, leave Both shoes selected, and name it Untie my shoes. Loosen my shoes works as a name too.")
-                ShortcutsLink()
-            }
-            Section("If Siri gives a general answer") {
-                Text("Say “untie” or “loosen.” Siri may hear “loose” as “lose,” meaning to misplace your shoes.")
-                Text("Use the full phrase with OpenAdapt, or say the exact name of a personal shortcut you’ve saved. For example, “Siri, untie my shoes” needs a shortcut named Untie my shoes.")
-                Text("Keep your shoes awake and nearby. Connect each shoe in OpenAdapt once first, and unlock your iPhone if Siri asks.")
-            }.font(.footnote).foregroundStyle(.secondary)
         }
-        .navigationTitle("Control with Siri")
-        .navigationBarTitleDisplayMode(.large)
-        .alert("Open Shortcuts to finish setup", isPresented: $importFailed) {
+        .navigationTitle("Siri & Shortcuts")
+        .navigationBarTitleDisplayMode(.inline)
+        .alert("Couldn’t open Shortcuts", isPresented: $importFailed) {
             Button("OK", role: .cancel) {}
         } message: {
-            Text("Use the steps below to create a shortcut with the Tie Shoes or Loosen Shoes action from OpenAdapt.")
+            Text("Open Help with Siri for the manual setup steps.")
         }
     }
-
+    @ViewBuilder private func shortcutRow(_ name: String, symbol: String, identifier: String) -> some View {
+        if let url = shortcutFile(name) {
+            Button {
+                UIApplication.shared.open(url) { if !$0 { importFailed = true } }
+            } label: { Label("Add “\(name)”", systemImage: symbol).padding(.vertical, 6) }
+                .accessibilityIdentifier(identifier)
+        } else {
+            NavigationLink { SiriHelpView() } label: {
+                Label("Set up “\(name)”", systemImage: symbol).padding(.vertical, 6)
+            }.accessibilityIdentifier("setup-\(identifier)")
+        }
+    }
     private func shortcutFile(_ name: String) -> URL? {
         guard let manifest = Bundle.main.url(forResource: "manifest", withExtension: "json", subdirectory: "SiriShortcuts"),
               let data = try? Data(contentsOf: manifest),
@@ -267,27 +293,37 @@ struct SiriSetupView: View {
               (info["files"] as? [String])?.contains("\(name).shortcut") == true else { return nil }
         return Bundle.main.url(forResource: name, withExtension: "shortcut", subdirectory: "SiriShortcuts")
     }
+}
 
-    private func addShortcut(_ url: URL) {
-        UIApplication.shared.open(url) { opened in
-            if !opened { importFailed = true }
-        }
-    }
-
-    private func voiceCommand(_ title: String, detail: String) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(title).font(.title3.weight(.semibold))
-            Text(detail).font(.subheadline).foregroundStyle(.secondary)
-        }.padding(.vertical, 8)
-    }
-
-    private func setupStep(_ number: Int, title: String, detail: String) -> some View {
-        HStack(alignment: .top, spacing: 12) {
-            Text("\(number)").font(.body.weight(.semibold)).foregroundStyle(.secondary)
-            VStack(alignment: .leading, spacing: 6) {
-                Text(title).font(.headline)
-                Text(detail).font(.subheadline).foregroundStyle(.secondary)
+struct SiriHelpView: View {
+    @EnvironmentObject private var store: AppStore
+    var body: some View {
+        Form {
+            Section("The fit Siri uses") {
+                if let mode = store.tieMode {
+                    LabeledContent(mode.name, value: "L \(mode.left)% · R \(mode.right)%")
+                        .accessibilityElement(children: .ignore)
+                        .accessibilityLabel(mode.name)
+                        .accessibilityValue("Left \(mode.left) percent, right \(mode.right) percent")
+                        .accessibilityIdentifier("siri-remembered-fit")
+                    Text("Your last applied mode, or your first saved fit to start. Untying keeps it remembered.")
+                        .font(.footnote).foregroundStyle(.secondary)
+                } else { Text("Save a fit in Modes to use Tie Shoes.") }
             }
-        }.padding(.vertical, 6)
+            Section("Getting started") {
+                Text("Tap Add Shortcut on Apple’s confirmation screen. Adding a shortcut does not run it.")
+                Text("Connect each shoe in OpenAdapt once. Keep them awake and nearby, and unlock your iPhone if Siri asks.")
+                Text("Siri can then control your shoes without opening OpenAdapt.")
+            }
+            Section("Set up manually") {
+                Text("In Shortcuts, tap +, search for OpenAdapt, and add Tie Shoes. Name it Tie my shoes.")
+                Text("Repeat with Loosen Shoes, leave Both shoes selected, and name it Untie my shoes.")
+                ShortcutsLink().accessibilityIdentifier("siri-shortcuts-link")
+            }
+            Section("If Siri gives a general answer") {
+                Text("Use the exact name of the shortcut you added. Say “untie” or “loosen”; Siri may hear “loose” as “lose.”")
+                Text("You can also try “Siri, lace my shoes with OpenAdapt” or “Siri, untie my shoes with OpenAdapt.”")
+            }
+        }.navigationTitle("Help with Siri").navigationBarTitleDisplayMode(.inline)
     }
 }

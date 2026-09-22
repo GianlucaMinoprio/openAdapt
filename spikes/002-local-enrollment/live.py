@@ -44,7 +44,7 @@ class LiveTransport(ControlTransport):
         if preview:
             await Transport.request(self, 20)
 
-    async def position(self, percent, maximum):
+    async def position(self, percent, maximum, *, on_moving=None):
         target = control_wire.relative_target(percent, maximum)
         before = await self.read_status()
         if before["charger_status"] != 1:
@@ -53,6 +53,8 @@ class LiveTransport(ControlTransport):
             raise ValueError("shoe battery is too low for lacing")
         if before["raw_position"] > maximum + 1:
             raise ValueError("position exceeds saved fit calibration")
+        if on_moving:
+            on_moving(before)
         completion = await self.move_raw(target)
         after = await self.read_position()
         if abs(after-target) > 1 or abs(after-completion["raw_position"]) > 1:
@@ -164,7 +166,8 @@ class AutoMaxLiveLink(ExistingKeyLink):
                 if action == "battery":
                     return {"before": await self.channel.read_status()}
                 if action == "lace":
-                    return await self.channel.position(percent, maximum)
+                    return await self.channel.position(percent, maximum,
+                                                       on_moving=lambda before:self.on_change("moving", before))
                 if action == "color":
                     await self.channel.set_color(color)
                     return {}

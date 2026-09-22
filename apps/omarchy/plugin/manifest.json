@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "id": "io.github.gianlucaminoprio.openadapt",
   "name": "OpenAdapt",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "author": "OpenAdapt",
   "license": "MIT",
-  "description": "Lacing, colors and battery for your saved Auto Max shoes.",
+  "description": "Fit, lights, saved modes and battery for your Adapt shoes.",
   "kinds": ["bar-widget"],
   "entryPoints": {"barWidget": "Panel.qml"},
   "barWidget": {

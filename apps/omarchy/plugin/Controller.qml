@@ -23,7 +23,7 @@ Item {
   }
   function refresh() {
     if (!process.running) start();
-    else if (loaded) request({action:"status"});
+    else if (loaded) request({action:busy ? "status" : "panel-open"});
   }
   function request(command) {
     if (!process.running || !loaded || (busy && command.action !== "disconnect" && command.action !== "status")) return false;

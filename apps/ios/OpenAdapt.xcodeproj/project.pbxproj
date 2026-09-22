@@ -7,26 +7,44 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		02F209C560E48FBCFE99CEB0 /* ShoeFirmware.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8E4E8B63A196F672F5476F0 /* ShoeFirmware.swift */; };
 		03139027160F4551181174E1 /* ShoeIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50AD91D14F5DBA8EEAB25571 /* ShoeIntents.swift */; };
+		0DF071F01F4743D4E21EC55A /* ShoeFeatures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FE02B41257CA0496A1464D9 /* ShoeFeatures.swift */; };
 		115F03E4D375F2CF8A23A9C8 /* ShoeChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DD02860DE47D0D277FD3FD8 /* ShoeChannel.swift */; };
+		161D685754EC6A9D46360073 /* CryptoExtras in Frameworks */ = {isa = PBXBuildFile; productRef = 30307E9C52788090440D00C5 /* CryptoExtras */; };
 		1A22E22A4EA4A249514A7D8B /* ShoeShortcuts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 720272D1739CBEE839DA99FC /* ShoeShortcuts.swift */; };
+		2BB58D46E67A2C7C44439DB7 /* EnrollmentVault.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE0E719ACBDE15F0A927F4AB /* EnrollmentVault.swift */; };
 		2D3A72243E92891DE070356A /* OpenAdaptUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A482D8DFFCFC70727B85C8F /* OpenAdaptUITests.swift */; };
+		34EF7481930C7B255A1B0E65 /* PairingExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E3FEFE954776531F4A9064A /* PairingExport.swift */; };
 		3A593B19310987A64C342E8F /* ShortcutExecution.swift in Sources */ = {isa = PBXBuildFile; fileRef = D76DF510A6A273ABC7F86303 /* ShortcutExecution.swift */; };
+		430841E6B46B71352ABF843D /* NewShoeSetup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3199BFEA5113167F00DD3090 /* NewShoeSetup.swift */; };
+		4645D68491B7151EC9BC1DB1 /* SavedPairHistory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 871980B641255DC6C835E5CD /* SavedPairHistory.swift */; };
+		49961A5199AC9DD80C224EF0 /* SavedAutoLacePreference.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DAE8EB37260D2E2DA03B6CB /* SavedAutoLacePreference.swift */; };
+		4A3804EB9611A80C5F64A295 /* ConnectionDiagnostics.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD09A1DA630AE8090C4BD5A3 /* ConnectionDiagnostics.swift */; };
 		51A69E150491C017EE647C5A /* Wire.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37FF80C9AF348C3694BB7170 /* Wire.swift */; };
+		524E62C91133449335BAE3E4 /* ShoesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADF3C2CD1FB9E789E177D958 /* ShoesView.swift */; };
+		53B2830A15D84734DC6DD30D /* ShoeEnrollment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DA5DA8A84EB08C9230402BE /* ShoeEnrollment.swift */; };
 		651F5B6CEE8C64E61429E7A3 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5AB3A7259B1E2E6E98EC1B9 /* RootView.swift */; };
 		654FD73997011CF41D6DDA61 /* ShortcutBackgroundLease.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3328D7FDACE06810B8610695 /* ShortcutBackgroundLease.swift */; };
+		67F3361FC2A0CE2E2BE72F14 /* PairingExportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF2846D776C98E89703E44F9 /* PairingExportView.swift */; };
+		68DA5FA16BB4F22AAA63EC93 /* ShoeEnrollmentExchange.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28DD6E3853DB5D148770915E /* ShoeEnrollmentExchange.swift */; };
 		6C59159037A37F550B5E1838 /* SiriShortcuts in Resources */ = {isa = PBXBuildFile; fileRef = 9888C6035326340946B3208F /* SiriShortcuts */; };
+		6F9F8907B562CF1997D50C9B /* AcknowledgedShoeWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7E2B06D456A0B7CFEC2C0C2 /* AcknowledgedShoeWriter.swift */; };
 		711C4F54969628C32176A17F /* PairVault.swift in Sources */ = {isa = PBXBuildFile; fileRef = 609975299E9E05DF768F8DF5 /* PairVault.swift */; };
 		865AA89D496F065251FD4BA6 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 2FFF5290DE6BC947D2C4C6CF /* PrivacyInfo.xcprivacy */; };
 		8713A8965F871141D79AA424 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 69B037DF56886B1FB769AF72 /* Assets.xcassets */; };
 		90D4DC53376D81A06134E843 /* SavedShoeConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D075BE1AF18E9F676948CDF /* SavedShoeConnection.swift */; };
 		91088F921F275BDCC3660AE1 /* SneakerMark.swift in Sources */ = {isa = PBXBuildFile; fileRef = 704D50CE44E384F654DB06A1 /* SneakerMark.swift */; };
 		941BFF2EFBDD12C20AE93316 /* OpenAdaptApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4CF2236D455A10D1709DA2B /* OpenAdaptApp.swift */; };
+		9851388DB0B5F422CDB7A8F2 /* ShoeFeatureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5B21B40BDCBD18101A78500 /* ShoeFeatureView.swift */; };
 		9B10EA45AF3BCC3F2B302BAF /* FitControlView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21550DE93C83F2A6DF2C6C38 /* FitControlView.swift */; };
 		9B2981A4DD39275CD7E38A0C /* Motion.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB6A6B43E62FC2CACE674D9 /* Motion.swift */; };
+		A2441779B2E6610A3547F26A /* PairingIllustration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 053883BFFF3101F48452090A /* PairingIllustration.swift */; };
+		A3ACD5CCC0549FA8F94FD8A0 /* ShoeAdvertisement.swift in Sources */ = {isa = PBXBuildFile; fileRef = F15ADBD3339861EC3B01116B /* ShoeAdvertisement.swift */; };
 		B46211CECF98EDC2491B2DEB /* SavedFitHistory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BD86C3F54032DC95AD71698 /* SavedFitHistory.swift */; };
 		C539BE758AC48481A1359223 /* PairingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62DCAD468F4D239292AA9413 /* PairingView.swift */; };
 		E497DA3FA2C39FFF08FFBDE4 /* Sheets.swift in Sources */ = {isa = PBXBuildFile; fileRef = A18150B9CD2988063A8C6542 /* Sheets.swift */; };
+		EA0B9C1A338B5CFB2AFAEDBE /* ShoeCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = A85010B9714D694A4DF4BAE7 /* ShoeCatalog.swift */; };
 		EDDA931868A7FA905072F325 /* BluetoothController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000FBDF8F99DBC6AEB55093 /* BluetoothController.swift */; };
 		F8E4B45972C06D54D3FE0750 /* ShoeCrypto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96E2F3E08931AB09F01A787E /* ShoeCrypto.swift */; };
 		F9AD67BD445BE5FB84816AF7 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF3B529B867B2FE919412D1C /* Models.swift */; };
@@ -44,15 +62,21 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		053883BFFF3101F48452090A /* PairingIllustration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PairingIllustration.swift; sourceTree = "<group>"; };
 		1DD02860DE47D0D277FD3FD8 /* ShoeChannel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoeChannel.swift; sourceTree = "<group>"; };
+		1E3FEFE954776531F4A9064A /* PairingExport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PairingExport.swift; sourceTree = "<group>"; };
 		21550DE93C83F2A6DF2C6C38 /* FitControlView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FitControlView.swift; sourceTree = "<group>"; };
+		28DD6E3853DB5D148770915E /* ShoeEnrollmentExchange.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoeEnrollmentExchange.swift; sourceTree = "<group>"; };
 		2FFF5290DE6BC947D2C4C6CF /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		3106B64CC36E14F8D8DA4D78 /* OpenAdapt.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = OpenAdapt.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		3199BFEA5113167F00DD3090 /* NewShoeSetup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewShoeSetup.swift; sourceTree = "<group>"; };
 		3328D7FDACE06810B8610695 /* ShortcutBackgroundLease.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutBackgroundLease.swift; sourceTree = "<group>"; };
 		37FF80C9AF348C3694BB7170 /* Wire.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Wire.swift; sourceTree = "<group>"; };
 		3C0B4A0F914DB0BDE9B01EF6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		4082C1AE737480A49341316B /* AppStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStore.swift; sourceTree = "<group>"; };
+		4DAE8EB37260D2E2DA03B6CB /* SavedAutoLacePreference.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedAutoLacePreference.swift; sourceTree = "<group>"; };
 		50AD91D14F5DBA8EEAB25571 /* ShoeIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoeIntents.swift; sourceTree = "<group>"; };
+		5FE02B41257CA0496A1464D9 /* ShoeFeatures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoeFeatures.swift; sourceTree = "<group>"; };
 		609975299E9E05DF768F8DF5 /* PairVault.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PairVault.swift; sourceTree = "<group>"; };
 		62DCAD468F4D239292AA9413 /* PairingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PairingView.swift; sourceTree = "<group>"; };
 		69B037DF56886B1FB769AF72 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -60,20 +84,42 @@
 		6BD86C3F54032DC95AD71698 /* SavedFitHistory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedFitHistory.swift; sourceTree = "<group>"; };
 		704D50CE44E384F654DB06A1 /* SneakerMark.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SneakerMark.swift; sourceTree = "<group>"; };
 		720272D1739CBEE839DA99FC /* ShoeShortcuts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoeShortcuts.swift; sourceTree = "<group>"; };
+		871980B641255DC6C835E5CD /* SavedPairHistory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedPairHistory.swift; sourceTree = "<group>"; };
+		8DA5DA8A84EB08C9230402BE /* ShoeEnrollment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoeEnrollment.swift; sourceTree = "<group>"; };
 		96E2F3E08931AB09F01A787E /* ShoeCrypto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoeCrypto.swift; sourceTree = "<group>"; };
 		9888C6035326340946B3208F /* SiriShortcuts */ = {isa = PBXFileReference; lastKnownFileType = folder; name = SiriShortcuts; path = Config/SiriShortcuts; sourceTree = SOURCE_ROOT; };
 		9D075BE1AF18E9F676948CDF /* SavedShoeConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedShoeConnection.swift; sourceTree = "<group>"; };
 		A000FBDF8F99DBC6AEB55093 /* BluetoothController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluetoothController.swift; sourceTree = "<group>"; };
 		A18150B9CD2988063A8C6542 /* Sheets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sheets.swift; sourceTree = "<group>"; };
+		A85010B9714D694A4DF4BAE7 /* ShoeCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoeCatalog.swift; sourceTree = "<group>"; };
+		ADF3C2CD1FB9E789E177D958 /* ShoesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoesView.swift; sourceTree = "<group>"; };
 		B5AB3A7259B1E2E6E98EC1B9 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		B918B58821DB6622785B350F /* Base.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Base.xcconfig; sourceTree = "<group>"; };
 		BBB6A6B43E62FC2CACE674D9 /* Motion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Motion.swift; sourceTree = "<group>"; };
+		BD09A1DA630AE8090C4BD5A3 /* ConnectionDiagnostics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionDiagnostics.swift; sourceTree = "<group>"; };
 		BF3B529B867B2FE919412D1C /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		C7E2B06D456A0B7CFEC2C0C2 /* AcknowledgedShoeWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AcknowledgedShoeWriter.swift; sourceTree = "<group>"; };
+		CF2846D776C98E89703E44F9 /* PairingExportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PairingExportView.swift; sourceTree = "<group>"; };
 		D25EDB7814943E503FB8A1D1 /* OpenAdaptUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = OpenAdaptUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D76DF510A6A273ABC7F86303 /* ShortcutExecution.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutExecution.swift; sourceTree = "<group>"; };
+		E5B21B40BDCBD18101A78500 /* ShoeFeatureView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoeFeatureView.swift; sourceTree = "<group>"; };
+		F15ADBD3339861EC3B01116B /* ShoeAdvertisement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoeAdvertisement.swift; sourceTree = "<group>"; };
 		F4CF2236D455A10D1709DA2B /* OpenAdaptApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAdaptApp.swift; sourceTree = "<group>"; };
 		F65A7F03095AFF804C58C0F4 /* OpenAdapt.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = OpenAdapt.entitlements; sourceTree = "<group>"; };
+		F8E4E8B63A196F672F5476F0 /* ShoeFirmware.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoeFirmware.swift; sourceTree = "<group>"; };
+		FE0E719ACBDE15F0A927F4AB /* EnrollmentVault.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnrollmentVault.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		C2826DA009474501A0E17B57 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				161D685754EC6A9D46360073 /* CryptoExtras in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		0E195AAA254DA26598A1AF2C /* Products */ = {
@@ -89,6 +135,8 @@
 			isa = PBXGroup;
 			children = (
 				A000FBDF8F99DBC6AEB55093 /* BluetoothController.swift */,
+				BD09A1DA630AE8090C4BD5A3 /* ConnectionDiagnostics.swift */,
+				3199BFEA5113167F00DD3090 /* NewShoeSetup.swift */,
 			);
 			path = Bluetooth;
 			sourceTree = "<group>";
@@ -150,11 +198,21 @@
 		B9F2E0D1BD15344B968E45E4 /* OpenAdaptCore */ = {
 			isa = PBXGroup;
 			children = (
+				C7E2B06D456A0B7CFEC2C0C2 /* AcknowledgedShoeWriter.swift */,
 				BF3B529B867B2FE919412D1C /* Models.swift */,
+				1E3FEFE954776531F4A9064A /* PairingExport.swift */,
+				4DAE8EB37260D2E2DA03B6CB /* SavedAutoLacePreference.swift */,
 				6BD86C3F54032DC95AD71698 /* SavedFitHistory.swift */,
+				871980B641255DC6C835E5CD /* SavedPairHistory.swift */,
 				9D075BE1AF18E9F676948CDF /* SavedShoeConnection.swift */,
+				F15ADBD3339861EC3B01116B /* ShoeAdvertisement.swift */,
+				A85010B9714D694A4DF4BAE7 /* ShoeCatalog.swift */,
 				1DD02860DE47D0D277FD3FD8 /* ShoeChannel.swift */,
 				96E2F3E08931AB09F01A787E /* ShoeCrypto.swift */,
+				8DA5DA8A84EB08C9230402BE /* ShoeEnrollment.swift */,
+				28DD6E3853DB5D148770915E /* ShoeEnrollmentExchange.swift */,
+				5FE02B41257CA0496A1464D9 /* ShoeFeatures.swift */,
+				F8E4E8B63A196F672F5476F0 /* ShoeFirmware.swift */,
 				720272D1739CBEE839DA99FC /* ShoeShortcuts.swift */,
 				D76DF510A6A273ABC7F86303 /* ShortcutExecution.swift */,
 				37FF80C9AF348C3694BB7170 /* Wire.swift */,
@@ -168,9 +226,13 @@
 			children = (
 				21550DE93C83F2A6DF2C6C38 /* FitControlView.swift */,
 				BBB6A6B43E62FC2CACE674D9 /* Motion.swift */,
+				CF2846D776C98E89703E44F9 /* PairingExportView.swift */,
+				053883BFFF3101F48452090A /* PairingIllustration.swift */,
 				62DCAD468F4D239292AA9413 /* PairingView.swift */,
 				B5AB3A7259B1E2E6E98EC1B9 /* RootView.swift */,
 				A18150B9CD2988063A8C6542 /* Sheets.swift */,
+				E5B21B40BDCBD18101A78500 /* ShoeFeatureView.swift */,
+				ADF3C2CD1FB9E789E177D958 /* ShoesView.swift */,
 				704D50CE44E384F654DB06A1 /* SneakerMark.swift */,
 			);
 			path = Views;
@@ -179,6 +241,7 @@
 		D263A39D81078CDDDE8E7792 /* Storage */ = {
 			isa = PBXGroup;
 			children = (
+				FE0E719ACBDE15F0A927F4AB /* EnrollmentVault.swift */,
 				609975299E9E05DF768F8DF5 /* PairVault.swift */,
 			);
 			path = Storage;
@@ -211,6 +274,7 @@
 			buildPhases = (
 				B87DE168A245A300C6E6C6B2 /* Sources */,
 				E7A2CDE867205E45179A6BC0 /* Resources */,
+				C2826DA009474501A0E17B57 /* Frameworks */,
 				96653701970383F4B25873CC /* Local owner pairing (Debug only) */,
 			);
 			buildRules = (
@@ -219,6 +283,7 @@
 			);
 			name = OpenAdapt;
 			packageProductDependencies = (
+				30307E9C52788090440D00C5 /* CryptoExtras */,
 			);
 			productName = OpenAdapt;
 			productReference = 3106B64CC36E14F8D8DA4D78 /* OpenAdapt.app */;
@@ -252,6 +317,9 @@
 			);
 			mainGroup = 51DFAB4468143A0403AC5A2B;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				9143E20168574DA505CF2539 /* XCRemoteSwiftPackageReference "swift-crypto" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 0E195AAA254DA26598A1AF2C /* Products */;
 			projectDirPath = "";
@@ -313,22 +381,39 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6F9F8907B562CF1997D50C9B /* AcknowledgedShoeWriter.swift in Sources */,
 				F9EB4CA174883F16D4B89116 /* AppStore.swift in Sources */,
 				EDDA931868A7FA905072F325 /* BluetoothController.swift in Sources */,
+				4A3804EB9611A80C5F64A295 /* ConnectionDiagnostics.swift in Sources */,
+				2BB58D46E67A2C7C44439DB7 /* EnrollmentVault.swift in Sources */,
 				9B10EA45AF3BCC3F2B302BAF /* FitControlView.swift in Sources */,
 				F9AD67BD445BE5FB84816AF7 /* Models.swift in Sources */,
 				9B2981A4DD39275CD7E38A0C /* Motion.swift in Sources */,
+				430841E6B46B71352ABF843D /* NewShoeSetup.swift in Sources */,
 				941BFF2EFBDD12C20AE93316 /* OpenAdaptApp.swift in Sources */,
 				711C4F54969628C32176A17F /* PairVault.swift in Sources */,
+				34EF7481930C7B255A1B0E65 /* PairingExport.swift in Sources */,
+				67F3361FC2A0CE2E2BE72F14 /* PairingExportView.swift in Sources */,
+				A2441779B2E6610A3547F26A /* PairingIllustration.swift in Sources */,
 				C539BE758AC48481A1359223 /* PairingView.swift in Sources */,
 				651F5B6CEE8C64E61429E7A3 /* RootView.swift in Sources */,
+				49961A5199AC9DD80C224EF0 /* SavedAutoLacePreference.swift in Sources */,
 				B46211CECF98EDC2491B2DEB /* SavedFitHistory.swift in Sources */,
+				4645D68491B7151EC9BC1DB1 /* SavedPairHistory.swift in Sources */,
 				90D4DC53376D81A06134E843 /* SavedShoeConnection.swift in Sources */,
 				E497DA3FA2C39FFF08FFBDE4 /* Sheets.swift in Sources */,
+				A3ACD5CCC0549FA8F94FD8A0 /* ShoeAdvertisement.swift in Sources */,
+				EA0B9C1A338B5CFB2AFAEDBE /* ShoeCatalog.swift in Sources */,
 				115F03E4D375F2CF8A23A9C8 /* ShoeChannel.swift in Sources */,
 				F8E4B45972C06D54D3FE0750 /* ShoeCrypto.swift in Sources */,
+				53B2830A15D84734DC6DD30D /* ShoeEnrollment.swift in Sources */,
+				68DA5FA16BB4F22AAA63EC93 /* ShoeEnrollmentExchange.swift in Sources */,
+				9851388DB0B5F422CDB7A8F2 /* ShoeFeatureView.swift in Sources */,
+				0DF071F01F4743D4E21EC55A /* ShoeFeatures.swift in Sources */,
+				02F209C560E48FBCFE99CEB0 /* ShoeFirmware.swift in Sources */,
 				03139027160F4551181174E1 /* ShoeIntents.swift in Sources */,
 				1A22E22A4EA4A249514A7D8B /* ShoeShortcuts.swift in Sources */,
+				524E62C91133449335BAE3E4 /* ShoesView.swift in Sources */,
 				654FD73997011CF41D6DDA61 /* ShortcutBackgroundLease.swift in Sources */,
 				3A593B19310987A64C342E8F /* ShortcutExecution.swift in Sources */,
 				91088F921F275BDCC3660AE1 /* SneakerMark.swift in Sources */,
@@ -595,6 +680,25 @@
 			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		9143E20168574DA505CF2539 /* XCRemoteSwiftPackageReference "swift-crypto" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-crypto.git";
+			requirement = {
+				kind = exactVersion;
+				version = 4.5.2;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		30307E9C52788090440D00C5 /* CryptoExtras */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9143E20168574DA505CF2539 /* XCRemoteSwiftPackageReference "swift-crypto" */;
+			productName = CryptoExtras;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 7BCE45D58D2E4AA449EBFC6B /* Project object */;
 }

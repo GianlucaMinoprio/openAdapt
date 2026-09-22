@@ -16,8 +16,10 @@ import signal
 import sys
 import time
 import traceback
+from urllib.parse import unquote, urlsplit
 
 import openadapt_app as storage
+from panel_preferences import Preferences, mode_name, valid_id
 
 LEGACY_ID = "auto-max"
 PUBLIC_FOOT = ("percent", "battery", "color", "lights", "checked_at", "battery_checked_at", "status")
@@ -53,8 +55,11 @@ def connectable(pair):
 
 
 def validate_request(request):
-    allowed = {"status":set(), "connect":{"pair_id"}, "disconnect":set(), "battery":set(),
-               "lace":{"side", "percent"}, "color":{"side", "color"}, "lights-off":set()}
+    allowed = {"status":set(), "panel-open":set(), "connect":{"pair_id"}, "disconnect":set(), "battery":set(),
+               "lace":{"side", "percent"}, "color":{"side", "color"}, "lights-off":set(),
+               "import-pairing":{"file_url"}, "tie":set(), "untie":set(),
+               "mode-save":{"name"}, "mode-rename":{"mode_id", "name"},
+               "mode-remove":{"mode_id"}, "mode-apply":{"mode_id"}}
     if not isinstance(request, dict) or not isinstance(request.get("action"), str):
         raise storage.UserError("Invalid control request.")
     action = request["action"]
@@ -65,7 +70,27 @@ def validate_request(request):
     if action == "connect" and (not isinstance(request["pair_id"], str)
                                or not re.fullmatch(r"[a-z0-9][a-z0-9-]{0,63}", request["pair_id"])):
         raise storage.UserError("Choose a saved pair.")
+    if action == "import-pairing":
+        export_path(request["file_url"])
+    if "mode_id" in request and not valid_id(request["mode_id"]):
+        raise storage.UserError("Choose a saved fit.")
+    if "name" in request:
+        mode_name(request["name"])
     return action
+
+
+def export_path(value):
+    if not isinstance(value, str) or len(value) > 4096:
+        raise storage.UserError("Choose a local pairing file.")
+    try:
+        url = urlsplit(value)
+        path = unquote(url.path)
+        if (url.scheme != "file" or url.netloc not in ("", "localhost") or url.query or url.fragment
+                or not path.startswith("/") or "\x00" in path):
+            raise ValueError()
+        return Path(path)
+    except ValueError:
+        raise storage.UserError("Choose a local pairing file.") from None
 
 
 class Controller:
@@ -84,6 +109,16 @@ class Controller:
         self.failed = False
         self.stopping = False
         self.cache = self.load_cache()
+        self.preferences = Preferences([p["id"] for p in self.entries])
+        self.operation_id = 0
+        self.link_epochs = {s:0 for s in storage.SIDES}
+        self.movement = {}
+        self.restore_selection()
+
+    def restore_selection(self):
+        self.selected = next((p for p in self.entries if p["id"] == self.preferences.preferred_pair),
+                             self.entries[0] if self.entries else None)
+        self.feet = copy.deepcopy(self.cache.get(self.selected["id"], storage.blank_state()["feet"])) if self.selected else {}
 
     def load_cache(self):
         try:
@@ -112,27 +147,41 @@ class Controller:
                                 "selected":pair["id"] == selected_id} for pair in self.entries],
                 "selected_id":selected_id, "pair_name":self.selected["name"] if self.selected else "",
                 "connected":any(connected.values()), "busy":bool(self.operation), "operation":self.operation,
+                "operation_id":self.operation_id, "preferred_pair_id":self.preferences.preferred_pair,
+                **(self.preferences.public(selected_id) if selected_id else {"modes":[], "tie_mode_id":None}),
                 "message":self.message, "failed":self.failed, "new_pairing_available":False,
                 "feet":{s:{**{k:feet[s].get(k) for k in PUBLIC_FOOT}, "connected":connected[s],
+                           "fit_calibrated":bool(self.profiles.get(s) and self.profiles[s][2] > 0),
+                           "movement":copy.deepcopy(self.movement.get(s)),
                            "connection":"connected" if connected[s] else self.connections[s]} for s in storage.SIDES}}
 
     def publish(self):
         self.emit(self.public())
 
-    def changed(self, side, event, value):
+    def changed(self, side, event, value, epoch=None):
+        if epoch is not None and epoch != self.link_epochs[side]:
+            return
         if event == "position" and side in self.profiles:
             self.feet[side]["percent"] = self.percent(value["raw_position"], self.profiles[side][2])
             self.feet[side]["raw_position"] = value["raw_position"]
             self.persist()
+        elif event == "moving" and side in self.movement:
+            move = self.movement[side]
+            if move["operation_id"] != self.operation_id or move["phase"] != "queued":
+                return
+            self.status_read(side, value)
+            move.update(phase="moving", start=self.feet[side]["percent"], started_at=time.time())
         elif event == "disconnected":
             self.connections[side] = "disconnected"
+            if side in self.movement and self.movement[side]["phase"] in ("queued", "moving"):
+                self.movement[side]["phase"] = "unconfirmed"
             if not self.stopping and self.operation != "connect":
                 self.message = f"{side.capitalize()} shoe disconnected."
         self.publish()
 
     @staticmethod
     def percent(raw, maximum):
-        return max(0, min(100, round(raw/maximum*20)*5))
+        return max(0, min(100, round(raw/maximum*20)*5)) if maximum > 0 else 0
 
     def status_read(self, side, result):
         self.feet[side].update(percent=self.percent(result["raw_position"], self.profiles[side][2]),
@@ -146,7 +195,9 @@ class Controller:
             raise storage.UserError("This saved pair is not ready for connection yet.")
         if self.selected and self.selected["id"] != pair_id:
             await self.disconnect()
+            self.feet = {}
         self.selected = pair
+        self.movement = {}
         self.profiles = storage.load_profiles({"version":1, "shoes":pair["shoes"]})
         if not self.feet:
             self.feet = copy.deepcopy(self.cache.get(pair_id, storage.blank_state()["feet"]))
@@ -158,13 +209,14 @@ class Controller:
         for side in storage.SIDES:
             if self.links.get(side) and self.links[side].connected:
                 continue
+            self.link_epochs[side] += 1
             if self.links.get(side):
                 await self.links[side].stop()
             self.connections[side] = "connecting"
             self.message = f"Connecting {side} shoe…"
             self.publish()
             target, key, _ = self.profiles[side]
-            link = factory(target, on_change=lambda event,value,s=side:self.changed(s,event,value),
+            link = factory(target, on_change=lambda event,value,s=side,e=self.link_epochs[side]:self.changed(s,event,value,e),
                            trace=lambda direction,packet,s=side:self.trace(s,direction,packet))
             self.links[side] = link
             try:
@@ -180,29 +232,104 @@ class Controller:
         count = sum(link.connected for link in self.links.values())
         self.message = "Both shoes connected" if count == 2 else " ".join(errors)
         self.failed = bool(errors)
+        if count == 2 and not errors:
+            self.preferences.remember_pair(pair_id)
 
     async def disconnect(self):
         self.stopping = True
+        self.operation_id += 1
+        self.link_epochs = {s:self.link_epochs[s]+1 for s in storage.SIDES}
+        self.movement = {}
         try:
             for link in self.links.values():
                 await link.stop()
         finally:
             self.links.clear()
             self.connections = {s:"disconnected" for s in storage.SIDES}
-            self.selected = None
             self.profiles = {}
-            self.feet = {}
             self.stopping = False
         self.message = "Disconnected"
 
+    def require_ready(self, sides, *, fit=False):
+        if not self.selected or any(not self.links.get(s) or not self.links[s].connected for s in sides):
+            raise storage.UserError("Connect both shoes first." if len(sides) == 2 else "Connect your shoes first.")
+        if fit and any(self.profiles[s][2] <= 0 for s in sides):
+            raise storage.UserError("Fit calibration is not available for this pair. Use the shoe buttons for now.")
+
+    async def fit(self, targets):
+        self.require_ready(targets, fit=True)
+        operation_id = self.operation_id
+        self.movement = {s:{"operation_id":operation_id, "phase":"queued", "start":self.feet[s]["percent"],
+                            "target":target, "started_at":None} for s,target in targets.items()}
+        self.publish()
+        completed = []
+        try:
+            for side, target in targets.items():
+                link = self.links[side]
+                result = await link.execute("lace", percent=target, maximum=self.profiles[side][2])
+                if operation_id != self.operation_id or self.links.get(side) is not link or not link.connected:
+                    raise storage.UserError("The connection changed. Check your shoes before trying again.")
+                self.status_read(side, result["before"])
+                raw = result["after_raw_position"]
+                self.feet[side].update(percent=self.percent(raw, self.profiles[side][2]), raw_position=raw, status="verified")
+                self.movement[side]["phase"] = "confirmed"
+                completed.append(side)
+                self.persist()
+                self.publish()
+        except BaseException as error:
+            if operation_id == self.operation_id:
+                for side in targets:
+                    if side not in completed:
+                        self.movement[side]["phase"] = "unconfirmed"
+                        self.feet[side]["status"] = "check-shoe"
+                self.persist()
+            if completed and isinstance(error, Exception):
+                raise storage.UserError(f"{completed[0].capitalize()} shoe updated; the other fit is unconfirmed. Check your shoes before trying again.") from error
+            raise
+        self.message = "Fit updated"
+
+    async def mode_action(self, request):
+        if not self.selected:
+            raise storage.UserError("Choose your shoes first.")
+        pair_id = self.selected["id"]
+        action = request["action"]
+        if action == "mode-save":
+            self.require_ready(storage.SIDES, fit=True)
+            if any(self.feet[s].get("status") != "verified" for s in storage.SIDES):
+                raise storage.UserError("Refresh your shoes before saving this fit.")
+            self.preferences.add(pair_id, request["name"], self.feet)
+            self.message = "Fit saved"
+        elif action == "mode-rename":
+            self.preferences.rename(pair_id, request["mode_id"], request["name"])
+            self.message = "Fit renamed"
+        elif action == "mode-remove":
+            self.preferences.remove(pair_id, request["mode_id"])
+            self.message = "Fit removed"
+        elif action == "untie":
+            await self.fit({s:0 for s in storage.SIDES})
+            self.message = "Shoes untied"
+        else:
+            mode_id = request.get("mode_id") if action == "mode-apply" else self.preferences.public(pair_id)["tie_mode_id"]
+            if mode_id is None:
+                raise storage.UserError("Save a fit in Modes before using Tie.")
+            mode = self.preferences.find(pair_id, mode_id)
+            await self.fit({s:mode[s] for s in storage.SIDES})
+            self.preferences.remember_mode(pair_id, mode_id)
+            self.message = "Fit applied"
+
     async def control(self, request):
         selected = request.get("side", "both")
-        if request["action"] in ("battery", "lights-off"):
+        if request["action"] == "battery":
             sides = tuple(s for s in storage.SIDES if self.links.get(s) and self.links[s].connected)
         else:
             sides = storage.SIDES if selected == "both" else (selected,)
-        if not sides or not self.selected or any(not self.links.get(s) or not self.links[s].connected for s in sides):
-            raise storage.UserError("Connect the selected shoes first.")
+        if not sides:
+            raise storage.UserError("Connect your shoes first.")
+        self.require_ready(sides)
+        if request["action"] == "lace":
+            await self.fit({s:request["percent"] for s in sides})
+            return
+        completed = []
         for side in sides:
             foot = self.feet[side]
             kwargs = {}
@@ -222,21 +349,33 @@ class Controller:
                     foot["lights"] = "off"
                 foot.update(checked_at=int(time.time()), status="verified")
                 self.persist()
-            except BaseException:
+                completed.append(side)
+                self.publish()
+            except BaseException as error:
                 foot["status"] = "check-shoe"
                 self.persist()
+                if completed and isinstance(error, Exception):
+                    raise storage.UserError(f"{completed[0].capitalize()} shoe updated; the other shoe did not confirm. Try again when both are connected.") from error
                 raise
         self.message = {"lace":"Lacing updated", "color":"Color updated",
                         "battery":"Battery checked", "lights-off":"Lights off"}[request["action"]]
 
     async def dispatch(self, request):
         action = validate_request(request)
-        if action == "status":
+        if action in ("status", "panel-open"):
+            if action == "panel-open" and not self.operation and not any(link.connected for link in self.links.values()):
+                self.link_epochs = {s:self.link_epochs[s]+1 for s in storage.SIDES}
+                self.profiles = {}
+                self.movement = {}
+                self.restore_selection()
+                self.message = ""
+                self.failed = False
             self.publish()
             return
         if self.operation:
             raise storage.UserError("An operation is already running.")
         self.operation = action
+        self.operation_id += 1
         self.failed = False
         self.message = "Working…"
         self.publish()
@@ -245,6 +384,25 @@ class Controller:
                 await self.connect(request["pair_id"])
             elif action == "disconnect":
                 await self.disconnect()
+            elif action == "import-pairing":
+                if any(link.connected for link in self.links.values()):
+                    raise storage.UserError("Disconnect your shoes before importing a pairing.")
+                if self.links:
+                    # Failed attempts leave stopped handles behind. Release those
+                    # without asking for an inaccessible Disconnect button.
+                    await self.disconnect()
+                from pairing_transfer import import_file
+                entries, imported_id = import_file(export_path(request["file_url"]), catalog())
+                self.entries = entries
+                self.profiles = {}
+                self.movement = {}
+                # Never reuse an old reading/calibration after credentials are replaced.
+                self.cache.pop(imported_id, None)
+                storage.write_json(storage.STATE/"readings.json", {"version":2, "pairs":self.cache})
+                self.restore_selection()
+                self.message = "Pairing imported. Wake both shoes, disconnect your iPhone, then choose Connect."
+            elif action.startswith("mode-") or action in ("tie", "untie"):
+                await self.mode_action(request)
             else:
                 await self.control(request)
         except (Exception, asyncio.CancelledError) as error:

@@ -1,0 +1,21 @@
+{
+  "version": 2,
+  "pairs": [{
+    "id": "pair-synthetic-export",
+    "name": "Synthetic Auto Max",
+    "shoes": {
+      "left": {
+        "profile": "auto-max-2.4.3M", "credential_status": "hardware-verified",
+        "advertised_name": "004-SYNTHETIC-000", "key_hex": "000102030405060708090a0b0c0d0e0f",
+        "fit_maximum": 0, "address": "", "shoe_identity": "AgMEBQYA",
+        "peripheral_id": "00000000-0000-4000-8000-000000000001"
+      },
+      "right": {
+        "profile": "auto-max-2.4.3M", "credential_status": "hardware-verified",
+        "advertised_name": "004-SYNTHETIC-000", "key_hex": "101112131415161718191a1b1c1d1e1f",
+        "fit_maximum": 0, "address": "", "shoe_identity": "AgMEBQcB",
+        "peripheral_id": "00000000-0000-4000-8000-000000000002"
+      }
+    }
+  }]
+}

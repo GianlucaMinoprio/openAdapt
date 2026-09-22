@@ -1,4 +1,8 @@
 name: OpenAdapt
+packages:
+  SwiftCrypto:
+    url: https://github.com/apple/swift-crypto.git
+    exactVersion: 4.5.2
 options:
   bundleIdPrefix: org.openadapt
   deploymentTarget:
@@ -16,6 +20,9 @@ targets:
   OpenAdapt:
     type: application
     platform: iOS
+    dependencies:
+      - package: SwiftCrypto
+        product: CryptoExtras
     info:
       path: OpenAdapt/Info.plist
       properties:

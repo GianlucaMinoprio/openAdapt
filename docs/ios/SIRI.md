@@ -9,11 +9,11 @@ The two primary actions are **Tie Shoes** and **Loosen Shoes**. Tie Shoes has no
 ### One-time setup for the shortest phrases
 
 1. Tie Shoes starts with your first saved fit, normally **Move · 60% / 60%**. The active tie fit is labeled **Used by Tie Shoes** in Modes. Applying another saved mode changes the fit used next time; no initial mode application is required.
-2. In **OpenAdapt → Settings → Siri & Shortcuts → Say “Tie my shoes”**, tap **Add “Tie my shoes”**, then confirm **Add Shortcut** on Apple's screen. This installs a single action bound to this OpenAdapt app. It does not run it during setup.
+2. In **OpenAdapt → Settings → Siri & Shortcuts**, tap **Add “Tie my shoes”**, then confirm **Add Shortcut** on Apple's screen. This installs a single action bound to this OpenAdapt app. It does not run it during setup.
 3. Return to OpenAdapt and repeat with **Add “Untie my shoes”**. It uses **Loosen Shoes → Both shoes**, without asking which shoe each time.
 4. Say **“Siri, tie my shoes”** or **“Siri, untie my shoes.”** No app name, mode choice, percentage, or separate Connect step is needed after initial setup. The shoes must be awake and nearby; unlock the iPhone if Siri asks.
 
-The Add buttons require bundle-specific signed shortcut resources. For builds without them, the guide includes manual setup: create a shortcut in Apple Shortcuts, search for OpenAdapt, add **Tie Shoes**, and rename it **Tie my shoes**. Repeat with **Loosen Shoes → Both shoes**, named **Untie my shoes**. **Loosen my shoes** is also a suitable personal-shortcut name. Distributors can generate the resources using [the signing script](../../apps/ios/Config/SiriShortcuts/README.md).
+The main screen shows these two setup actions and **Help with Siri**. Remembered-fit details, manual setup, and troubleshooting live in Help. The Add buttons require bundle-specific signed shortcut resources. For builds without them, **Set up** links open the manual guide: create a shortcut in Apple Shortcuts, search for OpenAdapt, add **Tie Shoes**, and rename it **Tie my shoes**. Repeat with **Loosen Shoes → Both shoes**, named **Untie my shoes**. **Loosen my shoes** is also a suitable personal-shortcut name. Distributors can generate the resources using [the signing script](../../apps/ios/Config/SiriShortcuts/README.md).
 
 Apple runs personal shortcuts by their saved names. App-provided activation phrases must include the app name, so OpenAdapt cannot automatically claim a bare “Tie my shoes” phrase. The short names need this one-time setup in Shortcuts. See [Apple’s Siri shortcut guide](https://support.apple.com/guide/shortcuts/run-shortcuts-with-siri-apd07c25bb38/ios) and [App Shortcut phrase requirements](https://developer.apple.com/videos/play/wwdc2022/10170/).
 

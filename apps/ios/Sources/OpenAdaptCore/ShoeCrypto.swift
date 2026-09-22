@@ -16,6 +16,12 @@ public enum ShoeCrypto {
     // AES-ECB is required only for the shoe's legacy single-block challenge protocol.
     public static func crypt(_ block: Data, key: Data, decrypt: Bool = false) throws -> Data {
         try validate(key: key)
+        return try legacyBlock(block, key: key, decrypt: decrypt)
+    }
+    static func setupBlock(_ block: Data, decrypt: Bool = false) throws -> Data {
+        try legacyBlock(block, key: Data(repeating: 1, count: 16), decrypt: decrypt)
+    }
+    private static func legacyBlock(_ block: Data, key: Data, decrypt: Bool) throws -> Data {
         guard block.count == 16 else { throw AdaptError.authentication }
         var output = [UInt8](repeating: 0, count: 16)
         var length = 0

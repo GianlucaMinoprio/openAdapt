@@ -15,7 +15,7 @@ public enum AdaptError: Error, LocalizedError, Equatable {
         case .unavailable: return "Bluetooth is unavailable. Check Bluetooth access in Settings."
         case .lowBattery: return "Charge the shoe to at least 20% before adjusting its fit."
         case .charging: return "Take the shoe off the charger before adjusting its fit."
-        case .calibration: return "The shoe's position does not match its saved fit calibration."
+        case .calibration: return "This shoe needs a verified fit calibration before percentage adjustments are available."
         case .movement: return "The shoe did not confirm the requested fit. Check the shoe before trying again."
         }
     }
@@ -36,18 +36,35 @@ public struct ShoeCredential: Codable, Equatable {
     public let fitMaximum: Int
     // Linux MAC addresses cannot be used as CoreBluetooth identifiers.
     public let address: String
+    public let peripheralID: UUID?
+    public let shoeIdentity: Data?
+    public var hasFitCalibration: Bool { fitMaximum > 0 }
     enum CodingKeys: String, CodingKey {
         case profile, address
         case credentialStatus = "credential_status", advertisedName = "advertised_name"
         case keyHex = "key_hex", fitMaximum = "fit_maximum"
+        case peripheralID = "peripheral_id", shoeIdentity = "shoe_identity"
     }
     public var key: Data { Data(hex: keyHex) ?? Data() }
     public func validate() throws {
         guard profile == "auto-max-2.4.3M", credentialStatus == "hardware-verified",
               advertisedName.range(of: "^004-[A-Z0-9]+-[0-9]{3}$", options: .regularExpression) != nil,
-              address.range(of: "^(?:[A-Fa-f0-9]{2}:){5}[A-Fa-f0-9]{2}$", options: .regularExpression) != nil,
-              (1...100).contains(fitMaximum), keyHex.count == 32 else { throw AdaptError.invalidProfile }
+              keyHex.count == 32 else { throw AdaptError.invalidProfile }
+        if peripheralID != nil {
+            guard address.isEmpty, shoeIdentity?.count == 6, (0...100).contains(fitMaximum) else { throw AdaptError.invalidProfile }
+        } else {
+            guard shoeIdentity == nil,
+                  address.range(of: "^(?:[A-Fa-f0-9]{2}:){5}[A-Fa-f0-9]{2}$", options: .regularExpression) != nil,
+                  (1...100).contains(fitMaximum) else { throw AdaptError.invalidProfile }
+        }
         try ShoeCrypto.validate(key: key)
+    }
+    public static func enrolled(_ record: ShoeEnrollmentRecord) throws -> Self {
+        try record.validate()
+        guard record.phase == .verified, let key = record.candidateKey else { throw AdaptError.invalidProfile }
+        return Self(profile: "auto-max-2.4.3M", credentialStatus: "hardware-verified", advertisedName: record.advertisedName,
+            keyHex: key.map { String(format: "%02x", $0) }.joined(), fitMaximum: 0, address: "",
+            peripheralID: record.peripheralID, shoeIdentity: record.identity)
     }
 }
 
@@ -59,9 +76,20 @@ public struct ShoePair: Codable, Identifiable, Equatable {
     public func validate() throws {
         guard id.range(of: "^[a-z0-9][a-z0-9-]{0,63}$", options: .regularExpression) != nil,
               (1...60).contains(name.count), Set(shoes.keys) == Set(["left", "right"]),
-              shoes["left"]?.address.uppercased() != shoes["right"]?.address.uppercased(),
               shoes["left"]?.key != shoes["right"]?.key else { throw AdaptError.invalidProfile }
         try shoes.values.forEach { try $0.validate() }
+        let left = credential(.left), right = credential(.right)
+        if left.peripheralID != nil || right.peripheralID != nil {
+            guard let leftID = left.peripheralID, let rightID = right.peripheralID, leftID != rightID,
+                  left.shoeIdentity?.last == 0, right.shoeIdentity?.last == 1 else { throw AdaptError.invalidProfile }
+        } else if left.address.uppercased() == right.address.uppercased() { throw AdaptError.invalidProfile }
+    }
+    public static func enrolled(_ records: [ShoeEnrollmentRecord]) throws -> Self {
+        guard records.count == 2, Set(records.map(\.side)) == Set(ShoeSide.allCases) else { throw AdaptError.invalidProfile }
+        let pair = Self(id: "pair-" + UUID().uuidString.lowercased(), name: ShoeModel.adaptAutoMax.name,
+            shoes: try Dictionary(uniqueKeysWithValues: records.map { ($0.side.rawValue, try ShoeCredential.enrolled($0)) }))
+        try pair.validate()
+        return pair
     }
 }
 

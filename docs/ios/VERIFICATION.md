@@ -1,5 +1,110 @@
 # iOS implementation and verification
 
+## September 22 source publication check
+
+The complete current source passes 97 Swift core tests and an unsigned Release iOS Simulator build. The Release app contains no owner pairing file. Staged source was checked against the local owner profiles; credentials, device identities, private configuration, radio captures and signed personal shortcuts are excluded. Documentation screenshots use synthetic UI data. No iPhone installation, Bluetooth connection, reset or enrollment was performed for this source check.
+
+## September 22 most recently connected pair
+
+- Saved-pair connection history is separate from temporary selection. Only both shoes authenticating and returning status records a pair as the default, including connections made through the shared Siri connection path. Browsing, canceled attempts, failed attempts, and partial connections cannot overwrite it.
+- Launch restores the most recent valid pair; foreground restoration does the same only when no connection or operation is active. It then uses the existing bounded reconnect for that pair alone. There is no automatic cycling through other saved pairs. My shoes at the top left still lets the user select another pair and press Connect.
+- Removing a pair prunes its history, with the most recently connected remaining pair preferred. Before any new history exists, the previous selectedPair preference is preserved as an upgrade fallback.
+- **94 core tests pass**, including five history tests for restarts, latest successful connection, partial/failure retention, removal, missing profiles, and upgrade fallback. The first full run timed out in the pre-existing gesture cancellation test during a concurrent build; an unchanged full rerun passed after the build finished. No protocol timing was changed.
+- The targeted multi-pair Simulator flow passes: failure and retry, choosing another saved pair through the top-left My shoes button, explicitly connecting it, and seeing that pair on the main page. The initial UI test attempted Done inside a detail page; the corrected test follows the visible Back button before Done. Synthetic profiles never initialize Bluetooth. Screenshot: [another pair selected](screenshots/other-pair-selected.png).
+- The final signed build passed, installed, and launched on the owner's iPhone. No motor, lights, feature settings, enrollment, or firmware writes were sent by development tools. Multi-pair history is verified offline; simultaneous access to multiple physical pairs was not tested.
+- Evidence: `/tmp/openadapt-last-pair-core-final.log`, `/tmp/openadapt-last-pair-ui-final.xcresult`, `/tmp/openadapt-last-pair-device-final.log`. Installation receipts remain private. Changes remain local and uncommitted.
+
+
+## September 22 three-option sliding Liquid Glass dock
+
+- Removed Link mode and its state from the home controls and touch handler. The bottom dock contains only Lights, Battery, and Modes; left/right fit controls remain independent, including multi-touch ownership.
+- The glass selector follows horizontal dragging directly, preserving the initial finger offset. Releasing inside the dock opens the nearest option; releasing outside cancels. Tap and VoiceOver button activation remain available. A 250 ms, zero-bounce animation settles the lens; Reduce Motion disables settling while keeping direct tracking. Reduce Transparency uses a solid fallback.
+- The updated `testIndependentFitAndSheets` passes: independent left/right drags, Link absent, Lights→Battery, Battery→Lights, Lights→Modes, normal taps, colors, lights off, and applying a saved mode in demo. Cancellation and device touch feel were reviewed in code but still need hands-on validation.
+- Reviewed a Simulator recording and caught a native glass-container layering issue that washed out selected labels. The corrected lens is rendered as a background behind the button row. The final UI run passes again; visually inspected crisp labels on [blue](screenshots/fit-glass-dock-blue.png) and [white](screenshots/fit-glass-dock-white.png).
+- Final signed iPhone build passed, installed, and launched successfully. No physical motor/light/feature-setting operation was executed by development tools. Existing protocol tests were not rerun for this presentation change.
+- Evidence: `/tmp/openadapt-sliding-dock-final-ui.xcresult`, `/tmp/openadapt-sliding-dock-final-device.log`; private installation receipts remain outside Git. `git diff --check` passes. Changes remain local and uncommitted.
+
+## September 22 pair-wide feature switches
+
+- Auto-Lace now has one native switch, defaulting **off** when no preference is saved. It stores a preference per pair only after both shoes acknowledge the same change. Loading that preference sends nothing; partial failures keep the previous preference and display an error.
+- **Quick Unlace** replaces the double-tap wording and supports one on/off switch for both shoes. It reads on entry/reconnection, preflights before setting, validates the ACK, and requires exact readback. The off request is derived from the archived GestureOff model, not a captured disable exchange; physical validation remains pending.
+- Removed the left/right selector from both feature pages and Lights. Every such action requires both shoes to be connected and available. The main independent L/R fit controls remain available.
+- **89 core tests passed.** Three targeted Simulator UI flows passed across the final runs: default-off Auto-Lace and on/off, Quick Unlace on/off and re-entry readback, and colors with existing fit/sheet behavior. Initial switch tests tapped the middle of a full-width accessibility row; the corrected tests tap its actual native switch control. No product change was needed for that test targeting issue.
+- Visually reviewed [Auto-Lace](screenshots/auto-lace-simple.png), [Quick Unlace](screenshots/quick-unlace-simple.png), and [Lights](screenshots/lights-pair.png). The [motion review](SHOE-LIBRARY.md#motion-review--pair-wide-switches) approves this change's native feedback.
+- **Final signed iPhone build passed, installed, and launched successfully.** No feature-setting, motor, reset, or enrollment operation was invoked by development tools. Hardware feature behavior remains a separate owner check.
+- Evidence: `/tmp/openadapt-simple-settings-core-final.log`, `/tmp/openadapt-simple-settings-ui.xcresult`, `/tmp/openadapt-simple-settings-ui-final.xcresult`, and `/tmp/openadapt-simple-settings-device-final.log`. Installation receipts remain private. Changes are local and uncommitted.
+
+
+## September 22: saved-pair reconnect stall
+
+- Reproduced the owner's failure on both saved shoes. Console showed encrypted Bluetooth links, successful service/firmware reads, notification subscription, one unacknowledged write per shoe, then app-initiated disconnects about three seconds later. Bounded Debug diagnostics confirmed `canSendWriteWithoutResponse` stayed false after the first fragment, no readiness callback arrived, and the pending second fragment hit the writer timeout. The underlying iOS flow-control cause remains undetermined; the trace did not show a rejected application key.
+- The AutoMax command characteristic advertises both ATT write types. The iPhone client now chooses acknowledged writes at discovery when supported, serializes fragments and flow acknowledgements, and waits for `didWriteValueFor` before sending the next packet. Timeout, disconnect, write error, and cancellation terminate the stream without replay or switching transport. The existing capacity-gated path remains for characteristics supporting only unacknowledged writes. Packet length is checked against CoreBluetooth's reported limit. The application handshake/proof validation is unchanged.
+- The installed update authenticated **both physical saved shoes** and completed status reads. The owner confirmed, “now it works.” No reset, re-enrollment, credential replacement, calibration, actuator, feature-setting, or firmware operation was initiated by the development tools.
+- **82 core tests pass**, including five new writer cases: ordered fragment/flow writes, error without replay, missing acknowledgement timeout, disconnect with queued writes, and cancellation with a late callback. Signed iPhone build passes. Tests cover writer lifecycle; this reconnect check does not establish physical motor/light behavior or fresh enrollment with the new transport.
+- Debug diagnostics retain at most 160 local events containing timestamps, transient link numbers, controlled stage labels, and numeric error codes. They contain no identifiers, credentials, or packet bytes; Release does not record them. Raw Console/device evidence stays outside Git. Local build/test logs: `/tmp/openadapt-reconnect-build.log`, `/tmp/openadapt-writer-tests.log`.
+
+## September 22: sequential, accessible first-time setup
+
+- Replaced separate connection cards with a single persistent large shoe, a concise physical instruction, and first/second-step progress. Firmware, proximity, and model-selection rows are absent from onboarding. The lamp cue runs only while waiting for a physical press.
+- Enrollment now saves/authenticates the first shoe before starting its partner. Manufacturer metadata determines physical side; proximity only chooses which shoe to approach first. The next instruction names the opposite foot. If the partner was not found initially, it can be discovered after the first confirmation. Retained candidate records are prioritized on retry; errors never advance the sequence or publish a partial pair.
+- Saved-pair Connect still connects both shoes together. Existing key-exchange persistence and no-replay rules are unchanged. These checks used synthetic responses and did not enroll, reset, or move physical shoes.
+- **77 core tests pass. Seven targeted Simulator flows pass** across the initial six-flow run and final accessibility check: first-only instruction/cancel, left → right, right → left with Reduce Motion, failed first foot without advancing, complete pair publication, welcome/reset help, and accessibility-size text. Final confirmation/success reruns also verify automatic scrolling to each new instruction.
+- Signed iPhone and unsigned Release Simulator builds pass. Installed and successfully launched the update on the owner’s iPhone. Visually inspected [first shoe](screenshots/new-shoes-first-confirmation.png), [opposite shoe](screenshots/new-shoes-second-confirmation.png), and [completion](screenshots/new-shoes-saved.png). The [motion review](SHOE-LIBRARY.md#motion-review--september-22) records the simplified transitions and reduced-motion behavior.
+- Evidence: `/tmp/openadapt-sequential-setup-core.log`, `/tmp/openadapt-sequential-setup-ui.xcresult`, `/tmp/openadapt-sequential-accessibility-ui.xcresult`, `/tmp/openadapt-sequential-setup-iphone-final.log`, and `/tmp/openadapt-sequential-setup-release.log`. Hardware enrollment and new-shoe fit calibration remain unverified.
+
+## September 21: first-time two-shoe enrollment
+
+- Recovered read-only Omarchy evidence for product families, manufacturer physical-side identity, setup readiness proof, button-event routing, and legacy DH derivation. No reset-state advertisement flag was established. [First-time pairing](FIRST-PAIRING.md) records the findings and limits.
+- Added explicit setup/enrollment APIs, pinned Swift Crypto 4.5.2 BoringSSL DH, durable Keychain attempt/candidate records, candidate-only recovery, both-shoe verification, and native profiles. Normal saved-key failure cannot trigger enrollment. A lost peer response can require an owner-performed manual reset; no automatic reenrollment or reset command is implemented.
+- New native pairs have unknown fit calibration. App L/R, saved-mode application, and Siri fit targets remain blocked until verified calibration is available. Existing calibrated profiles retain their controls. No fabricated MAC address, copied fit maximum, or pairing success based solely on an advertisement is used.
+- **77 Swift core tests passed.** Coverage includes all four MODP groups against independent synthetic arithmetic vectors, invalid values, side metadata, exact request sequence, readiness event versus final ACK, write-ahead storage, timeout, cancellation, persistence failure before final receive ACK, candidate-only retry, both-foot publication, and calibration rejection.
+- **Four relevant Simulator flows passed**: automatic inspection, welcome/reset guidance, physical button prompts without shoe selection, and synthetic verified-pair publication. The final compact layout rerun passed both enrollment flows; screenshots were visually inspected: [button prompts](screenshots/new-shoes-button-confirmation.png), [saved pair](screenshots/new-shoes-saved.png). These are synthetic previews, not live pairing evidence.
+- **Signed Debug iPhone and unsigned Release Simulator builds passed.** The Release bundle excludes the private owner profile. The Debug update was installed and successfully launched on the owner's iPhone. No physical reset, enrollment, feature setting, motor, or firmware-write command was invoked by development tools.
+- Evidence: `/tmp/openadapt-enrollment-core-final.log`, `/tmp/openadapt-enrollment-ui.xcresult`, `/tmp/openadapt-enrollment-ui-final.xcresult`, `/tmp/openadapt-enrollment-device-final.log`, `/tmp/openadapt-enrollment-release-final.log`. Installation receipts remain private. `git diff --check` passes; changes remain local and uncommitted.
+- **Remaining:** owner-operated factory-reset enrollment, successful candidate authentication on hardware, app restart/reconnect and shoe power-cycle retention, fit-calibration readback, other model/firmware compatibility, and OTA. No runtime original-iPhone derivation known answer was obtained; primary implementation evidence plus synthetic vectors do not replace these physical checks.
+
+## September 21: one Connect action for the pair
+
+- Removed Connect individually from saved-pair details and removed the obsolete navigation advice from ambiguous-identity errors. The single Connect button uses the existing pair reconnect operation, which starts both disconnected shoes together and retains an already connected foot.
+- The nine saved-connection core tests, existing shoe-details/removal UI flow, and signed iPhone build pass. Updated and visually checked the disconnected-pair screenshot. Installed and launched the update on the owner's iPhone. No physical setting or motor command was issued.
+- Evidence: `/tmp/openadapt-pair-connect-core.log`, `/tmp/openadapt-pair-connect-ui.xcresult`, `/tmp/openadapt-pair-connect-iphone.log`. Connection/authentication behavior was not broadened to accept ambiguous or unverified shoes.
+
+## September 21: Omarchy report and double-tap activation
+
+- Used the owner-supplied sanitized report to correct auto-lace Off from explicit protobuf false to the captured empty payload. On/Off requests and empty ACK now match the report’s full envelope vectors. This is comparison with the report, not independent reanalysis of the original raw captures on this Mac.
+- Added strict repeated-entry gesture parsing, opcode 179 readback, and captured opcode 178 double-tap activation. Activation reads first, avoids a write if already enabled, and leaves unfamiliar/multiple configurations unchanged. Only response 3 plus exact enabled readback becomes success. Critical-battery, active-session, unknown, negative, malformed, missing, canceled, or mismatched results never replay the write.
+- Gestures displays each foot’s actual readback, Left/Both/Right activation, and Refresh setting. Setting reads occur on page entry/reconnection. Disable remains unavailable; the report derives an off request but provides no captured disable transaction. No preset-write or percentage mapping was established. Removed the unsupported assertion that the raw stored preset was proven to be the step-in target.
+- **64 Swift core tests passed**, including eight additional message/session cases. **Both targeted UI flows passed**: independent gesture activation/readback (including mixed state and already-enabled controls), and the existing nickname/appearance/auto-lace/disconnect/removal flow. Tests used synthetic shoes and made no radio connections.
+- **Signed Debug iPhone and unsigned Release Simulator builds passed. Installed and successfully launched the update on the owner’s iPhone.** No gesture/auto-lace setting, motor, enrollment, reset, or firmware-write command was invoked on physical shoes by development tools. Actual step-in/double-tap behavior remains an owner-operated check.
+- Visually reviewed and saved [mixed gesture state](screenshots/gesture-settings-mixed.png) and [both enabled](screenshots/gesture-settings-enabled.png). These are Simulator demo state. The native Form/navigation and progress indicators add no custom motion or delayed interaction.
+- Evidence: `/tmp/openadapt-gesture-core.log`, `/tmp/openadapt-gesture-ui.xcresult`, `/tmp/openadapt-gesture-iphone.log`, `/tmp/openadapt-gesture-release.log`. Installation/launch receipts are private outside Git. `git diff --check` passed. Changes remain local and uncommitted.
+- Protocol scope and remaining evidence: [AUTO-LACE-GESTURE-EVIDENCE.md](AUTO-LACE-GESTURE-EVIDENCE.md).
+
+## September 21: My shoes, model names, and auto-lace controls
+
+- Implemented the owner's reference flow: saved-pair cards without repeated model names; separate connected and disconnected details; local nickname and appearance editing; native remove/cancel confirmation; five retail model names; and an Add shoes illustration based on the supplied video. Calibration is omitted. Original reference images and video frames are not bundled.
+- Auto-lace can request opcode 82 Enable/Disable on either or both connected feet. Per-foot state begins Unknown, records only accepted responses, and clears on disconnect. Synthetic tests verify both boolean encodings, authentication requirements, no fit write, missing/negative/malformed ACKs, and no replay. Full captured request/ACK comparison, state readback, persistence, and physical behavior remain unverified.
+- Gesture configuration and shoe-stored fit selection remain unavailable pending the complete schema from the Omarchy archive. The UI explains that limitation. Firmware inspection remains read-only; no fresh enrollment or OTA is added.
+- **56 Swift core tests passed. Four targeted UI flows passed** across the initial run and corrected rerun: new-shoe catalog/search, connected details/nickname/appearance/auto-lace/disconnect/removal, Settings/Siri discovery, and welcome/reset guidance. The details test verifies Both → Enabled, then Left → Disabled while Right stays Enabled, Cancel retains the pair, and Remove deletes the synthetic pair. Earlier failures were accessibility queries: a combined color label and duplicate native alert button elements; corrected queries passed.
+- **Signed Debug iPhone and unsigned Release Simulator builds passed.** Installed the final Debug build on the owner's iPhone. Automatic launch was refused because the phone was locked; unlock and open OpenAdapt. Installation/launch receipts remain private outside Git. No physical shoe configuration, motor, reset, enrollment, or firmware-write command was issued by development tools.
+- Visually inspected and saved Simulator screenshots: [cards](screenshots/shoes-cards.png), [connected details](screenshots/shoe-connected-details.png), [appearance](screenshots/shoe-colorways.png), [auto-lace](screenshots/auto-lace-settings.png), [disconnected pair](screenshots/shoe-disconnected-details.png), [remove confirmation](screenshots/remove-shoe-confirmation.png), [setup intro](screenshots/new-shoes-intro.png), and [search](screenshots/new-shoes-search.png). These use synthetic sample state, with no private identifiers or credentials. Motion review: [SHOE-LIBRARY.md](SHOE-LIBRARY.md#motion-review).
+- Evidence: `/tmp/openadapt-shoes-core.log`, `/tmp/openadapt-shoes-ui-v2.xcresult` (three passing flows), `/tmp/openadapt-shoes-ui-v4.xcresult` (corrected details flow), `/tmp/openadapt-shoes-iphone-final-v2.log`, and `/tmp/openadapt-shoes-release-final.log`. `git diff --check` passed. Source changes remain local and uncommitted.
+
+## September 21: settings, Glass, and firmware inspection
+
+- Native circular Liquid Glass top buttons on iOS 26+, with the existing native-compatible fallback for earlier systems and opaque backgrounds for Reduce Transparency. No second custom press scale is layered over Glass.
+- Removed Haptic feedback and Control steps from Settings. Kept Your shoes under a Debug-only Developer mode section; the Release binary excludes that section. Added the repository link.
+- Simplified Siri setup to Add Tie / Add Untie and Help. Builds lacking signed resources show functional manual-setup links. Remembered-fit semantics and background intents are unchanged.
+- Added bounded firmware inspection through standard service `180A` / characteristic `2A26`. It discovers no Nike service, creates no command session, and disconnects temporary links. Unknown revisions can be displayed without weakening the existing control allowlist. Authenticated connections retain their reported revision for developer details.
+- **51 Swift core tests passed**, including four new firmware-format/compatibility cases. **Four targeted XCUITest flows passed** across the initial run and corrected rerun: native shortcut confirmation/action resolution, simplified Settings and Siri/help navigation, initial Move 60/60, and new-shoe/reset guidance. The first Settings test queried the repository Link as a Button; the corrected accessibility query passed without changing the product control.
+- **Signed Debug iPhone build and unsigned Release Simulator build passed.** The Release app has no private resource file or Developer mode section. `git diff --check` passed.
+- Installed the current Debug build and launched it on the owner's iPhone 15 Pro. Installation/launch receipts remain owner-only outside Git. No actuator, configuration, enrollment, reset, or firmware-write command was invoked by the development tools.
+- Visually reviewed five demo screenshots under `screenshots/`: Glass controls, simplified Settings, developer details, Siri actions, and Siri help. See the [motion review](SETTINGS-MOTION-REVIEW.md).
+
+**Limits at this earlier checkpoint:** the new inspection path still needed a real-shoe check; UI/core tests do not verify radio behavior. Auto-lace and gesture pages were explanatory; auto-lace controls were subsequently added above. The current shoes have not been reset. Fresh enrollment and key recovery, shoe-stored auto-lace fit, gesture configuration/readback, and OTA remain open. `2.4.3M` is tested, not confirmed latest. See [new-shoe readiness](NEW-SHOES-READINESS.md).
+
+## Original September 15 implementation snapshot
+
 September 15, 2026. Native source lives in `apps/ios`; it is an existing-key Auto Max port of OpenAdapt's original Python protocol.
 
 ## Confirmed in this development session
@@ -158,3 +263,15 @@ Most importantly, owners without their current saved keys still need a validated
 - Exported only Git's staged source into a fresh directory. The iOS Release Simulator build passed without local owner files; its generic bundle contains no owner profile or distribution-specific personal shortcuts.
 - Re-ran all **47 Swift core tests** and the Omarchy Qt Quick suite (**14 passed**). macOS's native Qt control style reports customization warnings; the UI assertions pass.
 - CI explicitly selects Xcode 26.3 for the background App Intents declarations. The build guide now distinguishes this SDK requirement from the iOS 17 minimum deployment target.
+
+
+## September 22 pairing export and Omarchy import
+
+- 97 Swift core tests and 364 Python protocol/backend tests pass.
+- Shared synthetic export/import fixture; private backups, idempotence, strict inputs, identity resolution, ambiguity/bond/connection boundaries and unknown-calibration motor guards verified offline. Import never starts a connection.
+- Native iPhone export/save-sheet/dismissal UI flow passes. [Developer export screenshot](screenshots/developer-pairing-export.png) uses only synthetic profiles.
+- Signed device build passes and installation succeeds. Automatic launch is blocked while the iPhone is locked.
+- Omarchy is offline on Tailscale; deployment and its native file dialog remain unverified. Physical post-reset pairing transfer/calibration remain separate owner checks.
+- No owner keys were exported/imported or hardware commands issued by this development pass.
+
+See [pairing transfer](PAIRING-TRANSFER.md). Logs: `/tmp/openadapt-pairing-export-core.log`, `/tmp/openadapt-pairing-export-python-final.log`, `/tmp/openadapt-pairing-export-device-final.log`, `/tmp/openadapt-pairing-export-ui-final.xcresult`.

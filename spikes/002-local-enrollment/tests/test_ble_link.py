@@ -14,6 +14,55 @@ KEY = bytes(range(16))
 TARGET = OwnedTarget("02:00:00:00:00:01", "004-TEST-000", True)
 
 
+def identity_scanner(observations):
+    def factory(*, detection_callback):
+        class Scanner:
+            async def start(self):
+                for device, advertisement in observations:
+                    detection_callback(device, advertisement)
+            async def stop(self):
+                pass
+        return Scanner()
+    return factory
+
+
+def identity_observation(address, payload, *, paired=True, connected=False):
+    return (NS(address=address, details={"props":{"Paired":paired, "Bonded":paired, "Connected":connected}}),
+            NS(local_name=TARGET.advertised_name, manufacturer_data={0x78:payload}))
+
+
+async def test_iphone_identity_resolves_current_linux_address_not_shared_product_name():
+    identity = bytes([2,3,4,5,6,0])
+    observations = [
+        identity_observation("02:00:00:00:00:01", b"\xaf\x28" + identity),
+        identity_observation("02:00:00:00:00:02", b"\xaf\x28" + identity[:-1] + b"\x01"),
+        identity_observation("02:00:00:00:00:03", b"\x00\x00" + identity),
+    ]
+    link = ExistingKeyLink(OwnedTarget("", TARGET.advertised_name, True, identity),
+        scanner_factory=identity_scanner(observations), client_factory=lambda *_:None, scan_seconds=0.001)
+    assert await link._scan() is observations[0][0]
+
+
+@pytest.mark.parametrize("paired,connected", [(False,False), (True,True), (True,None)])
+async def test_imported_identity_never_bonds_or_adopts_another_connection(paired, connected):
+    identity = bytes([2,3,4,5,6,0])
+    observation = identity_observation(TARGET.address, b"\xaf\x28"+identity, paired=paired, connected=connected)
+    link = ExistingKeyLink(OwnedTarget("", TARGET.advertised_name, True, identity),
+        scanner_factory=identity_scanner([observation]), client_factory=lambda *_:pytest.fail("Must not connect"), scan_seconds=0.001)
+    with pytest.raises(PermissionError):
+        await link.authenticate(KEY)
+
+
+async def test_duplicate_advertised_identity_fails_closed_before_connecting():
+    identity = bytes([2,3,4,5,6,0])
+    observations = [identity_observation("02:00:00:00:00:01", b"\xaf\x28"+identity),
+                    identity_observation("02:00:00:00:00:02", b"\xaf\x28"+identity)]
+    link = ExistingKeyLink(OwnedTarget("", TARGET.advertised_name, True, identity),
+        scanner_factory=identity_scanner(observations), client_factory=lambda *_:pytest.fail("Must not connect"), scan_seconds=0.001)
+    with pytest.raises(PermissionError, match="ambiguous"):
+        await link.authenticate(KEY)
+
+
 class Harness:
     def __init__(self, *, failure=None, hang=None, absent=False, profile=None,
                  auto_max=False, firmware=b"2.4.3M"):

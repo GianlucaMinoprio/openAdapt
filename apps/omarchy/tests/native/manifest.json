@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "id": "io.github.gianlucaminoprio.openadapt.verification",
+  "name": "OpenAdapt verification fixture",
+  "version": "0.0.1",
+  "author": "OpenAdapt",
+  "description": "Temporary synthetic native UI verification; no Bluetooth access.",
+  "kinds": ["panel"],
+  "entryPoints": {"panel": "Panel.qml"}
+}
