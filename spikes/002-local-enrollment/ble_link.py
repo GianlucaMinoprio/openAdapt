@@ -61,6 +61,86 @@ class CleanupError(RuntimeError):
     """Authentication outcome must be inspected when cleanup did not complete."""
 
 
+def matches_target(target, device, advertisement):
+    payload = advertisement.manufacturer_data.get(0x78)
+    if target.shoe_identity is not None:
+        match = (isinstance(payload, (bytes, bytearray)) and len(payload) >= 8
+                 and payload[:2] == b"\xaf\x28"
+                 and bytes(payload[2:7]) + bytes([payload[7] & 1]) == target.shoe_identity)
+    else:
+        match = device.address.upper() == target.address.upper() and payload is not None
+    return match and advertisement.local_name == target.advertised_name
+
+
+class SharedShoeDiscovery:
+    """One fresh scan for a single pair-connect attempt; never caches across attempts.
+
+    Readers wait for scanner cleanup before opening their independent links.
+    The controller owns close(), so cancelling one reader cannot orphan the scan.
+    """
+    def __init__(self, targets, *, scanner_factory=BleakScanner, scan_seconds=5, cleanup_timeout=5):
+        self.targets = tuple(targets)
+        if not 1 <= len(self.targets) <= 2 or any(not isinstance(t, OwnedTarget) for t in self.targets):
+            raise ValueError("one or two owned targets required")
+        if any(not isinstance(v, (int, float)) or not math.isfinite(v) or not 0 < v <= 15
+               for v in (scan_seconds, cleanup_timeout)):
+            raise ValueError("bounded discovery deadlines required")
+        self.scanner_factory = scanner_factory
+        self.scan_seconds, self.cleanup_timeout = scan_seconds, cleanup_timeout
+        self.task = None
+        self.closed = False
+
+    async def matches_for(self, target):
+        if self.closed or target not in self.targets:
+            raise ValueError("discovery belongs to a different connection attempt")
+        if self.task is None:
+            self.task = asyncio.create_task(self._scan())
+        return (await asyncio.shield(self.task))[target]
+
+    async def _scan(self):
+        matches = {target:{} for target in self.targets}
+        def observed(device, advertisement):
+            for target in self.targets:
+                if matches_target(target, device, advertisement):
+                    found = matches[target]
+                    # Two different devices already establish ambiguity.
+                    if len(found) < 2 or device.address.upper() in found:
+                        found[device.address.upper()] = device
+        scanner = self.scanner_factory(detection_callback=observed)
+        try:
+            async with asyncio.timeout(self.scan_seconds + self.cleanup_timeout):
+                await scanner.start()
+                await asyncio.sleep(self.scan_seconds)
+        finally:
+            async def stop():
+                async with asyncio.timeout(self.cleanup_timeout):
+                    await scanner.stop()
+            cleanup = asyncio.create_task(stop())
+            cancellation = None
+            while not cleanup.done():
+                try:
+                    await asyncio.shield(cleanup)
+                except asyncio.CancelledError as error:
+                    cancellation = error
+                except Exception:
+                    break  # Report scanner cleanup failure below to both readers.
+            try:
+                cleanup.result()
+            except Exception as error:
+                raise CleanupError("shared scanner cleanup failed; no connection attempted") from error
+            if cancellation is not None:
+                raise cancellation
+        return matches
+
+    async def close(self):
+        self.closed = True
+        if self.task is not None:
+            if not self.task.done():
+                self.task.cancel()
+            # Consume failures even when all readers were cancelled.
+            await asyncio.gather(self.task, return_exceptions=True)
+
+
 class ExistingKeyLink:
     """Single-use, Linux-shaped lifecycle with injectable scanner/client factories.
 
@@ -71,7 +151,7 @@ class ExistingKeyLink:
 
     def __init__(self, target, *, scanner_factory=BleakScanner,
                  client_factory=BleakClient, scan_seconds=5, timeout=40,
-                 cleanup_timeout=5, profile=LinkProfile.STRICT):
+                 cleanup_timeout=5, profile=LinkProfile.STRICT, discovery=None):
         if not isinstance(target, OwnedTarget):
             raise ValueError("OwnedTarget required")
         if not isinstance(profile, LinkProfile):
@@ -90,6 +170,7 @@ class ExistingKeyLink:
         self.scan_seconds = scan_seconds
         self.timeout = timeout
         self.cleanup_timeout = cleanup_timeout
+        self.discovery = discovery
         self.used = False
         self.events = []
         self.cleanup_errors = []
@@ -167,22 +248,18 @@ class ExistingKeyLink:
         matches = {}
 
         def observed(device, advertisement):
-            payload = advertisement.manufacturer_data.get(0x78)
-            if self.target.shoe_identity is not None:
-                match = (isinstance(payload, (bytes, bytearray)) and len(payload) >= 8
-                         and payload[:2] == b"\xaf\x28"
-                         and bytes(payload[2:7]) + bytes([payload[7] & 1]) == self.target.shoe_identity)
-            else:
-                match = device.address.upper() == self.target.address.upper() and payload is not None
-            if match and advertisement.local_name == self.target.advertised_name:
+            if matches_target(self.target, device, advertisement):
                 matches[device.address.upper()] = device
 
-        scanner = self.scanner_factory(detection_callback=observed)
-        try:
-            await scanner.start()
-            await asyncio.sleep(self.scan_seconds)
-        finally:
-            await self._finish([("scan-stopped", scanner.stop)])
+        if self.discovery is not None:
+            matches = await self.discovery.matches_for(self.target)
+        else:
+            scanner = self.scanner_factory(detection_callback=observed)
+            try:
+                await scanner.start()
+                await asyncio.sleep(self.scan_seconds)
+            finally:
+                await self._finish([("scan-stopped", scanner.stop)])
         if self.cleanup_errors:
             raise CleanupError("scanner cleanup failed; connection was not attempted")
         if not matches:

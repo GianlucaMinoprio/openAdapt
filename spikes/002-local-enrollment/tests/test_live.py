@@ -155,3 +155,34 @@ async def test_moving_event_occurs_after_preflight_before_motor_write():
         assert h.peer.commands.count(3) == 1 and changes[0][0] == "moving"
     finally:
         await link.stop()
+
+
+async def test_parallel_live_channels_keep_frames_and_completion_independent():
+    peers = [live_harness(), live_harness()]
+    entered = [asyncio.Event(), asyncio.Event()]
+    release = [asyncio.Event(), asyncio.Event()]
+    tasks = []
+    try:
+        await asyncio.gather(*(link.start(KEY) for _,link,_ in peers))
+        for index, (h, link, _) in enumerate(peers):
+            original = h.peer.write
+            async def delayed(packet, i=index, write=original):
+                if not packet[0] & 64 and packet[0] & 128 and packet[1] == 3:
+                    entered[i].set()
+                    await release[i].wait()
+                await write(packet)
+            h.peer.write = delayed
+            tasks.append(asyncio.create_task(link.execute("lace", percent=75 if index == 0 else 50, maximum=60)))
+        await asyncio.wait_for(asyncio.gather(*(e.wait() for e in entered)), 1)
+        release[1].set()
+        assert (await tasks[1])["after_raw_position"] == 30
+        assert not tasks[0].done()
+        release[0].set()
+        assert (await tasks[0])["after_raw_position"] == 45
+        assert all(h.peer.commands.count(3) == 1 for h,_,_ in peers)
+        assert all(link.connected for _,link,_ in peers)
+    finally:
+        for task in tasks:
+            task.cancel()
+        await asyncio.gather(*tasks, return_exceptions=True)
+        await asyncio.gather(*(link.stop() for _,link,_ in peers))

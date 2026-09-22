@@ -13,7 +13,11 @@ September 22, 2026. Implemented and installed on the owner's Omarchy 4.0.4 deskt
 
 ## Verification
 
-**386 Python tests and 33 Qt test results pass.** Coverage includes mode persistence, failed and partial connections, pair switching, missing calibration, stale callbacks, per-shoe movement start, single release commits, linked dragging, five-percent keyboard input, Escape cancellation and reduced motion. Light/dark and 1×/1.5× text renders were inspected.
+**410 Python tests and 33 Qt test results pass.** Coverage includes mode persistence, failed and partial connections, pair switching, missing calibration, stale callbacks, per-shoe movement start, single release commits, linked dragging, five-percent keyboard input, Escape cancellation and reduced motion. Light/dark and 1×/1.5× text renders were inspected.
+
+The subsequent concurrent-pair update uses one fresh scan for both saved shoes, then independent connection/authentication tasks. All pair controls run on both channels concurrently, while each shoe's messages remain ordered. Tests require both attempts to begin before either completes, cover either side failing first, and verify that cancellation leaves no pending work. Scanner cleanup must finish before either connection opens; bond, identity and ambiguity checks remain unchanged. This is concurrent communication, not a guarantee of millisecond-synchronized physical motors. First-time enrollment remains the iPhone flow; importing its completed pair does not create a Linux system Bluetooth bond.
+
+The concurrent-pair follow-up is verified in source but awaits desktop installation: Tailscale SSH stopped responding during staging. The earlier UI revision remains installed.
 
 Standalone QtTest uses explicitly test-only shell adapters because Quickshell's native plugin is statically linked. The real installed Omarchy controls were also loaded in the existing shell with a temporary synthetic fixture, without a Bluetooth backend. Native Fit and Battery screenshots are below. The fixture was removed afterward.
 
@@ -28,7 +32,7 @@ The production panel loaded without OpenAdapt runtime warnings, selected its sav
 | Before | After | Why |
 | --- | --- | --- |
 | Target and current position were visually combined | Target follows input directly; stronger fill represents progress | Dragging stays immediate while shoe movement remains distinguishable |
-| One animation could imply both shoes had begun | Each shoe's 2.8-second estimate starts at its own motor-command boundary | Serialized commands must not show the queued shoe moving |
+| One animation could imply both shoes had begun | Each shoe's 2.8-second estimate starts at its own motor-command boundary | A shoe still completing preflight must not appear to move early |
 | An elapsed estimate could suggest completion | Estimate stops at 90% of the distance until confirmed readback | Duration alone is not evidence of completion |
 | Potential motion without a shell preference | Plugin `reduceMotion` disables estimate/settling; measured fill remains | Installed shell has no shared reduced-motion setting |
 | Battery fill originally scaled around the wrong origin | Scale anchors at the fill's own bottom | Keeps every charge level within the battery silhouette |

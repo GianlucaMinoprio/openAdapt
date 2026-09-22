@@ -2,6 +2,8 @@
 
 Updated September 22, 2026.
 
+**Concurrent L/R follow-up:** source now connects and controls both shoes concurrently, using one shared discovery scan and independent per-shoe outcomes. All 410 protocol/backend tests pass. Installation is waiting for Omarchy to respond over Tailscale again; the UI revision below is already installed. Physical concurrent timing remains unverified.
+
 **The updated Omarchy panel is installed.** Fit / Lights / Battery / Modes use native theme controls. Fit has rounded 5% bars with a centered link icon; battery information appears only in its own tab. Shoes opens the saved-pair selector directly, with Disconnect inside. Tie/Untie, per-pair modes, preferred-pair history and per-shoe progress are implemented. Opening selects the last fully connected pair without connecting automatically. 386 Python tests and 33 Qt results pass, with additional native UI inspection. New-shoe pairing-file import is installed; owner-operated transfer and physical control verification remain separate. See [panel polish](omarchy/PANEL-POLISH.md) and [the app guide](../apps/omarchy/README.md).
 
 ## Native iPhone development

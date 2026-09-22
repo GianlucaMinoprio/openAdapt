@@ -93,6 +93,18 @@ def export_path(value):
         raise storage.UserError("Choose a local pairing file.") from None
 
 
+async def together(actions):
+    """Settle each shoe independently; drain all children before ending an action."""
+    tasks = [asyncio.create_task(action) for action in actions]
+    try:
+        return await asyncio.gather(*tasks, return_exceptions=True)
+    finally:
+        for task in tasks:
+            if not task.done():
+                task.cancel()
+        await asyncio.gather(*tasks, return_exceptions=True)
+
+
 class Controller:
     def __init__(self, *, entries=None, link_factory=None, emit=None, trace=None):
         self.entries = catalog() if entries is None else entries
@@ -201,34 +213,56 @@ class Controller:
         self.profiles = storage.load_profiles({"version":1, "shoes":pair["shoes"]})
         if not self.feet:
             self.feet = copy.deepcopy(self.cache.get(pair_id, storage.blank_state()["feet"]))
+        pending = [s for s in storage.SIDES if not (self.links.get(s) and self.links[s].connected)]
+        discovery = None
         factory = self.link_factory
         if factory is None:
             from live import AutoMaxLiveLink
-            factory = AutoMaxLiveLink
-        errors = []
-        for side in storage.SIDES:
-            if self.links.get(side) and self.links[side].connected:
-                continue
-            self.link_epochs[side] += 1
-            if self.links.get(side):
-                await self.links[side].stop()
+            from ble_link import SharedShoeDiscovery
+            if pending:
+                discovery = SharedShoeDiscovery([self.profiles[s][0] for s in pending])
+            factory = lambda target, **kwargs: AutoMaxLiveLink(target, discovery=discovery, **kwargs)
+        operation_id = self.operation_id
+        for side in pending:
             self.connections[side] = "connecting"
-            self.message = f"Connecting {side} shoe…"
-            self.publish()
-            target, key, _ = self.profiles[side]
-            link = factory(target, on_change=lambda event,value,s=side,e=self.link_epochs[side]:self.changed(s,event,value,e),
-                           trace=lambda direction,packet,s=side:self.trace(s,direction,packet))
-            self.links[side] = link
+        self.message = "Connecting shoes…"
+        self.publish()
+
+        async def connect_side(side):
+            link = None
             try:
+                self.link_epochs[side] += 1
+                if self.links.get(side):
+                    await self.links[side].stop()
+                target, key, _ = self.profiles[side]
+                link = factory(target, on_change=lambda event,value,s=side,e=self.link_epochs[side]:self.changed(s,event,value,e),
+                               trace=lambda direction,packet,s=side:self.trace(s,direction,packet))
+                self.links[side] = link
                 result = await link.start(key)
+                self.check_operation(operation_id, side, link)
                 self.status_read(side, result)
                 self.connections[side] = "connected"
-            except asyncio.CancelledError:
-                raise
-            except Exception as error:
-                self.connections[side] = "disconnected"
-                errors.append(f"{side.capitalize()}: {storage.friendly_error(error)}")
+                self.publish()
+            except BaseException as error:
+                if operation_id == self.operation_id:
+                    self.connections[side] = "disconnected"
                 self.trace(side, "error", type(error).__name__)
+                if link is not None:
+                    await link.stop()
+                self.publish()
+                raise
+
+        try:
+            results = await together(connect_side(s) for s in pending)
+        finally:
+            if discovery is not None:
+                await discovery.close()
+        errors = [f"{s.capitalize()}: {storage.friendly_error(r)}" for s,r in zip(pending, results) if isinstance(r, Exception)]
+        for result in results:
+            if isinstance(result, asyncio.CancelledError):
+                raise result
+        if operation_id != self.operation_id:
+            raise asyncio.CancelledError()
         count = sum(link.connected for link in self.links.values())
         self.message = "Both shoes connected" if count == 2 else " ".join(errors)
         self.failed = bool(errors)
@@ -241,8 +275,10 @@ class Controller:
         self.link_epochs = {s:self.link_epochs[s]+1 for s in storage.SIDES}
         self.movement = {}
         try:
-            for link in self.links.values():
-                await link.stop()
+            results = await together(link.stop() for link in self.links.values())
+            for result in results:
+                if isinstance(result, BaseException):
+                    raise result
         finally:
             self.links.clear()
             self.connections = {s:"disconnected" for s in storage.SIDES}
@@ -256,6 +292,10 @@ class Controller:
         if fit and any(self.profiles[s][2] <= 0 for s in sides):
             raise storage.UserError("Fit calibration is not available for this pair. Use the shoe buttons for now.")
 
+    def check_operation(self, operation_id, side, link):
+        if operation_id != self.operation_id or self.links.get(side) is not link or not link.connected:
+            raise storage.UserError("The connection changed. Check your shoes before trying again.")
+
     async def fit(self, targets):
         self.require_ready(targets, fit=True)
         operation_id = self.operation_id
@@ -263,29 +303,38 @@ class Controller:
                             "target":target, "started_at":None} for s,target in targets.items()}
         self.publish()
         completed = []
-        try:
-            for side, target in targets.items():
-                link = self.links[side]
-                result = await link.execute("lace", percent=target, maximum=self.profiles[side][2])
-                if operation_id != self.operation_id or self.links.get(side) is not link or not link.connected:
-                    raise storage.UserError("The connection changed. Check your shoes before trying again.")
+        links = {s:self.links[s] for s in targets}
+        maxima = {s:self.profiles[s][2] for s in targets}
+
+        async def move_side(side, target):
+            link = links[side]
+            try:
+                result = await link.execute("lace", percent=target, maximum=maxima[side])
+                self.check_operation(operation_id, side, link)
                 self.status_read(side, result["before"])
                 raw = result["after_raw_position"]
-                self.feet[side].update(percent=self.percent(raw, self.profiles[side][2]), raw_position=raw, status="verified")
+                self.feet[side].update(percent=self.percent(raw, maxima[side]), raw_position=raw, status="verified")
                 self.movement[side]["phase"] = "confirmed"
                 completed.append(side)
                 self.persist()
                 self.publish()
-        except BaseException as error:
-            if operation_id == self.operation_id:
-                for side in targets:
-                    if side not in completed:
-                        self.movement[side]["phase"] = "unconfirmed"
-                        self.feet[side]["status"] = "check-shoe"
-                self.persist()
-            if completed and isinstance(error, Exception):
-                raise storage.UserError(f"{completed[0].capitalize()} shoe updated; the other fit is unconfirmed. Check your shoes before trying again.") from error
-            raise
+            except BaseException:
+                if operation_id == self.operation_id:
+                    self.movement[side]["phase"] = "unconfirmed"
+                    self.feet[side]["status"] = "check-shoe"
+                    self.persist()
+                    self.publish()
+                raise
+
+        results = await together(move_side(s, target) for s,target in targets.items())
+        for result in results:
+            if isinstance(result, asyncio.CancelledError):
+                raise result
+        errors = [r for r in results if isinstance(r, Exception)]
+        if errors:
+            if completed:
+                raise storage.UserError(f"{completed[0].capitalize()} shoe updated; the other fit is unconfirmed. Check your shoes before trying again.") from errors[0]
+            raise errors[0]
         self.message = "Fit updated"
 
     async def mode_action(self, request):
@@ -330,20 +379,18 @@ class Controller:
             await self.fit({s:request["percent"] for s in sides})
             return
         completed = []
-        for side in sides:
+        operation_id = self.operation_id
+        links = {s:self.links[s] for s in sides}
+
+        async def control_side(side):
             foot = self.feet[side]
-            kwargs = {}
-            if request["action"] == "lace":
-                kwargs = {"percent":request["percent"], "maximum":self.profiles[side][2]}
-            if request["action"] == "color":
-                kwargs = {"color":storage.COLORS[request["color"]]}
+            kwargs = {"color":storage.COLORS[request["color"]]} if request["action"] == "color" else {}
             try:
-                result = await self.links[side].execute(request["action"], **kwargs)
+                result = await links[side].execute(request["action"], **kwargs)
+                self.check_operation(operation_id, side, links[side])
                 if "before" in result:
                     self.status_read(side, result["before"])
-                if request["action"] == "lace":
-                    foot.update(percent=request["percent"], raw_position=result["after_raw_position"])
-                elif request["action"] == "color":
+                if request["action"] == "color":
                     foot.update(color=request["color"], lights="color-set")
                 elif request["action"] == "lights-off":
                     foot["lights"] = "off"
@@ -351,13 +398,22 @@ class Controller:
                 self.persist()
                 completed.append(side)
                 self.publish()
-            except BaseException as error:
-                foot["status"] = "check-shoe"
-                self.persist()
-                if completed and isinstance(error, Exception):
-                    raise storage.UserError(f"{completed[0].capitalize()} shoe updated; the other shoe did not confirm. Try again when both are connected.") from error
+            except BaseException:
+                if operation_id == self.operation_id:
+                    foot["status"] = "check-shoe"
+                    self.persist()
+                    self.publish()
                 raise
-        self.message = {"lace":"Lacing updated", "color":"Color updated",
+        results = await together(control_side(s) for s in sides)
+        for result in results:
+            if isinstance(result, asyncio.CancelledError):
+                raise result
+        errors = [r for r in results if isinstance(r, Exception)]
+        if errors:
+            if completed:
+                raise storage.UserError(f"{completed[0].capitalize()} shoe updated; the other shoe did not confirm. Try again when both are connected.") from errors[0]
+            raise errors[0]
+        self.message = {"color":"Color updated",
                         "battery":"Battery checked", "lights-off":"Lights off"}[request["action"]]
 
     async def dispatch(self, request):

@@ -28,11 +28,11 @@ The percentage is a target relative to each shoe's saved fit maximum, not a meas
 
 Opening the panel shows Fit for the last pair that completed authentication and status reads on **both** shoes. Before any such connection, the first saved pair is the default. Temporary selection and failed/partial attempts do not change the remembered pair. Existing live connections are preserved when reopening. **Shoes** selects an alternative pair, and **New shoes** imports a completed iPhone pairing; it does not reset or enroll shoes.
 
-**Connect** makes one bounded attempt per shoe and retains an already authenticated partner. A partial connection keeps individual controls available with Link fit off, while paired fit and light actions require both shoes. **Disconnect** in Your shoes releases the links. No automatic reconnect or command replay is implemented.
+**Connect** shares one fresh Bluetooth scan, then connects and authenticates both shoes concurrently. It makes one bounded attempt per shoe and retains an already authenticated partner when retrying. A partial connection keeps individual controls available with Link fit off, while paired fit and light actions require both shoes. **Disconnect** in Your shoes releases both links concurrently. No automatic reconnect or command replay is implemented.
 
 Cached readings never restore connection state. Freshly imported pairs with unknown fit calibration can use battery/lights after connecting, but cannot issue fit commands. Existing calibration, charging, battery and fit-limit checks remain in force.
 
-The native shell owns a local process with JSON-line stdin/stdout. It keeps credentials private and serializes operations. Closing the shell or its input cancels the current action and runs the existing disconnect cleanup. The older one-shot command bridge remains for compatibility and is excluded by the shared operation lock while the new backend runs.
+The native shell owns a local process with JSON-line stdin/stdout. It keeps credentials private and accepts one user action at a time. Within that action, Tie, Untie, linked fit, modes, lights and battery reads run concurrently across the shoes. Each shoe retains its own ordered protocol channel and safety checks. A failed side does not discard the other side's confirmed result; the panel waits for both outcomes and reports partial completion. Cancellation drains both tasks before another action is accepted. Closing the shell or its input runs the same disconnect cleanup. The older one-shot command bridge is excluded by the shared operation lock while the new backend runs.
 
 **September 15 live checkpoint:** the owner requested real connections, confirmed both shoes awake and Nike Adapt closed, and then operated the UI. Both shoes authenticated and remained connected; two further battery refreshes reused the same sessions. Trace review also found five owner-operated color changes per shoe and one left motor target in those sessions, with one handshake per shoe. The owner subsequently selected Disconnect and the UI returned to the saved-pair list. No agent motor or LED command was sent during this connection check. Physical color appearance and perceived response time await owner feedback. Fresh enrollment, Huarache control, animation uploads and worn-shoe behavior remain unvalidated.
 
@@ -86,7 +86,7 @@ QT_QPA_PLATFORM=offscreen QT_QUICK_BACKEND=software /usr/lib/qt6/bin/qmltestrunn
 omarchy plugin validate apps/omarchy/plugin
 ```
 
-The September 22 panel revision passes **386 Python tests**. UI checks and native verification are recorded in [panel polish](../../docs/omarchy/PANEL-POLISH.md). The QtTest imports are explicitly test-only adapters: standalone QtTest cannot load Quickshell’s statically linked plugin. The actual shell supplies the production controls.
+The September 22 concurrent-pair revision passes **410 Python tests**. These include overlapping connections/controls, independent protocol frames, partial results, cancellation and shared-scan cleanup. UI checks and native verification are recorded in [panel polish](../../docs/omarchy/PANEL-POLISH.md). The QtTest imports are explicitly test-only adapters: standalone QtTest cannot load Quickshell’s statically linked plugin. The actual shell supplies the production controls.
 
 The earlier V0 checkpoint passed 337 Python tests and 14 Qt results. Coverage includes the existing authentication/control lifecycle, persistent connections beyond the handshake deadline, repeated reads across sequence-number wraparound, two explicit movements on one connection, idle movement notifications, disconnect/cancellation, command failure without replay, profile selection, multiple saved pairs and startup without radio access. Qt tests exercise slider behavior, empty-list button placement, selection routing and busy state. A separate real-process stdin/status/EOF check completed without radio access.
 
@@ -100,7 +100,8 @@ The light codec independently matches **858 original-app messages** across seven
 - `backend/openadapt_session.py`: persistent local controller and sanitized connection state.
 - `backend/panel_preferences.py`: local saved modes and successful-pair history.
 - `backend/openadapt_app.py`: shared private-storage helpers and older one-shot bridge.
-- `../../spikes/002-local-enrollment/live.py`: persistent authenticated sessions with explicit serialized controls.
+- `../../spikes/002-local-enrollment/live.py`: persistent authenticated sessions, ordered independently within each shoe.
+- `../../spikes/002-local-enrollment/ble_link.py`: one shared discovery scan and independent authenticated connections.
 - `../../spikes/002-local-enrollment/control.py`: existing-key status and motor operations.
 - `../../spikes/002-local-enrollment/lights.py`: separate allowlisted base-color/preview and lights-off operations.
 

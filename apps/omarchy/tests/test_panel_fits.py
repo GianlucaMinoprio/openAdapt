@@ -12,10 +12,13 @@ class MovingLink(FakeLink):
     fail_side = None
     gate = None
     moved = None
+    preflight_gate = None
     async def execute(self, action, **kwargs):
         self.calls.append((action, kwargs))
         if action != "lace":
             return {}
+        if self.preflight_gate is not None and self.side == "right":
+            await self.preflight_gate.wait()
         before = {"raw_position":30, "battery_percent":88}
         self.changed("moving", before)
         if self.side == self.fail_side:
@@ -34,6 +37,7 @@ def moving(controller):
     MovingLink.fail_side = None
     MovingLink.fail_right = False
     MovingLink.gate = None
+    MovingLink.preflight_gate = None
     return controller
 
 
@@ -116,6 +120,7 @@ async def test_partial_fit_does_not_remember_mode_or_claim_full_completion(movin
 async def test_queued_shoe_does_not_animate_and_each_completion_is_confirmed(moving):
     await moving.dispatch({"action":"connect", "pair_id":"first"})
     MovingLink.gate, MovingLink.moved = asyncio.Event(), asyncio.Event()
+    MovingLink.preflight_gate = asyncio.Event()
     updates = []
     moving.emit = lambda state: updates.append(copy.deepcopy(state))
     task = asyncio.create_task(moving.dispatch({"action":"tie"}))
@@ -125,10 +130,16 @@ async def test_queued_shoe_does_not_animate_and_each_completion_is_confirmed(mov
     assert state["feet"]["right"]["movement"]["phase"] == "queued"
     assert state["feet"]["right"]["movement"]["started_at"] is None
     assert state["feet"]["left"]["percent"] == 50
+    MovingLink.preflight_gate.set()
+    # Right can complete while left is still moving, after its own preflight.
+    async with asyncio.timeout(1):
+        while moving.public()["feet"]["right"]["movement"]["phase"] != "confirmed":
+            await asyncio.sleep(0)
+    assert not task.done()
     MovingLink.gate.set()
     await task
     assert all(moving.public()["feet"][s]["movement"]["phase"] == "confirmed" for s in session.storage.SIDES)
-    assert any((u["feet"]["left"]["movement"] or {}).get("phase") == "confirmed" and u["feet"]["right"]["movement"]["phase"] == "queued" for u in updates)
+    assert any((u["feet"]["left"]["movement"] or {}).get("phase") == "moving" and u["feet"]["right"]["movement"]["phase"] == "confirmed" for u in updates)
 
 
 async def test_old_link_notifications_cannot_change_new_pair(moving):

@@ -21,6 +21,7 @@ The owner wants to test adding a factory-reset Auto Max. The iOS enrollment flow
 
 - [x] Implement and install Omarchy Fit / Lights / Battery / Modes, centered linked-fit control, 5% bar marks, saved modes, Tie/Untie and successful-pair history; pass offline/native UI checks.
 - [ ] Collect owner feedback on the updated panel's physical progress timing and pair-wide commands.
+- [x] Run Omarchy pair connection and controls concurrently, with a shared scan, independent outcomes and drained cancellation; pass 410 protocol/backend tests.
 
 - [x] Add Developer-mode export of a completed iPhone pair and Omarchy import with backups, identity matching and unknown-calibration protection.
 - [x] Install the updated Omarchy client including pairing-file import when the desktop became reachable and idle.

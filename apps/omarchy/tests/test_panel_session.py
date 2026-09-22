@@ -98,7 +98,7 @@ async def test_partial_connection_keeps_working_shoe_and_scopes_battery(controll
     assert 'private identity' not in result['message']
     await controller.dispatch({'action':'battery'})
     assert FakeLink.instances[0].calls==['connect','battery']
-    assert FakeLink.instances[1].calls==['connect']
+    assert FakeLink.instances[1].calls==['connect','disconnect']
     with pytest.raises(session.storage.UserError):
         await controller.dispatch({'action':'color','side':'both','color':'green'})
     await controller.disconnect()
