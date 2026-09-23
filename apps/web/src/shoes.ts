@@ -21,11 +21,13 @@ const models = [
     status: "Verified · firmware 2.4.3M",
     detail:
       "Control verified on the development pair. Fresh setup and fit calibration are still being tested.",
-    goat: "https://www.goat.com/sneakers/adapt-auto-max-triple-black-cz6799-002",
+    photoSource:
+      "https://www.goat.com/sneakers/adapt-auto-max-triple-black-cz6799-002",
     stockx: "https://stockx.com/nike-adapt-auto-max-triple-black-us-charger",
   },
   {
     id: "adapt-bb",
+    stockx: "https://stockx.com/nike-adapt-bb-black-pure-platinum",
     brand: "Nike Adapt",
     model: "BB",
     year: "2019",
@@ -39,10 +41,11 @@ const models = [
     status: "Not yet verified",
     detail:
       "Included in the app’s shoe catalog. OpenAdapt connection and control have not been verified on this model.",
-    goat: "https://www.goat.com/sneakers/adapt-bb-black-ao2582-001",
+    photoSource: "https://www.goat.com/sneakers/adapt-bb-black-ao2582-001",
   },
   {
     id: "adapt-bb-2",
+    stockx: "https://stockx.com/nike-adapt-bb-2-black",
     brand: "Nike Adapt",
     model: "BB 2.0",
     year: "2020",
@@ -56,10 +59,12 @@ const models = [
     status: "Not yet verified",
     detail:
       "Included in the app’s shoe catalog. OpenAdapt connection and control have not been verified on this model.",
-    goat: "https://www.goat.com/sneakers/adapt-bb-2-0-all-star-2020-cv2441-001",
+    photoSource:
+      "https://www.goat.com/sneakers/adapt-bb-2-0-all-star-2020-cv2441-001",
   },
   {
     id: "adapt-huarache",
+    stockx: "https://stockx.com/nike-adapt-huarache-white-black",
     brand: "Nike Adapt",
     model: "Huarache",
     year: "2019",
@@ -73,10 +78,12 @@ const models = [
     status: "Not yet verified",
     detail:
       "Included in the app’s shoe catalog. OpenAdapt connection and control have not been verified on this model.",
-    goat: "https://www.goat.com/sneakers/adapt-huarache-white-black-bv6397-110",
+    photoSource:
+      "https://www.goat.com/sneakers/adapt-huarache-white-black-bv6397-110",
   },
   {
     id: "jordan-11-adapt",
+    stockx: "https://stockx.com/air-jordan-11-adapt-white",
     brand: "Air Jordan",
     model: "11 Adapt",
     year: "2020",
@@ -90,7 +97,8 @@ const models = [
     status: "Not yet verified",
     detail:
       "Included in the app’s shoe catalog. OpenAdapt connection and control have not been verified on this model.",
-    goat: "https://www.goat.com/sneakers/air-jordan-11-adapt-25th-anniversary-da7990-100",
+    photoSource:
+      "https://www.goat.com/sneakers/air-jordan-11-adapt-25th-anniversary-da7990-100",
   },
 ];
 
@@ -100,12 +108,9 @@ export const shoes = models.map((shoe) => ({
   links: [
     {
       name: "StockX",
-      url:
-        shoe.stockx ||
-        `https://stockx.com/search?s=${encodeURIComponent(`${shoe.brand} ${shoe.model}`)}`,
+      url: shoe.stockx,
       affiliate: false,
     },
-    { name: "GOAT", url: shoe.goat, affiliate: false },
     {
       name: "eBay",
       url: `https://www.ebay.com/sch/i.html?_nkw=${encodeURIComponent(`${shoe.brand} ${shoe.model}`)}`,

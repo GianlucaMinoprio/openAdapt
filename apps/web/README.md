@@ -37,7 +37,7 @@ Use the DNS records Vercel reports for this project when connecting `openadapt.a
 
 ## Referral program
 
-StockX documents an affiliate program through Impact. Apply and use approved tracking links once accepted; current program terms must be verified in the account before making commission claims. eBay also offers the eBay Partner Network, including tracked links to products and search results. Apply separately, then use real campaign links; commission rates depend on the category and qualifying purchase terms. No official GOAT sneaker affiliate program was verified. GOAT links therefore remain ordinary product links unless a direct arrangement is established. No affiliate application was submitted by this website task.
+StockX documents an affiliate program through Impact. Apply and use approved tracking links once accepted; current program terms must be verified in the account before making commission claims. eBay also offers the eBay Partner Network, including tracked links to products and search results. Apply separately, then use real campaign links; commission rates depend on the category and qualifying purchase terms. No official GOAT sneaker affiliate program was verified. GOAT has been removed from the shopping options. Photo-source credits remain because the gallery uses GOAT product photography. No affiliate application was submitted by this website task.
 
 Sources:
 - https://stockx.com/news/en-us/affiliate-faq/
@@ -51,7 +51,7 @@ Sources:
 - The sneaker mark is the project's original MIT-licensed artwork from `assets/brand/sneaker.svg`.
 - The iPhone screenshot is the project’s own labeled Simulator demo capture. The Omarchy view is a labeled HTML/CSS theme preview matching the native panel’s controls, using the official Tokyo Night palette: https://raw.githubusercontent.com/basecamp/omarchy/master/themes/tokyo-night/colors.toml
 - Omarchy’s logo and wordmark come from https://omarchy.org/brand/ and retain their default brand green. These third-party brand assets are not covered by the OpenAdapt MIT license.
-- Product photos come from the matching GOAT listing linked on each shoe card in `src/shoes.ts`. Auto Max: https://www.goat.com/sneakers/adapt-auto-max-triple-black-cz6799-002 . Third-party product photography is not covered by this repository's MIT license. Replace with owner photography or approved affiliate creative when available.
+- Product photos come from the matching GOAT listing recorded in each model’s `photoSource` field in `src/shoes.ts`. Auto Max: https://www.goat.com/sneakers/adapt-auto-max-triple-black-cz6799-002 . Third-party product photography is not covered by this repository's MIT license. Replace with owner photography or approved affiliate creative when available.
 - Inter and Inter Tight are self-hosted, with their font licenses in `public/fonts/`.
 - No analytics scripts, email collection, cloud app backend, Bluetooth access, or cookies are added by the website. The interactive demo is browser-local simulation.
 - Search metadata, a social preview, sitemap, robots file, security headers, privacy page, and a 404 page are included.
@@ -69,3 +69,11 @@ Photo sources (GOAT, retrieved September 23, 2026):
 - Adapt BB 2.0: https://image.goat.com/transform/v1/attachments/product_template_additional_pictures/images/080/337/367/original/589235_01.jpg.jpeg
 - Adapt Huarache: https://image.goat.com/transform/v1/attachments/product_template_additional_pictures/images/079/333/407/original/546697_01.jpg.jpeg
 - Air Jordan 11 Adapt: https://image.goat.com/transform/v1/attachments/product_template_additional_pictures/images/100/071/868/original/704154_01.jpg.jpeg
+
+### Application preparation — September 23, 2026
+
+Both official application flows have been opened. eBay requires the owner to sign in before its application form is accessible. StockX requires acceptance of its Publisher Agreement before account setup; owner approval is pending. No application has been submitted and no tracking link has been issued.
+
+StockX’s current offer shows 3% on qualifying sneaker sales to new customers, 1% to existing customers, and 15-day last-click attribution. Section 2.2 restricts links near competing marketplaces and use of creative assets. Before activating StockX tracking, use separate StockX shopping pages without competitor links, or obtain an explicit exception. Keep ordinary links and the no-commission disclosure until actual enrollment and tracking details are verified.
+
+Application description: OpenAdapt is an independent software project working to restore app control to Nike Adapt shoes. Its website presents the iPhone and Omarchy clients, documents compatibility limits, and introduces the five-model Adapt family. Marketplace links help visitors find relevant resale listings. Promotion is through editorial content on https://openadapt.app; no paid advertising, coupon distribution, or incentivized traffic is planned. Do not invent audience or traffic metrics for application forms.
