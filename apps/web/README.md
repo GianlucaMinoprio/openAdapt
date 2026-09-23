@@ -19,7 +19,7 @@ Edit `src/site.ts` and redeploy:
 - `repo` and `branch`: source, star, clone, and contribution links are enabled for the owner's requested open-source launch presentation. The repository was still private when this presentation was prepared; publishing the website does not change GitHub visibility or make these links accessible to anonymous visitors. Repository publication remains a separate owner action.
 - `testflight`: set to the real approved public invitation URL. An empty value renders “coming soon” and links to the release status.
 - `appStore`: set to the actual Apple listing after release.
-- Marketplace URLs in `src/shoes.ts`: replace only with real product or approved affiliate links. Set the matching `affiliate` field to `true` when the URL earns commission. The site then renders a nearby disclosure and marks that link `rel="sponsored"`.
+- Marketplace URLs in `src/shoes.ts`: replace only with real product or approved affiliate links. Set the matching `affiliate` field to `true` when the URL earns commission. The site marks that link `rel="sponsored"`; the website privacy page describes affiliate redirects.
 
 Compatibility copy reflects the repository's September 22, 2026 documentation: Auto Max 2.4.3M is the verified profile; new enrollment/calibration and broader iPhone hardware validation are pending. Update the FAQ, compatibility note, and client copy when new hardware evidence or release status changes. Client ideas are not advertised as implemented features.
 
@@ -37,7 +37,7 @@ Use the DNS records Vercel reports for this project when connecting `openadapt.a
 
 ## Referral program
 
-eBay shopping links use the owner's active eBay Partner Network campaign, with one shoe-specific Custom ID per model. Each points to relevant search results so visitors can choose their size, condition, and seller. Links use eBay's documented tracking URL format, are marked `rel="sponsored"`, and have a commission disclosure near the gallery. The website adds no tracking script or visitor identifier. Commission eligibility depends on eBay's qualifying purchase terms.
+eBay shopping links use the owner's active eBay Partner Network campaign, with one shoe-specific Custom ID per model. Each points to relevant search results so visitors can choose their size, condition, and seller. Links use eBay's documented tracking URL format, are marked `rel="sponsored"`, and are described in the website privacy page. The gallery uses direct shopping actions without the former affiliate paragraph, as requested by the owner. The website adds no tracking script or visitor identifier. Commission eligibility depends on eBay's qualifying purchase terms.
 
 StockX documents an affiliate program through Impact. Keep its links ordinary until enrollment and tracking details are available. No official GOAT sneaker affiliate program was verified, so GOAT is absent from the shopping options. Photo-source credits remain because the gallery uses GOAT product photography.
 
@@ -53,11 +53,11 @@ Sources:
 ## Assets and privacy
 
 - The sneaker mark is the project's original MIT-licensed artwork from `assets/brand/sneaker.svg`.
-- The iPhone screenshot is the project’s own labeled Simulator demo capture. The Omarchy view is a labeled HTML/CSS theme preview matching the native panel’s controls, using the official Tokyo Night palette: https://raw.githubusercontent.com/basecamp/omarchy/master/themes/tokyo-night/colors.toml
+- The iPhone screenshot is the project’s own labeled Simulator demo capture. The Omarchy view is an HTML/CSS theme preview matching the native panel’s controls, using the official Tokyo Night palette: https://raw.githubusercontent.com/basecamp/omarchy/master/themes/tokyo-night/colors.toml
 - Omarchy’s logo and wordmark come from https://omarchy.org/brand/ and retain their default brand green. These third-party brand assets are not covered by the OpenAdapt MIT license.
 - Product photos come from the matching GOAT listing recorded in each model’s `photoSource` field in `src/shoes.ts`. Auto Max: https://www.goat.com/sneakers/adapt-auto-max-triple-black-cz6799-002 . Third-party product photography is not covered by this repository's MIT license. Replace with owner photography or approved affiliate creative when available.
 - Inter and Inter Tight are self-hosted, with their font licenses in `public/fonts/`.
-- No analytics scripts, email collection, cloud app backend, Bluetooth access, or cookies are added by the website. The interactive demo is browser-local simulation.
+- No analytics scripts, email collection, cloud app backend, Bluetooth access, or cookies are added by the website. The hero light picker is a browser-local visual effect; the separate interactive app demo has been removed.
 - Search metadata, a social preview, sitemap, robots file, security headers, privacy page, and a 404 page are included.
 
 ## Shared iPhone privacy policy
@@ -66,7 +66,7 @@ Sources:
 
 ## Shoe gallery
 
-The five models mirror the native app catalog, not five verified profiles. Only Auto Max firmware 2.4.3M is marked verified. Use `src/shoes.ts` to update model evidence and per-link affiliate flags. The carousel is server-rendered, uses native scroll snap and touch scrolling, has keyboard/thumbnail/previous/next controls, and never advances automatically. Reduced Motion disables smooth scrolling. Without JavaScript, all cards and model anchor links remain accessible.
+The five models mirror the native app catalog, not five verified profiles. The FAQ and compatibility note identify Auto Max firmware 2.4.3M as the verified profile. The shopping cards show only model names, photos, colorways, and marketplace actions; per-model testing badges and descriptions have been removed. Use `src/shoes.ts` to update model evidence and per-link affiliate flags. The carousel is server-rendered, uses native scroll snap and touch scrolling, has keyboard/thumbnail/previous/next controls, and never advances automatically. Reduced Motion disables smooth scrolling. Without JavaScript, all cards and model anchor links remain accessible.
 
 Photo sources (GOAT, retrieved September 23, 2026):
 - Adapt BB: https://image.goat.com/transform/v1/attachments/product_template_additional_pictures/images/079/299/458/original/487879_01.jpg.jpeg

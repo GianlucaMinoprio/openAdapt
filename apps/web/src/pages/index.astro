@@ -197,59 +197,6 @@ const faqs = [
           </p>
         </div>
         <div class="app-grid">
-          <div class="interactive-card" id="interactive-demo">
-            <div class="demo-top">
-              <span class="demo-brand">OpenAdapt</span>
-              <span class="demo-label">
-                <span class="status-dot"></span> INTERACTIVE PREVIEW
-              </span>
-            </div>
-            <div class="demo-controls">
-              <div class="fit-control">
-                <label for="left-fit">
-                  L<span>LEFT FIT</span>
-                </label>
-                <input
-                  id="left-fit"
-                  type="range"
-                  min="0"
-                  max="100"
-                  step="5"
-                  value="60"
-                  aria-describedby="demo-note"
-                />
-                <output for="left-fit" id="left-value">
-                  60<span>%</span>
-                </output>
-              </div>
-              <div class="fit-control">
-                <label for="right-fit">
-                  R<span>RIGHT FIT</span>
-                </label>
-                <input
-                  id="right-fit"
-                  type="range"
-                  min="0"
-                  max="100"
-                  step="5"
-                  value="60"
-                  aria-describedby="demo-note"
-                />
-                <output for="right-fit" id="right-value">
-                  60<span>%</span>
-                </output>
-              </div>
-            </div>
-            <div class="demo-bottom">
-              <LightPicker />
-              <span id="color-name" role="status">
-                BLUE LIGHTS
-              </span>
-            </div>
-            <p id="demo-note">
-              Try the sliders. This preview doesn’t connect to shoes.
-            </p>
-          </div>
           <article class="iphone-card">
             <div class="card-top">
               <Icon name="phone" size={24} />
@@ -295,42 +242,42 @@ const faqs = [
               </span>
             </div>
           </article>
-        </div>
-        <article class="desktop-card">
-          <div class="desktop-copy">
-            <div class="eyebrow">
-              <span>MADE FOR</span>
-              <a
-                href="https://omarchy.org"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Omarchy (opens in a new tab)"
-              >
-                <img
-                  class="omarchy-wordmark"
-                  src="/images/omarchy-wordmark.svg"
-                  width="150"
-                  height="35"
-                  alt="Omarchy"
-                  loading="lazy"
-                />
+          <article class="desktop-card">
+            <div class="desktop-copy">
+              <div class="eyebrow">
+                <span>MADE FOR</span>
+                <a
+                  href="https://omarchy.org"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Omarchy (opens in a new tab)"
+                >
+                  <img
+                    class="omarchy-wordmark"
+                    src="/images/omarchy-wordmark.svg"
+                    width="150"
+                    height="35"
+                    alt="Omarchy"
+                    loading="lazy"
+                  />
+                </a>
+              </div>
+              <h3>
+                Right at home
+                <br />
+                on your desktop
+              </h3>
+              <p>
+                Fit, lights, and battery in your Omarchy panel. Pair on iPhone,
+                bring your shoes to Linux, and settle into Tokyo Night.
+              </p>
+              <a class="text-link" href={source("apps/omarchy")}>
+                Get the Omarchy client <Icon name="arrow" size={18} />
               </a>
             </div>
-            <h3>
-              Right at home
-              <br />
-              on your desktop
-            </h3>
-            <p>
-              Fit, lights, and battery in your Omarchy panel. Pair on iPhone,
-              bring your shoes to Linux, and settle into Tokyo Night.
-            </p>
-            <a class="text-link" href={source("apps/omarchy")}>
-              Get the Omarchy client <Icon name="arrow" size={18} />
-            </a>
-          </div>
-          <OmarchyPreview />
-        </article>
+            <OmarchyPreview />
+          </article>
+        </div>
         <div class="compatibility-note">
           <Icon name="bluetooth" size={20} />
           <p>
@@ -356,7 +303,7 @@ const faqs = [
           <p>
             Five silhouettes. One Adapt family.
             <br />
-            Find yours and check its testing status.
+            Find your pair. Make it yours with OpenAdapt.
           </p>
         </div>
         <ShoeCarousel />
@@ -507,38 +454,11 @@ const faqs = [
       </div>
     </footer>
     <script>
-      const demo = document.querySelector<HTMLElement>("#interactive-demo");
-      for (const side of ["left", "right"]) {
-        const input = document.querySelector<HTMLInputElement>(`#${side}-fit`);
-        const output = document.querySelector<HTMLOutputElement>(
-          `#${side}-value`,
-        );
-        const update = () => {
-          if (!input || !output) return;
-          output.innerHTML = `${input.value}<span>%</span>`;
-          input.style.setProperty("--fit", `${input.value}%`);
-          input.setAttribute(
-            "aria-valuetext",
-            `${input.value} percent, simulated fit`,
-          );
-        };
-        input?.addEventListener("input", update);
-        update();
-      }
-      const names: Record<string, string> = {
-        blue: "BLUE LIGHTS",
-        volt: "VOLT LIGHTS",
-        orange: "ORANGE LIGHTS",
-        pink: "PINK LIGHTS",
-        white: "WHITE LIGHTS",
-        off: "LIGHTS OFF",
-      };
       document
         .querySelectorAll<HTMLButtonElement>("[data-color]")
         .forEach((button) => {
           button.addEventListener("click", () => {
             const color = button.dataset.color || "blue";
-            if (demo) demo.dataset.theme = color;
             document.documentElement.dataset.light = color;
             document
               .querySelectorAll("[data-color]")
@@ -548,8 +468,6 @@ const faqs = [
                   String((item as HTMLButtonElement).dataset.color === color),
                 ),
               );
-            const name = document.querySelector("#color-name");
-            if (name) name.textContent = names[color];
           });
         });
       const copyButton =

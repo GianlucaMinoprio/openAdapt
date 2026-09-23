@@ -404,150 +404,13 @@ p {
 }
 .app-grid {
   display: grid;
-  grid-template-columns: 1.05fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 22px;
-}
-.interactive-card {
-  background: var(--lamp-color);
-  color: var(--ink);
-  container: light-preview / inline-size;
-  border-radius: 12px;
-  padding: 28px 32px 21px;
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  min-height: 620px;
-  transition: background-color 0.2s;
-}
-.interactive-card[data-theme="off"] {
-  background: var(--light-off);
-  color: var(--paper);
-}
-.demo-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-}
-.demo-brand {
-  font-size: 17px;
-  font-weight: 600;
-  letter-spacing: -0.8px;
-}
-.demo-label {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  font: 8px var(--mono);
-  letter-spacing: 0.035em;
-}
-.demo-label .status-dot {
-  background: currentColor;
-  width: 5px;
-  height: 5px;
-}
-.demo-controls {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  flex: 1;
-  margin-top: 35px;
-  margin-bottom: 28px;
-}
-.fit-control {
-  padding: 8px 22px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  position: relative;
-  gap: 14px;
-}
-.fit-control + div {
-  border-left: 1px solid #06163025;
-}
-.fit-control label {
-  font: 600 150px/0.9 var(--display);
-  letter-spacing: -0.045em;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  cursor: pointer;
-}
-.fit-control label span {
-  font: 9px var(--mono);
-  letter-spacing: 0.16em;
-  margin-top: 22px;
-}
-.fit-control input {
-  appearance: none;
-  width: 100%;
-  height: 44px;
-  background: transparent;
-  cursor: pointer;
-  margin-top: auto;
-  border-radius: 4px;
-}
-.fit-control input::-webkit-slider-runnable-track {
-  height: 3px;
-  background: linear-gradient(
-    to right,
-    currentColor var(--fit, 60%),
-    #0e243d33 var(--fit, 60%)
-  );
-  border-radius: 3px;
-}
-.fit-control input::-webkit-slider-thumb {
-  appearance: none;
-  height: 23px;
-  width: 23px;
-  background: currentColor;
-  border: 3px solid #ffffff90;
-  border-radius: 50%;
-  margin-top: -10px;
-  box-shadow: 0 2px 4px #0002;
-}
-.fit-control input::-moz-range-track {
-  height: 3px;
-  background: #102c4840;
-}
-.fit-control input::-moz-range-progress {
-  height: 3px;
-  background: currentColor;
-}
-.fit-control input::-moz-range-thumb {
-  height: 18px;
-  width: 18px;
-  background: currentColor;
-  border: 3px solid #ffffff90;
-  border-radius: 50%;
-}
-.fit-control output {
-  font-size: 42px;
-  letter-spacing: -2px;
-  font-variant-numeric: tabular-nums;
-}
-.fit-control output span {
-  font-size: 20px;
-  letter-spacing: -1px;
-  margin-left: 4px;
-}
-.demo-bottom {
-  border-top: 1px solid #06163025;
-  padding-top: 24px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 10px;
 }
 .swatches {
   display: grid;
   grid-template-columns: repeat(6, 44px);
   gap: 0;
-}
-@container light-preview (max-width: 263px) {
-  .swatches {
-    grid-template-columns: repeat(3, 44px);
-  }
 }
 .swatch {
   width: 44px;
@@ -602,17 +465,10 @@ p {
 .swatch:active {
   transform: scale(0.96);
 }
-#color-name {
-  font: 9px var(--mono);
-  letter-spacing: 0.06em;
-}
-#demo-note {
-  text-align: center;
-  font-size: 9px;
-  margin-top: 21px;
-  line-height: 1.4;
-}
 .iphone-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
   background: #eef0f5;
   padding: 30px 34px 0;
   border-radius: 12px;
@@ -661,14 +517,14 @@ p {
 }
 .phone-crop {
   position: relative;
-  height: 209px;
-  margin-top: 35px;
+  height: 395px;
+  margin-top: 32px;
 }
 .phone-shell {
   position: absolute;
-  left: 48%;
-  top: -181px;
-  width: 193px;
+  top: 5px;
+  left: calc(50% - 82px);
+  width: 164px;
   padding: 6px;
   border: 2px solid #4a4c54;
   border-radius: 31px;
@@ -685,41 +541,29 @@ p {
 }
 .phone-caption {
   position: absolute;
-  left: 0;
-  bottom: 22px;
+  inset: auto 0 15px;
   font-size: 7px;
-  max-width: 100px;
+  text-align: center;
   color: #737780;
 }
-@media (min-width: 651px) and (max-width: 1150px) {
-  .iphone-card .phone-crop {
-    height: 350px;
-    margin-top: 28px;
-  }
-  .iphone-card .phone-shell {
-    top: 4px;
-    left: calc(50% - 76px);
-    width: 152px;
-  }
-  .iphone-card .phone-caption {
-    left: 0;
-    right: 0;
-    bottom: 8px;
-    max-width: none;
-    text-align: center;
-  }
-}
 .desktop-card {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 70px;
-  margin-top: 22px;
-  background: #eef0f5;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 32px;
+  min-width: 0;
+  padding: 30px 34px;
   border-radius: 12px;
-  padding: 46px 60px;
-  min-height: 480px;
-  align-items: center;
-  overflow: hidden;
+  background: #1a1b26;
+  color: #c0caf5;
+}
+.desktop-card .omarchy-preview {
+  align-self: center;
+}
+@media (max-width: 850px) {
+  .desktop-card {
+    padding: 25px;
+  }
 }
 .desktop-copy {
   max-width: 360px;
@@ -841,13 +685,6 @@ p {
   border: none;
   min-height: 44px;
   font-size: 11px;
-}
-
-.affiliate-disclosure {
-  font-size: 12px;
-  color: #656d7b;
-  margin-top: 19px;
-  max-width: 900px;
 }
 .faq-section {
   display: grid;
@@ -1086,9 +923,6 @@ footer {
   .hero-lights > span {
     font-size: 10px;
   }
-  .demo-bottom {
-    flex-wrap: wrap;
-  }
   .build-resources {
     gap: 20px;
   }
@@ -1165,12 +999,6 @@ footer {
   .hero-bottom {
     gap: 25px;
   }
-
-  .phone-shell {
-    left: 48%;
-    width: 172px;
-    top: -135px;
-  }
   .iphone-card {
     padding-inline: 26px;
   }
@@ -1179,10 +1007,6 @@ footer {
   }
   .iphone-card > p {
     max-width: 230px;
-  }
-  .desktop-card {
-    padding-inline: 40px;
-    gap: 40px;
   }
   .build-heading {
     gap: 50px;
@@ -1266,33 +1090,6 @@ footer {
   .app-grid {
     gap: 16px;
   }
-  .interactive-card {
-    padding: 24px 20px;
-    min-height: 585px;
-  }
-  .demo-top {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
-  .fit-control {
-    padding-inline: 12px;
-  }
-  .fit-control label {
-    font-size: 122px;
-  }
-  .demo-controls {
-    margin-top: 38px;
-  }
-  .demo-bottom {
-    gap: 6px;
-  }
-  #color-name {
-    font-size: 7px;
-  }
-  #demo-note {
-    font-size: 8px;
-  }
   .iphone-card {
     padding: 25px 25px 0;
     min-height: 585px;
@@ -1309,25 +1106,8 @@ footer {
   .iphone-card > p {
     font-size: 11px;
   }
-  .phone-shell {
-    top: -100px;
-    left: 39%;
-    width: 151px;
-  }
-  .phone-crop {
-    height: 205px;
-  }
-  .phone-caption {
-    font-size: 6px;
-    max-width: 80px;
-  }
   .release-caption {
     font-size: 8px;
-  }
-  .desktop-card {
-    height: auto;
-    gap: 30px;
-    padding: 35px;
   }
   .desktop-copy h3 {
     font-size: 29px;
@@ -1510,46 +1290,6 @@ footer {
     grid-template-columns: 1fr;
     gap: 17px;
   }
-  .interactive-card {
-    min-height: 510px;
-    padding: 25px;
-  }
-  .demo-top {
-    flex-direction: row;
-    align-items: center;
-  }
-  .demo-brand {
-    font-size: 17px;
-  }
-  .demo-label {
-    font-size: 7px;
-  }
-  .demo-controls {
-    margin-top: 40px;
-    margin-bottom: 20px;
-  }
-  .fit-control {
-    padding-inline: 22px;
-  }
-  .fit-control label {
-    font-size: 140px;
-  }
-  .fit-control label span {
-    font-size: 8px;
-    margin-top: 18px;
-  }
-  .fit-control input {
-    margin-top: 30px;
-  }
-  .fit-control output {
-    font-size: 39px;
-  }
-  #color-name {
-    font-size: 8px;
-  }
-  #demo-note {
-    font-size: 8px;
-  }
   .iphone-card {
     min-height: 578px;
     padding: 25px 28px 0;
@@ -1569,25 +1309,6 @@ footer {
   }
   .release-caption {
     font-size: 9px;
-  }
-  .phone-crop {
-    height: 201px;
-  }
-  .phone-shell {
-    width: 168px;
-    top: -118px;
-    left: 51%;
-  }
-  .phone-caption {
-    font-size: 6px;
-    max-width: 100px;
-  }
-  .desktop-card {
-    margin-top: 17px;
-    height: auto;
-    grid-template-columns: 1fr;
-    padding: 29px 28px;
-    gap: 27px;
   }
   .desktop-copy {
     max-width: 100%;
@@ -1653,11 +1374,6 @@ footer {
   }
   .code-strip > .mono {
     font-size: 6px;
-  }
-
-  .affiliate-disclosure {
-    font-size: 11px;
-    margin-top: 17px;
   }
   .faq-section {
     display: block;
@@ -1763,19 +1479,6 @@ footer {
     width: 95%;
     left: 2.5%;
   }
-  .phone-crop {
-    height: 335px;
-    margin-top: 35px;
-  }
-  .phone-shell {
-    top: 0;
-    left: calc(50% - 80px);
-    width: 160px;
-  }
-  .phone-caption {
-    bottom: 18px;
-    max-width: 80px;
-  }
 }
 
 .omarchy-wordmark {
@@ -1791,10 +1494,6 @@ footer {
 .desktop-copy .eyebrow > span {
   white-space: nowrap;
 }
-.desktop-card {
-  background: #1a1b26;
-  color: #c0caf5;
-}
 .desktop-copy p {
   color: #a9b1d6;
 }
@@ -1803,7 +1502,4 @@ footer {
 }
 .desktop-copy .eyebrow {
   color: #a9b1d6;
-}
-.interactive-card[data-theme="off"] input[type="range"] {
-  color: #c7d8ff;
 }

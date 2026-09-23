@@ -1,6 +1,6 @@
 ---
 import Icon from "./Icon.astro";
-import { shoes, hasAffiliate } from "../shoes";
+import { shoes } from "../shoes";
 ---
 
 <div
@@ -10,7 +10,7 @@ import { shoes, hasAffiliate } from "../shoes";
   aria-label="Explore the Adapt shoe family"
 >
   <div class="gallery-bar">
-    <p class="mono">FIVE ICONS. ONE NEW CHAPTER.</p>
+    <p class="mono">CHOOSE YOUR PAIR</p>
     <div class="gallery-controls" hidden>
       <span class="gallery-count mono" aria-hidden="true">
         01 / 05
@@ -50,10 +50,6 @@ import { shoes, hasAffiliate } from "../shoes";
         data-name={`${shoe.brand} ${shoe.model}`}
       >
         <div class="shoe-photo">
-          <div class="shoe-edition mono">
-            <span>ADAPT ARCHIVE</span>
-            <span>{shoe.year}</span>
-          </div>
           <img
             src={shoe.image}
             width={shoe.width}
@@ -67,19 +63,7 @@ import { shoes, hasAffiliate } from "../shoes";
         <div class="shoe-copy">
           <span class="shoe-brand mono">{shoe.brand}</span>
           <h3>{shoe.model}</h3>
-          <p class="shoe-description">{shoe.description}</p>
-          <div class:list={["shoe-compatibility", { verified: shoe.verified }]}>
-            <strong>
-              {shoe.verified ? (
-                <Icon name="check" size={15} />
-              ) : (
-                <span class="unverified-dot" aria-hidden="true"></span>
-              )}
-              {shoe.status}
-            </strong>
-            <p>{shoe.detail}</p>
-          </div>
-          <span class="market-label mono">EXPLORE RESALE LISTINGS</span>
+          <span class="market-label mono">FIND THIS PAIR</span>
           <div class="market-links">
             {shoe.links.map((link) => (
               <a
@@ -90,9 +74,9 @@ import { shoes, hasAffiliate } from "../shoes";
                     ? "sponsored noopener noreferrer"
                     : "noopener noreferrer"
                 }
-                aria-label={`Find ${shoe.brand} ${shoe.model} on ${link.name} (opens in a new tab)`}
+                aria-label={`Shop ${shoe.brand} ${shoe.model} on ${link.name} (opens in a new tab)`}
               >
-                {link.name}
+                Shop {link.name}
                 <Icon name="external" size={15} />
               </a>
             ))}
@@ -120,17 +104,6 @@ import { shoes, hasAffiliate } from "../shoes";
     aria-atomic="true"
   ></p>
 </div>
-<p class="gallery-note">
-  The full Adapt family, with testing status for each model. A catalog entry is
-  not a compatibility guarantee. Check the pair’s condition, charger, and
-  firmware before buying. <a href="#faq">Read the current setup limits.</a>
-</p>
-<p class="affiliate-disclosure">
-  {hasAffiliate
-    ? "eBay links are affiliate links. OpenAdapt may earn a commission if you make a purchase."
-    : "These are regular marketplace links. OpenAdapt does not currently earn a commission."}{" "}
-  Availability and prices are set by each marketplace.
-</p>
 
 <script>
   const gallery = document.querySelector<HTMLElement>(".shoe-carousel");
@@ -181,7 +154,7 @@ import { shoes, hasAffiliate } from "../shoes";
       next.setAttribute("aria-disabled", String(index === slides.length - 1));
       count.textContent = `${String(index + 1).padStart(2, "0")} / ${String(slides.length).padStart(2, "0")}`;
       if (changed)
-        announcement.textContent = `${index + 1} of ${slides.length}: ${slides[index].dataset.name}. ${slides[index].querySelector(".shoe-compatibility strong")?.textContent}`;
+        announcement.textContent = `${index + 1} of ${slides.length}: ${slides[index].dataset.name}.`;
     };
     const goTo = (index: number, immediate = false) => {
       requested = Math.max(0, Math.min(slides.length - 1, index));
@@ -323,12 +296,6 @@ import { shoes, hasAffiliate } from "../shoes";
     justify-content: space-between;
     min-width: 0;
   }
-  .shoe-edition {
-    display: flex;
-    justify-content: space-between;
-    font-size: 9px;
-    color: #6a6c72;
-  }
   .shoe-photo > img {
     width: 100%;
     height: 300px;
@@ -343,6 +310,7 @@ import { shoes, hasAffiliate } from "../shoes";
     text-transform: uppercase;
   }
   .shoe-copy {
+    justify-content: center;
     padding: 38px;
     background: #fff;
     display: flex;
@@ -359,46 +327,11 @@ import { shoes, hasAffiliate } from "../shoes";
     line-height: 1.05;
     margin-top: 8px;
   }
-  .shoe-description {
-    font-size: 13px;
-    line-height: 1.75;
-    color: var(--muted);
-    margin-top: 18px;
-    min-height: 70px;
-  }
-  .shoe-compatibility {
-    margin: 22px 0;
-    padding: 16px 0;
-    border-top: 1px solid var(--line);
-    border-bottom: 1px solid var(--line);
-  }
-  .shoe-compatibility strong {
-    font-size: 11px;
-    display: flex;
-    gap: 7px;
-    align-items: center;
-    font-weight: 600;
-  }
-  .shoe-compatibility.verified strong {
-    color: var(--blue);
-  }
-  .unverified-dot {
-    width: 7px;
-    height: 7px;
-    border: 1px solid currentColor;
-    border-radius: 50%;
-  }
-  .shoe-compatibility p {
-    font-size: 11px;
-    line-height: 1.6;
-    color: var(--muted);
-    margin-top: 8px;
-  }
   .market-label {
     font-size: 8px;
     letter-spacing: 0.06em;
     color: var(--muted);
-    margin-top: auto;
+    margin-top: 32px;
   }
   .market-links {
     display: grid;
@@ -462,17 +395,6 @@ import { shoes, hasAffiliate } from "../shoes";
     font-weight: 500;
     margin-top: 7px;
   }
-  .gallery-note {
-    margin-top: 24px;
-    font-size: 11px;
-    color: var(--muted);
-    line-height: 1.75;
-    max-width: 900px;
-  }
-  .gallery-note a {
-    text-decoration: underline;
-    text-underline-offset: 3px;
-  }
   .sr-only {
     position: absolute;
     width: 1px;
@@ -525,7 +447,6 @@ import { shoes, hasAffiliate } from "../shoes";
       height: 180px;
       margin: 16px 0;
     }
-    .shoe-edition,
     .shoe-photo > p {
       font-size: 8px;
     }
@@ -534,14 +455,6 @@ import { shoes, hasAffiliate } from "../shoes";
     }
     .shoe-copy h3 {
       font-size: 42px;
-    }
-    .shoe-description {
-      min-height: 70px;
-      font-size: 12px;
-      margin-top: 12px;
-    }
-    .shoe-compatibility {
-      margin: 18px 0;
     }
     .shoe-picker {
       gap: 6px;
@@ -556,9 +469,6 @@ import { shoes, hasAffiliate } from "../shoes";
     .shoe-picker span {
       font-size: 8px;
       margin-top: 5px;
-    }
-    .gallery-note {
-      font-size: 10px;
     }
   }
   @media (prefers-reduced-motion: reduce) {

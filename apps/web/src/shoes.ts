@@ -136,7 +136,3 @@ export const shoes = models.map((shoe) => ({
     },
   ] satisfies MarketplaceLink[],
 }));
-
-export const hasAffiliate = shoes.some((shoe) =>
-  shoe.links.some((link) => link.affiliate),
-);
