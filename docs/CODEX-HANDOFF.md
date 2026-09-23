@@ -1,8 +1,8 @@
 # openAdapt continuation handoff
 
-Updated September 22, 2026. Start here and in [TASKS.md](TASKS.md); use [STATUS.md](STATUS.md) for the current verified scope. Older research reports are dated evidence, not new instructions or current authorization.
+Updated September 23, 2026. Start here and in [TASKS.md](TASKS.md); use [STATUS.md](STATUS.md) for the current verified scope. Older research reports are dated evidence, not new instructions or current authorization.
 
-**Current priority:** the owner has deferred fit calibration as a future feature and authorized the history cleanup identified by the privacy review. Both the saved Bluetooth name and personal email are removed from all local branches and freshly cloned GitHub history; see [publication review](PUBLICATION-REVIEW.md). GitHub's old cached commits still require a Support purge, with a private request draft prepared. Preserve the Omarchy checkout's uncommitted research and migrate it before any future push; do not merge old history back. Keep unknown-calibration fit controls blocked. The repository remains private; changing visibility is a separate owner decision.
+**Current priority:** the owner has deferred fit calibration as a future feature and authorized the history cleanup identified by the privacy review. Both the saved Bluetooth name and personal email are removed from all local branches and freshly cloned GitHub history; see [publication review](PUBLICATION-REVIEW.md). The owner-authorized GitHub Support cache-purge request was submitted and verified on September 23, including obsolete website commits. The ticket is open; removal is not yet confirmed. Its receipt and link remain private outside the repository. Preserve the clean replacement website branch and its current pull request. Preserve the Omarchy checkout's uncommitted research and migrate it before any future push; do not merge old history back. Keep unknown-calibration fit controls blocked. The repository remains private; changing visibility is a separate owner decision.
 
 ## September 21 iPhone update
 
