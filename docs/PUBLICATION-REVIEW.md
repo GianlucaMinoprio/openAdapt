@@ -1,17 +1,19 @@
 # Pre-publication privacy review
 
-September 22, 2026. Reviewed source revision `4995b0e`, its reachable history, and the GitHub repository's existing release/build surfaces. The repository remains private. This review does not change its visibility or rewrite history.
+September 22, 2026. Reviewed the source, its reachable history, and the GitHub repository's existing release/build surfaces. The owner subsequently authorized removing both identified privacy items from history. The repository remains private.
 
 ## Result
 
-No private shoe credentials, provider tokens, signing keys, raw captures, or proprietary app/firmware files were found in the material checked. Two privacy items were found:
+No private shoe credentials, provider tokens, signing keys, raw captures, or proprietary app/firmware files were found in the material checked. Both identified privacy items have now been removed from the working repository's Git objects and the history obtained by a fresh GitHub clone:
 
-- **Commit author/committer email:** all eight existing commits contain the owner's personal address. The address is deliberately not repeated here.
-- **Saved Bluetooth advertised name:** the full name from the owner's private profile appeared in three research notes. Four occurrences were replaced in the current files with the model family and a reference to the privately saved name. This is an advertisement label, not a pairing secret; its uniqueness across shoes has not been established. Its historical copies remain in Git.
+- **Commit author/committer email:** the eight original commits used a personal address. All author and committer fields now use the account's GitHub noreply address. The address is also configured locally for future commits in this checkout.
+- **Saved Bluetooth advertised name:** the full name from the owner's private profile appeared in three research notes. Four occurrences were removed from current files, and the name has now been replaced throughout historical files. This is an advertisement label, not a pairing secret; its uniqueness across shoes has not been established.
 
-Before public visibility, decide whether to replace the personal email with the account's GitHub noreply address and remove the saved Bluetooth name from historical files. Doing so requires a coordinated history rewrite and force-push; adding this cleanup commit or updating `.gitignore` does not remove old copies. No rewrite was performed by this review. The public GitHub account name, project URLs, and plugin identifier are intentional project attribution.
+The rewrite used git-filter-repo 2.47.0 across all three local branches, followed by an explicit force-with-lease push of `master`. All nine commits present at rewrite time were rewritten; no commits were dropped. A verified, access-restricted Git bundle backup remains outside the repository. The public GitHub account name, project URLs, and plugin identifier are intentional project attribution.
 
-## Checks performed
+**Remaining GitHub-side cleanup:** the old root and former tip still resolve through GitHub's commit API even though no published branch/tag references the old history. A GitHub Support cache/garbage-collection request is needed for complete server-side removal. A private request draft and the first-changed commit details have been prepared locally; no support message has been sent. Keep the repository private while resolving this. See [GitHub's removal guidance](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/removing-sensitive-data-from-a-repository#fully-removing-the-data-from-github).
+
+## Initial audit
 
 | Surface | Scope and result |
 | --- | --- |
@@ -26,7 +28,15 @@ Before public visibility, decide whether to replace the personal email with the 
 
 Synthetic crypto vectors and the fixed enrollment protocol constant are part of the implementation, not the owner's saved pairing secrets. Sanitized research notes include protocol behavior and historical fit-limit measurements; the raw recordings and proprietary implementations remain excluded.
 
-After removing the advertised-name references, the full staged tree (241 files) had zero matches against the known private profile values, and the staged Gitleaks check passed. The documentation cleanup uses the GitHub noreply address for its new commit; existing commit metadata is unchanged.
+After the initial advertised-name cleanup, the full staged tree (241 files) had zero matches against the known private profile values, and the staged Gitleaks check passed.
+
+## History rewrite verification
+
+- Compared every stored Git object in the working repository, including unreachable objects, against the personal email and known private profile values. All 426 objects passed with zero matches.
+- Repeated that check on a fresh mirror clone fetched from GitHub after the force-push: nine reachable commits, 426 objects, zero matches, and only noreply author/committer email fields.
+- Gitleaks reported no leaks across the rewritten history; Git's integrity check passed.
+- The current source tree was byte-for-byte identical before and after rewriting. Local owner profiles and private build configuration retained their original file hashes. No app rebuild, installation, Bluetooth command, or credential change occurred.
+- The separately inspected Omarchy research checkout still has uncommitted changes and private Codex checkpoint refs. It was left unchanged. Preserve that work and migrate it onto the rewritten history before any future push; do not merge the old history back into the cleaned repository. Private archival bundles are also not publication sources.
 
 ## Publication boundary
 

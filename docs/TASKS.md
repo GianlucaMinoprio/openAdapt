@@ -15,7 +15,7 @@ Updated September 22, 2026. Current evidence is summarized in [STATUS.md](STATUS
 
 ## Next session
 
-Prepare the existing clients for an eventual public source release. The September 22 [publication review](PUBLICATION-REVIEW.md) found no private credentials in the scanned source/history. The saved Bluetooth name was removed from three current research notes; its historical copies and commit author/committer email remain a separate cleanup decision. Keep the repository private until the owner explicitly authorizes changing its visibility.
+Prepare the existing clients for an eventual public source release. The September 22 [publication review](PUBLICATION-REVIEW.md) found no private credentials. At the owner's request, the saved Bluetooth name and personal commit email have now been removed from all local branches and the history fetched from GitHub. GitHub still retains the old commits outside published refs; a private Support request draft is prepared for server-side purging. Preserve and migrate the Omarchy checkout's uncommitted research before any future push from that copy. Keep the repository private until the owner explicitly authorizes changing its visibility.
 
 ## Future feature: fit calibration
 
