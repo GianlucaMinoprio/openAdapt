@@ -2,13 +2,13 @@
 
 Updated September 22, 2026.
 
-**Concurrent L/R follow-up:** source now connects and controls both shoes concurrently, using one shared discovery scan and independent per-shoe outcomes. All 410 protocol/backend tests pass. Installation is waiting for Omarchy to respond over Tailscale again; the UI revision below is already installed. Physical concurrent timing remains unverified.
+**Concurrent L/R follow-up is installed:** both shoes connect and accept controls concurrently, using one shared discovery scan and independent per-shoe outcomes. All 410 protocol/backend tests pass locally and on Omarchy. A plugin rescan loaded the updated controller; Fit opens without connecting. Credentials are unchanged and a rollback backup is retained. Physical concurrent timing remains unverified.
 
 **The updated Omarchy panel is installed.** Fit / Lights / Battery / Modes use native theme controls. Fit has rounded 5% bars with a centered link icon; battery information appears only in its own tab. Shoes opens the saved-pair selector directly, with Disconnect inside. Tie/Untie, per-pair modes, preferred-pair history and per-shoe progress are implemented. Opening selects the last fully connected pair without connecting automatically. 386 Python tests and 33 Qt results pass, with additional native UI inspection. New-shoe pairing-file import is installed; owner-operated transfer and physical control verification remain separate. See [panel polish](omarchy/PANEL-POLISH.md) and [the app guide](../apps/omarchy/README.md).
 
 ## Native iPhone development
 
-Developer-mode pairing export and Omarchy file import are implemented locally, including private backups, manufacturer-identity discovery on Linux and unknown-calibration protection. The transfer has 97 passing Swift core tests and 364 Python tests, plus a successful signed build. Omarchy deployment and physical iPhone-to-Omarchy handoff remain pending while that computer is offline. See [pairing transfer](ios/PAIRING-TRANSFER.md).
+Developer-mode pairing export and Omarchy file import are installed, including private backups, manufacturer-identity discovery on Linux and unknown-calibration protection. The transfer checkpoint has 97 passing Swift core tests and 364 Python tests, plus a successful signed build. Physical iPhone-to-Omarchy handoff remains pending. See [pairing transfer](ios/PAIRING-TRANSFER.md).
 
 Opening OpenAdapt now reconnects the last pair whose two shoes successfully connected. Temporary selections and failed/partial attempts do not change the default. My shoes at the top left remains the way to choose another pair; no automatic cycling through saved pairs occurs. The history tests and multi-pair failure/switching UI flow pass, and the signed update is installed.
 
