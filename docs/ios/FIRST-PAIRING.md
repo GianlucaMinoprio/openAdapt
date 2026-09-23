@@ -50,6 +50,8 @@ New profiles use CoreBluetooth UUIDs and manufacturer identities, without fabric
 
 No trustworthy fit-calibration read was established. Newly enrolled profiles therefore store an unknown maximum (0); L/R dragging, saved-mode application, and Siri fit commands cannot send fit targets. The app explains this before setup and after saving. Battery and base-light controls can operate after authentication; use the physical shoe buttons for fit. Existing imported calibrated shoes keep their controls. Never copy the owner's measured maxima to another pair or assume 100.
 
+September 22 follow-up: [analysis of the existing fit-check recording](FIT-CALIBRATION-EVIDENCE.md) establishes that the original app learns per-shoe limits during a distinct calibration movement and stores them in its pair profile. The normal sequence is recovered; a separate calibration getter remains unproven. OpenAdapt still needs an explicit, separately validated calibration operation before the restriction above can be lifted.
+
 ## Verification and next hardware check
 
 The current Swift suite passes **77 tests**, including all four DH groups, invalid peer values, physical-side parsing, enrollment ordering, timeout, cancellation, candidate storage failure, no replay, candidate-only recovery, partial native profile rejection, and unknown calibration. Simulator tests cover sequential confirmation, both possible starting sides, first-step failure without advancing, cancellation, saving a synthetic pair, and reset guidance. Signed iPhone build succeeds. See [verification](VERIFICATION.md) for final build/install evidence.
