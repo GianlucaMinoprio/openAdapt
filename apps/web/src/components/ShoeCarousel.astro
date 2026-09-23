@@ -155,6 +155,15 @@ import { shoes, hasAffiliate } from "../shoes";
     let current = initial;
     let requested = initial;
     let frame = 0;
+    const nearestIndex = () =>
+      slides.reduce(
+        (best, slide, index) =>
+          Math.abs(slide.offsetLeft - track.scrollLeft) <
+          Math.abs(slides[best].offsetLeft - track.scrollLeft)
+            ? index
+            : best,
+        0,
+      );
     const update = (index: number) => {
       const changed = index !== current;
       current = index;
@@ -180,6 +189,7 @@ import { shoes, hasAffiliate } from "../shoes";
         left: slides[requested].offsetLeft,
         behavior: reducedMotion.matches ? "instant" : "smooth",
       });
+      if (reducedMotion.matches) update(requested);
     };
     previous.addEventListener("click", () => goTo(requested - 1));
     next.addEventListener("click", () => goTo(requested + 1));
@@ -209,20 +219,14 @@ import { shoes, hasAffiliate } from "../shoes";
         if (frame) return;
         frame = requestAnimationFrame(() => {
           frame = 0;
-          const closest = slides.reduce(
-            (best, slide, index) =>
-              Math.abs(slide.offsetLeft - track.scrollLeft) <
-              Math.abs(slides[best].offsetLeft - track.scrollLeft)
-                ? index
-                : best,
-            0,
-          );
-          update(closest);
+          update(nearestIndex());
         });
       },
       { passive: true },
     );
     track.addEventListener("scrollend", () => {
+      // Instant scrolling can finish before the pending animation frame updates current.
+      update(nearestIndex());
       requested = current;
     });
     track.addEventListener("pointerdown", () => {
