@@ -1,6 +1,13 @@
 # Pre-publication privacy review
 
-September 22, 2026. Reviewed the source, its reachable history, and the GitHub repository's existing release/build surfaces. The owner subsequently authorized removing both identified privacy items from history. The repository remains private.
+Initial review: September 22, 2026. Reviewed the source, its reachable history, and the GitHub repository's existing release/build surfaces. The owner subsequently authorized removing both identified privacy items from history. On September 23, after the final checks below, the owner authorized making the cleaned repository public under its existing MIT license. Public visibility was verified through both authenticated and anonymous GitHub API requests.
+
+## Publication verification — September 23
+
+- A fresh GitHub mirror contained 633 Git objects and 27 reachable commits across both branches and the website pull-request refs. Exact checks found zero known private values; all commit identities used noreply addresses. Gitleaks passed across all refs.
+- Scanned all 33 existing Actions runs plus issue/pull-request descriptions, comments, and reviews: 89 downloaded files, zero known private matches, and a passing Gitleaks scan. There were no releases, tags, or Actions artifacts.
+- Existing local private files were unchanged. Private captures, profiles, and cleanup receipts remain outside the published material. Old local development copies must be migrated before future pushes.
+- The proposed new developer protocol guide and shared example collection are deferred at the owner's request. Publication adds no raw recordings or new capture material.
 
 ## Result
 
@@ -11,9 +18,9 @@ No private shoe credentials, provider tokens, signing keys, raw captures, or pro
 
 The rewrite used git-filter-repo 2.47.0 across all three local branches, followed by an explicit force-with-lease push of `master`. All nine commits present at rewrite time were rewritten; no commits were dropped. A verified, access-restricted Git bundle backup remains outside the repository. The public GitHub account name, project URLs, and plugin identifier are intentional project attribution.
 
-**GitHub-side cleanup verified:** the owner shared GitHub Support's confirmation that cache clearance and garbage collection were completed for the September 23, 2026 request. An authenticated API check independently verified that all four reported obsolete Git commit objects—the old root, former tip, and two website commits—return HTTP 404. The repository commit endpoint returns HTTP 422 with “No commit found for SHA” for those same hashes. Both current clean branch tips return HTTP 200, and the website pull request remains open. The support receipt, ticket link, and verification results are retained privately outside the repository. This resolves the reported cached-history cleanup; repository visibility remains private until separately authorized by the owner. See [GitHub's removal guidance](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/removing-sensitive-data-from-a-repository#fully-removing-the-data-from-github).
+**GitHub-side cleanup verified:** the owner shared GitHub Support's confirmation that cache clearance and garbage collection were completed for the September 23, 2026 request. An authenticated API check independently verified that all four reported obsolete Git commit objects—the old root, former tip, and two website commits—return HTTP 404. The repository commit endpoint returns HTTP 422 with “No commit found for SHA” for those same hashes. Both current clean branch tips return HTTP 200, and the website pull request remains open. The support receipt, ticket link, and verification results are retained privately outside the repository. This resolved the reported cached-history cleanup before the owner authorized public visibility. See [GitHub's removal guidance](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/removing-sensitive-data-from-a-repository#fully-removing-the-data-from-github).
 
-The obsolete website branch was deleted and only its website diff was replayed onto cleaned history using noreply metadata. The replacement branch, `codex/openadapt-site`, and its current pull request must be preserved. The Support request explicitly asks to retain both the current clean history and the repository's private visibility.
+The obsolete website branch was deleted and only its website diff was replayed onto cleaned history using noreply metadata. The replacement branch, `codex/openadapt-site`, and its current pull request must be preserved. The Support request asked to retain the clean history and keep the repository private during cleanup; the later visibility change was separately authorized by the owner.
 
 ## Initial audit
 
