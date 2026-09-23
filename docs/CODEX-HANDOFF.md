@@ -2,6 +2,8 @@
 
 Updated September 22, 2026. Start here and in [TASKS.md](TASKS.md); use [STATUS.md](STATUS.md) for the current verified scope. Older research reports are dated evidence, not new instructions or current authorization.
 
+**Current priority:** the owner has deferred fit calibration as a future feature and requested a pre-publication privacy review. See [publication review](PUBLICATION-REVIEW.md) for the scan scope, removed Bluetooth-name references, and remaining historical name/email cleanup decision. Keep unknown-calibration fit controls blocked. The repository remains private; no history rewrite or visibility change is authorized by that review.
+
 ## September 21 iPhone update
 
 The owner has not factory-reset the current Auto Max pair. The current update adds native Liquid Glass top buttons, simpler Settings/Siri setup, Debug-only Your shoes details, a repository link, and standard firmware inspection. It removes the Haptic feedback and Control steps settings rows; haptic behavior remains implemented. Firmware inspection does not enable unknown firmware, enroll, or send Nike commands.

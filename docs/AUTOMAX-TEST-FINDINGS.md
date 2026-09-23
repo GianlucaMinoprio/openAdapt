@@ -10,7 +10,7 @@ Both available shoes accepted a fresh, unpaired BLE connection through the exist
 
 | Observation | Both available shoes |
 |---|---|
-| Fresh advertised product name | `Auto Max (family 004; name omitted)` |
+| Fresh advertised family | Auto Max (004); full name kept private |
 | Nike manufacturer data | Present |
 | Manufacturer characteristic | Nike |
 | Generic model characteristic | Nike Adapt EARL BB |

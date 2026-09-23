@@ -25,7 +25,7 @@ Omarchy acts as a companion to shoes already configured on iPhone. The iOS app c
 
 The export contains secrets that allow control of your shoes. Keep it private and out of Git. Importing it does not copy the iPhone's system Bluetooth bond: Omarchy also needs its own local Bluetooth pairing. This is a manual transfer, with no account or sync server; fit modes and later changes are not synchronized. Use one client connection at a time until simultaneous multi-client support is established.
 
-**Fresh-pairing status:** the iPhone's first-time setup flow is implemented and tested offline and in Simulator, but factory-reset enrollment and subsequent transfer still need hardware validation. New pairs have unknown fit calibration, so app lacing stays disabled until calibration is verified; battery and lights are available after authentication. Existing calibrated profiles retain their fit controls. See the [transfer guide](docs/ios/PAIRING-TRANSFER.md) for the full flow and current limits.
+**Fresh-pairing status:** the iPhone's first-time setup flow is implemented and tested offline and in Simulator, but factory-reset enrollment and subsequent transfer still need hardware validation. Fit calibration is a future feature. New pairs have unknown fit calibration, so app lacing stays disabled until calibration is verified; battery and lights are available after authentication. Existing calibrated profiles retain their fit controls. See the [transfer guide](docs/ios/PAIRING-TRANSFER.md) for the full flow and current limits.
 
 ## Build your own client
 

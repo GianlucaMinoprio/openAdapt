@@ -6,7 +6,7 @@ September 13, 2026 Pacific / September 14 UTC. The owner asked **“Can you try 
 
 ## Observed result
 
-BlueZ 5.87 successfully completed one `Device1.Pair` call for each of the two previously tracked family-004 radios. Fresh scans required each exact prior address, Nike manufacturer data and advertised product name `Auto Max (family 004; name omitted)`. Immediately before each attempt, Paired, Bonded, Connected, Trusted and Blocked were all false.
+BlueZ 5.87 successfully completed one `Device1.Pair` call for each of the two previously tracked family-004 radios. Fresh scans required each exact prior address, Nike manufacturer data and the privately saved Auto Max name (family 004). Immediately before each attempt, Paired, Bonded, Connected, Trusted and Blocked were all false.
 
 | Target alias from previous Auto Max recordings | Pair completed UTC | After pairing | After cleanup |
 |---|---|---|---|
@@ -21,7 +21,7 @@ After these attempts, the owner corrected the description, saying the observed r
 
 Read-only comparison found neither newly bonded address in any of the four earlier Huarache discovery/inspection references. Those older references advertise family 002. The owner was then asked to switch off both Huaraches and leave both Auto Max shoes powered on for a bounded advertising-only identification scan. The owner confirmed **“Huaraches off; Auto Max on.”**
 
-The 75-second scan completed cleanly at 00:50:52.559 UTC. After that owner report, the newly bonded targets produced **51 and 48 fresh advertisements**, both with product name `Auto Max (family 004; name omitted)`. Neither historical Huarache address appeared. Together with the distinct historical addresses and family mapping, this corroborates that the two new computer bonds belong to Auto Max. Keep the earlier owner-reported **iPhone Huarache pairing** separate. The left/right aliases come from the earlier app/key capture, rather than from this pair-level power-off check. No physical motor/light identification command was sent.
+The 75-second scan completed cleanly at 00:50:52.559 UTC. After that owner report, the newly bonded targets produced **51 and 48 fresh advertisements**, both identified as Auto Max (family 004). Neither historical Huarache address appeared. Together with the distinct historical addresses and family mapping, this corroborates that the two new computer bonds belong to Auto Max. Keep the earlier owner-reported **iPhone Huarache pairing** separate. The left/right aliases come from the earlier app/key capture, rather than from this pair-level power-off check. No physical motor/light identification command was sent.
 
 ## Remaining work
 

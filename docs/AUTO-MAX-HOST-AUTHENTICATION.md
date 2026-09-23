@@ -13,7 +13,7 @@ This demonstrates independent application authentication using recovered credent
 | Right | 07:12:15.408 | 12.020 s | 12 | Authentication acknowledged; disconnected |
 | Left | 07:13:06.093 | 10.292 s | 12 | Authentication acknowledged; disconnected |
 
-The owner confirmed the shoes were awake and Nike Adapt was fully closed. Each attempt required the exact previously confirmed address, fresh Nike advertisements with product name `Auto Max (family 004; name omitted)`, a saved local Bluetooth bond, an explicitly disconnected target, and the supported firmware revision.
+The owner confirmed the shoes were awake and Nike Adapt was fully closed. Each attempt required the exact previously confirmed address, fresh Nike advertisements matching the privately saved Auto Max name (family 004), a saved local Bluetooth bond, an explicitly disconnected target, and the supported firmware revision.
 
 A separate offline verifier reassembled each recorded transcript. Both contain exactly one opcode-112 request/reply and one opcode-113 request/reply, plus transport flow acknowledgments. It verified the 96-bit peer challenge, the client's AES proof and the final shoe ACK. No additional application message was present. These are live exchanges with fresh client nonces, distinct from replaying the iPhone recordings.
 

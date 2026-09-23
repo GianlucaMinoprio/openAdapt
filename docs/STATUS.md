@@ -2,6 +2,8 @@
 
 Updated September 22, 2026.
 
+**Calibration is deferred:** the existing recordings have been [examined](ios/FIT-CALIBRATION-EVIDENCE.md), but the owner has chosen to leave implementation for a future feature. New profiles with unknown calibration still use the physical shoe buttons for fit; existing calibrated profiles retain app controls. The [publication review](PUBLICATION-REVIEW.md) records source/history privacy checks separately from functional readiness.
+
 **Concurrent L/R follow-up is installed:** both shoes connect and accept controls concurrently, using one shared discovery scan and independent per-shoe outcomes. All 410 protocol/backend tests pass locally and on Omarchy. A plugin rescan loaded the updated controller; Fit opens without connecting. Credentials are unchanged and a rollback backup is retained. Physical concurrent timing remains unverified.
 
 **The updated Omarchy panel is installed.** Fit / Lights / Battery / Modes use native theme controls. Fit has rounded 5% bars with a centered link icon; battery information appears only in its own tab. Shoes opens the saved-pair selector directly, with Disconnect inside. Tie/Untie, per-pair modes, preferred-pair history and per-shoe progress are implemented. Opening selects the last fully connected pair without connecting automatically. 386 Python tests and 33 Qt results pass, with additional native UI inspection. New-shoe pairing-file import is installed; owner-operated transfer and physical control verification remain separate. See [panel polish](omarchy/PANEL-POLISH.md) and [the app guide](../apps/omarchy/README.md).
