@@ -1,0 +1,567 @@
+---
+import Icon from "./Icon.astro";
+import { shoes, hasAffiliate } from "../shoes";
+---
+
+<div
+  class="shoe-carousel"
+  role="region"
+  aria-roledescription="carousel"
+  aria-label="Explore the Adapt shoe family"
+>
+  <div class="gallery-bar">
+    <p class="mono">FIVE ICONS. ONE NEW CHAPTER.</p>
+    <div class="gallery-controls" hidden>
+      <span class="gallery-count mono" aria-hidden="true">
+        01 / 05
+      </span>
+      <button
+        class="previous-shoe"
+        type="button"
+        aria-label="Previous shoe"
+        aria-controls="shoe-track"
+        aria-disabled="true"
+      >
+        <Icon name="arrow" />
+      </button>
+      <button
+        class="next-shoe"
+        type="button"
+        aria-label="Next shoe"
+        aria-controls="shoe-track"
+      >
+        <Icon name="arrow" />
+      </button>
+    </div>
+  </div>
+  <div
+    class="shoe-track"
+    id="shoe-track"
+    tabindex="0"
+    aria-label="Shoe gallery. Swipe or use left and right arrow keys to explore."
+  >
+    {shoes.map((shoe, index) => (
+      <article
+        class="shoe-slide"
+        id={`shoe-${shoe.id}`}
+        role="group"
+        aria-roledescription="slide"
+        aria-label={`${index + 1} of ${shoes.length}: ${shoe.brand} ${shoe.model}`}
+        data-name={`${shoe.brand} ${shoe.model}`}
+      >
+        <div class="shoe-photo">
+          <div class="shoe-edition mono">
+            <span>ADAPT ARCHIVE</span>
+            <span>{shoe.year}</span>
+          </div>
+          <img
+            src={shoe.image}
+            width={shoe.width}
+            height={shoe.height}
+            alt={`${shoe.brand} ${shoe.model} ${shoe.colorway}, side profile`}
+            loading="lazy"
+            decoding="async"
+          />
+          <p class="mono">{shoe.colorway}</p>
+        </div>
+        <div class="shoe-copy">
+          <span class="shoe-brand mono">{shoe.brand}</span>
+          <h3>{shoe.model}</h3>
+          <p class="shoe-description">{shoe.description}</p>
+          <div class:list={["shoe-compatibility", { verified: shoe.verified }]}>
+            <strong>
+              {shoe.verified ? (
+                <Icon name="check" size={15} />
+              ) : (
+                <span class="unverified-dot" aria-hidden="true"></span>
+              )}
+              {shoe.status}
+            </strong>
+            <p>{shoe.detail}</p>
+          </div>
+          <span class="market-label mono">EXPLORE RESALE LISTINGS</span>
+          <div class="market-links">
+            {shoe.links.map((link) => (
+              <a
+                href={link.url}
+                target="_blank"
+                rel={
+                  link.affiliate
+                    ? "sponsored noopener noreferrer"
+                    : "noopener noreferrer"
+                }
+                aria-label={`Find ${shoe.brand} ${shoe.model} on ${link.name} (opens in a new tab)`}
+              >
+                {link.name}
+                <Icon name="external" size={15} />
+              </a>
+            ))}
+          </div>
+        </div>
+      </article>
+    ))}
+  </div>
+  <nav class="shoe-picker" aria-label="Choose a shoe model">
+    {shoes.map((shoe, index) => (
+      <a
+        href={`#shoe-${shoe.id}`}
+        data-shoe-index={index}
+        aria-current={index === 0 ? "true" : undefined}
+        aria-label={`Show ${shoe.brand} ${shoe.model}`}
+      >
+        <img src={shoe.image} width="130" height="78" alt="" loading="lazy" />
+        <span>{shoe.model}</span>
+      </a>
+    ))}
+  </nav>
+  <p
+    class="sr-only gallery-announcement"
+    aria-live="polite"
+    aria-atomic="true"
+  ></p>
+</div>
+<p class="gallery-note">
+  The full Adapt family, with testing status for each model. A catalog entry is
+  not a compatibility guarantee. Check the pair’s condition, charger, and
+  firmware before buying. <a href="#faq">Read the current setup limits.</a>
+</p>
+<p class="affiliate-disclosure">
+  {hasAffiliate
+    ? "Some shopping links are affiliate links. OpenAdapt may earn a commission if you make a purchase."
+    : "These are regular marketplace links. OpenAdapt does not currently earn a commission."}{" "}
+  Availability and prices are set by each marketplace.
+</p>
+
+<script>
+  const gallery = document.querySelector<HTMLElement>(".shoe-carousel");
+  if (gallery) {
+    const track = gallery.querySelector<HTMLElement>(".shoe-track")!;
+    const slides = [...gallery.querySelectorAll<HTMLElement>(".shoe-slide")];
+    const choices = [
+      ...gallery.querySelectorAll<HTMLAnchorElement>("[data-shoe-index]"),
+    ];
+    const previous =
+      gallery.querySelector<HTMLButtonElement>(".previous-shoe")!;
+    const next = gallery.querySelector<HTMLButtonElement>(".next-shoe")!;
+    const count = gallery.querySelector<HTMLElement>(".gallery-count")!;
+    const announcement = gallery.querySelector<HTMLElement>(
+      ".gallery-announcement",
+    )!;
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const initial = Math.max(
+      0,
+      slides.findIndex((slide) => `#${slide.id}` === location.hash),
+    );
+    let current = initial;
+    let requested = initial;
+    let frame = 0;
+    const update = (index: number) => {
+      const changed = index !== current;
+      current = index;
+      choices.forEach((choice, i) => {
+        if (i === index) choice.setAttribute("aria-current", "true");
+        else choice.removeAttribute("aria-current");
+      });
+      slides.forEach((slide, i) => {
+        // Keep keyboard focus reachable when a user swipes away from a focused link.
+        if (i !== index && slide.contains(document.activeElement))
+          track.focus({ preventScroll: true });
+        slide.inert = i !== index;
+      });
+      previous.setAttribute("aria-disabled", String(index === 0));
+      next.setAttribute("aria-disabled", String(index === slides.length - 1));
+      count.textContent = `${String(index + 1).padStart(2, "0")} / ${String(slides.length).padStart(2, "0")}`;
+      if (changed)
+        announcement.textContent = `${index + 1} of ${slides.length}: ${slides[index].dataset.name}. ${slides[index].querySelector(".shoe-compatibility strong")?.textContent}`;
+    };
+    const goTo = (index: number) => {
+      requested = Math.max(0, Math.min(slides.length - 1, index));
+      track.scrollTo({
+        left: slides[requested].offsetLeft,
+        behavior: reducedMotion.matches ? "instant" : "smooth",
+      });
+    };
+    previous.addEventListener("click", () => goTo(requested - 1));
+    next.addEventListener("click", () => goTo(requested + 1));
+    choices.forEach((choice, index) =>
+      choice.addEventListener("click", (event) => {
+        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
+          return;
+        event.preventDefault();
+        goTo(index);
+      }),
+    );
+    track.addEventListener("keydown", (event) => {
+      if (event.target !== track) return;
+      const target = {
+        ArrowLeft: requested - 1,
+        ArrowRight: requested + 1,
+        Home: 0,
+        End: slides.length - 1,
+      }[event.key];
+      if (target === undefined) return;
+      event.preventDefault();
+      goTo(target);
+    });
+    track.addEventListener(
+      "scroll",
+      () => {
+        if (frame) return;
+        frame = requestAnimationFrame(() => {
+          frame = 0;
+          const closest = slides.reduce(
+            (best, slide, index) =>
+              Math.abs(slide.offsetLeft - track.scrollLeft) <
+              Math.abs(slides[best].offsetLeft - track.scrollLeft)
+                ? index
+                : best,
+            0,
+          );
+          update(closest);
+        });
+      },
+      { passive: true },
+    );
+    track.addEventListener("scrollend", () => {
+      requested = current;
+    });
+    track.addEventListener("pointerdown", () => {
+      requested = current;
+    });
+    new ResizeObserver(() => {
+      track.scrollTo({ left: slides[current].offsetLeft, behavior: "instant" });
+      requested = current;
+    }).observe(track);
+    gallery.querySelector<HTMLElement>(".gallery-controls")!.hidden = false;
+    update(initial);
+  }
+</script>
+
+<style>
+  .gallery-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 18px;
+    min-height: 44px;
+  }
+  .gallery-bar > p {
+    font-size: 10px;
+    color: var(--muted);
+  }
+  .gallery-controls {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+  }
+  .gallery-controls[hidden] {
+    display: none;
+  }
+  .gallery-count {
+    font-size: 11px;
+    margin-right: 16px;
+    font-variant-numeric: tabular-nums;
+  }
+  .gallery-controls button {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    background: transparent;
+    cursor: pointer;
+    transition:
+      background-color 160ms,
+      color 160ms;
+  }
+  .gallery-controls button:hover:not([aria-disabled="true"]) {
+    background: var(--ink);
+    color: white;
+  }
+  .gallery-controls button[aria-disabled="true"] {
+    opacity: 0.3;
+    cursor: default;
+  }
+  .previous-shoe :global(svg) {
+    transform: rotate(180deg);
+  }
+  .shoe-track {
+    display: flex;
+    position: relative;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+  }
+  .shoe-track::-webkit-scrollbar {
+    display: none;
+  }
+  .shoe-track:focus-visible {
+    outline-offset: 5px;
+  }
+  .shoe-slide {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    flex: 0 0 100%;
+    min-width: 0;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+  .shoe-photo {
+    background: #f0f2f5;
+    padding: 28px 32px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-width: 0;
+  }
+  .shoe-edition {
+    display: flex;
+    justify-content: space-between;
+    font-size: 9px;
+    color: #6a6c72;
+  }
+  .shoe-photo > img {
+    width: 100%;
+    height: 300px;
+    object-fit: contain;
+    mix-blend-mode: multiply;
+    margin: 24px 0;
+  }
+  .shoe-photo > p {
+    font-size: 10px;
+    color: #62656d;
+    text-align: center;
+    text-transform: uppercase;
+  }
+  .shoe-copy {
+    padding: 38px;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+  }
+  .shoe-brand {
+    font-size: 11px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .shoe-copy h3 {
+    font-size: clamp(35px, 4vw, 54px);
+    letter-spacing: -0.045em;
+    line-height: 1.05;
+    margin-top: 8px;
+  }
+  .shoe-description {
+    font-size: 13px;
+    line-height: 1.75;
+    color: var(--muted);
+    margin-top: 18px;
+    min-height: 70px;
+  }
+  .shoe-compatibility {
+    margin: 22px 0;
+    padding: 16px 0;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+  .shoe-compatibility strong {
+    font-size: 11px;
+    display: flex;
+    gap: 7px;
+    align-items: center;
+    font-weight: 600;
+  }
+  .shoe-compatibility.verified strong {
+    color: var(--blue);
+  }
+  .unverified-dot {
+    width: 7px;
+    height: 7px;
+    border: 1px solid currentColor;
+    border-radius: 50%;
+  }
+  .shoe-compatibility p {
+    font-size: 11px;
+    line-height: 1.6;
+    color: var(--muted);
+    margin-top: 8px;
+  }
+  .market-label {
+    font-size: 8px;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    margin-top: auto;
+  }
+  .market-links {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .market-links a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 5px;
+    min-height: 44px;
+    border: 1px solid var(--line);
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 11px;
+    font-weight: 500;
+    transition:
+      background-color 160ms,
+      border-color 160ms;
+  }
+  .market-links a:hover {
+    background: #eff3ff;
+    border-color: var(--blue);
+  }
+  .shoe-picker {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 14px;
+  }
+  .shoe-picker a {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 14px 10px 12px;
+    background: #f7f8fa;
+    text-align: center;
+    transition:
+      background-color 160ms,
+      border-color 160ms;
+    min-width: 0;
+  }
+  .shoe-picker a[aria-current="true"] {
+    border-color: var(--blue);
+    background: #edf2ff;
+    box-shadow: inset 0 -2px var(--blue);
+  }
+  .shoe-picker a:hover {
+    border-color: var(--blue);
+  }
+  .shoe-picker img {
+    width: 100%;
+    height: 66px;
+    object-fit: contain;
+    mix-blend-mode: multiply;
+  }
+  .shoe-picker span {
+    display: block;
+    font-size: 11px;
+    font-weight: 500;
+    margin-top: 7px;
+  }
+  .gallery-note {
+    margin-top: 24px;
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.75;
+    max-width: 900px;
+  }
+  .gallery-note a {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  @media (max-width: 850px) {
+    .shoe-copy {
+      padding: 25px;
+    }
+    .shoe-photo {
+      padding: 25px 20px;
+    }
+    .shoe-photo > img {
+      height: 240px;
+    }
+    .market-links {
+      gap: 5px;
+    }
+    .market-links a {
+      padding: 8px;
+      font-size: 10px;
+    }
+  }
+  @media (max-width: 650px) {
+    .gallery-bar > p {
+      max-width: 130px;
+      font-size: 8px;
+      line-height: 1.5;
+    }
+    .gallery-count {
+      margin-right: 5px;
+      font-size: 10px;
+    }
+    .gallery-controls {
+      gap: 6px;
+    }
+    .shoe-slide {
+      grid-template-columns: 1fr;
+    }
+    .shoe-photo {
+      padding: 18px 22px;
+    }
+    .shoe-photo > img {
+      height: 180px;
+      margin: 16px 0;
+    }
+    .shoe-edition,
+    .shoe-photo > p {
+      font-size: 8px;
+    }
+    .shoe-copy {
+      padding: 25px;
+    }
+    .shoe-copy h3 {
+      font-size: 42px;
+    }
+    .shoe-description {
+      min-height: 70px;
+      font-size: 12px;
+      margin-top: 12px;
+    }
+    .shoe-compatibility {
+      margin: 18px 0;
+    }
+    .shoe-picker {
+      gap: 6px;
+    }
+    .shoe-picker a {
+      padding: 8px 3px;
+      border-radius: 5px;
+    }
+    .shoe-picker img {
+      height: 39px;
+    }
+    .shoe-picker span {
+      font-size: 8px;
+      margin-top: 5px;
+    }
+    .gallery-note {
+      font-size: 10px;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      transition: none !important;
+    }
+  }
+</style>

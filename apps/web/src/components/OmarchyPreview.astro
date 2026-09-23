@@ -1,0 +1,323 @@
+<figure class="omarchy-preview">
+  <div class="shell-bar" aria-hidden="true">
+    <img src="/images/omarchy-logo.svg" width="24" height="24" alt="" />
+    <span>
+      1 <span class="workspace">2</span> 3
+    </span>
+    <span class="shell-title">OpenAdapt</span>
+    <span>09:41</span>
+  </div>
+  <div
+    class="native-panel"
+    role="img"
+    aria-label="OpenAdapt client theme preview in Omarchy’s Tokyo Night colors: dark navy, soft blue controls, independent left and right fit at 60 percent, and Tie and Untie actions."
+  >
+    <div class="native-header" aria-hidden="true">
+      <span class="native-shoe"></span>
+      <div>
+        <strong>OpenAdapt</strong>
+        <span>Adapt Auto Max</span>
+      </div>
+      <span class="native-button">Shoes</span>
+    </div>
+    <div class="native-tabs" aria-hidden="true">
+      <span class="selected">Fit</span>
+      <span>Lights</span>
+      <span>Battery</span>
+      <span>Modes</span>
+    </div>
+    <div class="native-fit" aria-hidden="true">
+      <div class="native-foot">
+        <span>Left</span>
+        <div class="native-track">
+          <div class="native-fill"></div>
+          <div class="native-ticks"></div>
+          <span class="native-knob"></span>
+        </div>
+        <strong>
+          60<small>%</small>
+        </strong>
+      </div>
+      <span class="native-link">↔</span>
+      <div class="native-foot">
+        <span>Right</span>
+        <div class="native-track">
+          <div class="native-fill"></div>
+          <div class="native-ticks"></div>
+          <span class="native-knob"></span>
+        </div>
+        <strong>
+          60<small>%</small>
+        </strong>
+      </div>
+    </div>
+    <div class="native-actions" aria-hidden="true">
+      <span class="selected">Tie</span>
+      <span>Untie</span>
+    </div>
+  </div>
+  <figcaption>
+    <span class="theme-dot"></span>TOKYO NIGHT <span>/</span> CLIENT THEME
+    PREVIEW
+  </figcaption>
+</figure>
+
+<style>
+  .omarchy-preview {
+    --oma-bg: #1a1b26;
+    --oma-fg: #a9b1d6;
+    --oma-accent: #7aa2f7;
+    background: #13141c;
+    color: var(--oma-fg);
+    border: 1px solid #414868;
+    border-radius: 10px;
+    padding: 0 20px 17px;
+    width: 100%;
+    min-width: 0;
+    max-width: 365px;
+    margin: 0;
+    justify-self: center;
+    box-shadow: 0 20px 50px #0003;
+    font-family: var(--mono);
+  }
+  .shell-bar {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 10px;
+    height: 49px;
+    border-bottom: 1px solid #292e42;
+    margin-bottom: 19px;
+  }
+  .shell-bar img {
+    width: 21px;
+    height: 21px;
+  }
+  .workspace {
+    color: #565f89;
+    margin: 0 7px;
+  }
+  .shell-title {
+    flex: 1;
+    text-align: center;
+    font-size: 9px;
+  }
+  .native-panel {
+    padding: 18px;
+    background: var(--oma-bg);
+    border: 1px solid #414868;
+    border-radius: 9px;
+  }
+  .native-header {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+  }
+  .native-shoe {
+    display: block;
+    width: 32px;
+    height: 32px;
+    background: var(--oma-accent);
+    mask: url("/favicon.svg") center / contain no-repeat;
+  }
+  .native-header > div {
+    flex: 1;
+  }
+  .native-header strong {
+    display: block;
+    font: 600 15px var(--body);
+    color: #c0caf5;
+    letter-spacing: -0.4px;
+  }
+  .native-header div span {
+    display: block;
+    font-size: 8px;
+    margin-top: 4px;
+  }
+  .native-button,
+  .native-tabs span,
+  .native-actions span {
+    border: 1px solid #414868;
+    border-radius: 5px;
+    text-align: center;
+    font-size: 9px;
+    padding: 9px;
+  }
+  .native-tabs {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    margin-top: 18px;
+  }
+  .native-tabs span {
+    padding: 9px 0;
+    font-size: 8px;
+  }
+  .selected {
+    color: #c0caf5;
+    background: #292e42;
+    border-color: var(--oma-accent) !important;
+  }
+  .native-fit {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    margin: 20px 12px 18px;
+  }
+  .native-foot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    font-size: 9px;
+  }
+  .native-track {
+    position: relative;
+    background: #24283b;
+    width: 51px;
+    height: 126px;
+    border: 1px solid #414868;
+    border-radius: 20px;
+    margin: 9px 0 11px;
+    overflow: hidden;
+  }
+  .native-fill {
+    position: absolute;
+    inset: 40% 0 0;
+    background: #7aa2f7;
+    opacity: 0.9;
+  }
+  .native-ticks {
+    position: absolute;
+    inset: 8px 7px;
+    background: repeating-linear-gradient(
+      to top,
+      transparent 0 5px,
+      #a9b1d642 5px 6px
+    );
+  }
+  .native-knob {
+    position: absolute;
+    inset: calc(40% - 2px) 6px auto;
+    height: 4px;
+    border-radius: 4px;
+    background: #c0caf5;
+    box-shadow: 0 1px 4px #0004;
+  }
+  .native-foot strong {
+    font-size: 19px;
+    font-weight: 500;
+    color: #c0caf5;
+  }
+  .native-foot small {
+    font-size: 10px;
+    margin-left: 2px;
+    color: var(--oma-fg);
+  }
+  .native-link {
+    background: #292e42;
+    color: var(--oma-accent);
+    border: 1px solid var(--oma-accent);
+    border-radius: 50%;
+    width: 27px;
+    height: 27px;
+    display: grid;
+    place-items: center;
+    font-size: 17px;
+    margin-top: -10px;
+  }
+  .native-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 9px;
+  }
+  figcaption {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    font-size: 7px;
+    letter-spacing: 0.025em;
+    margin-top: 16px;
+  }
+  figcaption > span:not(.theme-dot) {
+    color: #565f89;
+  }
+  .theme-dot {
+    width: 5px;
+    height: 5px;
+    background: var(--oma-accent);
+    border-radius: 50%;
+  }
+  @media (max-width: 850px) and (min-width: 651px) {
+    .omarchy-preview {
+      padding: 0 12px 14px;
+    }
+    .native-panel {
+      padding: 13px;
+    }
+    .native-fit {
+      gap: 10px;
+      margin-inline: 0;
+    }
+    .shell-title {
+      display: none;
+    }
+    .shell-bar > span:last-child {
+      margin-left: auto;
+    }
+  }
+  @media (max-width: 400px) {
+    .omarchy-preview {
+      padding: 0 12px 14px;
+    }
+    .native-panel {
+      padding: 12px;
+    }
+    .native-header {
+      gap: 6px;
+    }
+    .native-header > div {
+      min-width: 0;
+    }
+    .native-header strong {
+      font-size: 12px;
+    }
+    .native-header div span {
+      font-size: 7px;
+    }
+    .native-shoe {
+      width: 24px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+    .native-button {
+      padding: 7px;
+      font-size: 8px;
+    }
+    .native-fit {
+      gap: 8px;
+      margin-inline: 0;
+    }
+    .native-track {
+      width: 43px;
+    }
+    .native-tabs {
+      gap: 4px;
+    }
+    .native-tabs span {
+      font-size: 7px;
+    }
+    .shell-title {
+      display: none;
+    }
+    .shell-bar > span:last-child {
+      margin-left: auto;
+    }
+    figcaption {
+      font-size: 6px;
+      gap: 5px;
+    }
+  }
+</style>

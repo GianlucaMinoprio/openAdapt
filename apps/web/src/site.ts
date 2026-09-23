@@ -7,14 +7,6 @@ export const site = {
   branch: "master",
   testflight: "",
   appStore: "",
-  stockx: {
-    url: "https://stockx.com/nike-adapt-auto-max-triple-black-us-charger",
-    affiliate: false,
-  },
-  goat: {
-    url: "https://www.goat.com/sneakers/adapt-auto-max-triple-black-cz6799-002",
-    affiliate: false,
-  },
 };
 export const source = (path: string) =>
   `${site.repo}/tree/${site.branch}/${path}`;

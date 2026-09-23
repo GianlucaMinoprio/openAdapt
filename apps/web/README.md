@@ -19,7 +19,7 @@ Edit `src/site.ts` and redeploy:
 - `repositoryPublic`: leave `false` while the repository is private. Once public release is approved and the repository actually becomes public, set `true` to activate GitHub star, source, clone, and contribution links. This flag never changes GitHub visibility itself.
 - `testflight`: set to the real approved public invitation URL. An empty value renders “coming soon” and links to the release status.
 - `appStore`: set to the actual Apple listing after release.
-- Marketplace URLs: replace only with real product or approved affiliate links. Set the matching `affiliate` field to `true` when the URL earns commission. The site then renders a nearby disclosure and marks that link `rel="sponsored"`.
+- Marketplace URLs in `src/shoes.ts`: replace only with real product or approved affiliate links. Set the matching `affiliate` field to `true` when the URL earns commission. The site then renders a nearby disclosure and marks that link `rel="sponsored"`.
 
 Compatibility copy reflects the repository's September 22, 2026 documentation: Auto Max 2.4.3M is the verified profile; new enrollment/calibration and broader iPhone hardware validation are pending. Update the FAQ, compatibility note, and client copy when new hardware evidence or release status changes. Client ideas are not advertised as implemented features.
 
@@ -37,17 +37,21 @@ Use the DNS records Vercel reports for this project when connecting `openadapt.a
 
 ## Referral program
 
-StockX documents an affiliate program through Impact. Apply and use approved tracking links once accepted; current program terms must be verified in the account before making commission claims. No official GOAT sneaker affiliate program was verified. GOAT links therefore remain ordinary product links unless a direct arrangement is established. No affiliate application was submitted by this website task.
+StockX documents an affiliate program through Impact. Apply and use approved tracking links once accepted; current program terms must be verified in the account before making commission claims. eBay also offers the eBay Partner Network, including tracked links to products and search results. Apply separately, then use real campaign links; commission rates depend on the category and qualifying purchase terms. No official GOAT sneaker affiliate program was verified. GOAT links therefore remain ordinary product links unless a direct arrangement is established. No affiliate application was submitted by this website task.
 
 Sources:
 - https://stockx.com/news/en-us/affiliate-faq/
 - https://stockx.com/news/en-us/stockx-affiliate-program/
+- https://partnernetwork.ebay.com/our-program
+- https://partnernetwork.ebay.com/our-program/rate-card
+- https://partnernetwork.ebay.com/resources/create-your-affiliate-link
 
 ## Assets and privacy
 
 - The sneaker mark is the project's original MIT-licensed artwork from `assets/brand/sneaker.svg`.
-- App screenshots are the project's own labeled Simulator/native demo captures, resized and encoded as WebP.
-- The Auto Max product photograph is from the GOAT listing linked in the footer: https://www.goat.com/sneakers/adapt-auto-max-triple-black-cz6799-002 . Third-party product photography is not covered by this repository's MIT license. Replace with owner photography or approved affiliate creative when available.
+- The iPhone screenshot is the project’s own labeled Simulator demo capture. The Omarchy view is a labeled HTML/CSS theme preview matching the native panel’s controls, using the official Tokyo Night palette: https://raw.githubusercontent.com/basecamp/omarchy/master/themes/tokyo-night/colors.toml
+- Omarchy’s logo and wordmark come from https://omarchy.org/brand/ and retain their default brand green. These third-party brand assets are not covered by the OpenAdapt MIT license.
+- Product photos come from the matching GOAT listing linked on each shoe card in `src/shoes.ts`. Auto Max: https://www.goat.com/sneakers/adapt-auto-max-triple-black-cz6799-002 . Third-party product photography is not covered by this repository's MIT license. Replace with owner photography or approved affiliate creative when available.
 - Inter and Inter Tight are self-hosted, with their font licenses in `public/fonts/`.
 - No analytics scripts, email collection, cloud app backend, Bluetooth access, or cookies are added by the website. The interactive demo is browser-local simulation.
 - Search metadata, a social preview, sitemap, robots file, security headers, privacy page, and a 404 page are included.
@@ -55,3 +59,13 @@ Sources:
 ## Shared iPhone privacy policy
 
 `npm run build` refreshes `src/content/app-privacy.txt` from the iPhone policy when building from the full repository. Standalone website uploads use the checked-in copy. The `/app-privacy` route keeps the app policy separate from website privacy.
+
+## Shoe gallery
+
+The five models mirror the native app catalog, not five verified profiles. Only Auto Max firmware 2.4.3M is marked verified. Use `src/shoes.ts` to update model evidence and per-link affiliate flags. The carousel is server-rendered, uses native scroll snap and touch scrolling, has keyboard/thumbnail/previous/next controls, and never advances automatically. Reduced Motion disables smooth scrolling. Without JavaScript, all cards and model anchor links remain accessible.
+
+Photo sources (GOAT, retrieved September 23, 2026):
+- Adapt BB: https://image.goat.com/transform/v1/attachments/product_template_additional_pictures/images/079/299/458/original/487879_01.jpg.jpeg
+- Adapt BB 2.0: https://image.goat.com/transform/v1/attachments/product_template_additional_pictures/images/080/337/367/original/589235_01.jpg.jpeg
+- Adapt Huarache: https://image.goat.com/transform/v1/attachments/product_template_additional_pictures/images/079/333/407/original/546697_01.jpg.jpeg
+- Air Jordan 11 Adapt: https://image.goat.com/transform/v1/attachments/product_template_additional_pictures/images/100/071/868/original/704154_01.jpg.jpeg

@@ -1,8 +1,9 @@
 ---
 import "../styles/global.css";
 import Icon from "../components/Icon.astro";
+import ShoeCarousel from "../components/ShoeCarousel.astro";
+import OmarchyPreview from "../components/OmarchyPreview.astro";
 import { site, source } from "../site";
-const hasAffiliate = site.stockx.affiliate || site.goat.affiliate;
 const installUrl = site.appStore || site.testflight;
 const installLabel = site.appStore
   ? "Download on the App Store"
@@ -64,7 +65,7 @@ const faqs = [
     />
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#f5f5f2" />
+    <meta name="theme-color" content="#f7f8fa" />
     <title>OpenAdapt — Good shoes. Second life.</title>
     <meta
       name="description"
@@ -301,22 +302,22 @@ const faqs = [
                   data-color="blue"
                 ></button>
                 <button
-                  class="swatch mint"
-                  aria-label="Mint lights"
+                  class="swatch sky"
+                  aria-label="Ice blue lights"
                   aria-pressed="false"
-                  data-color="mint"
-                ></button>
-                <button
-                  class="swatch orange"
-                  aria-label="Orange lights"
-                  aria-pressed="false"
-                  data-color="orange"
+                  data-color="sky"
                 ></button>
                 <button
                   class="swatch white"
-                  aria-label="Lights off"
+                  aria-label="White lights"
                   aria-pressed="false"
                   data-color="white"
+                ></button>
+                <button
+                  class="swatch off"
+                  aria-label="Lights off"
+                  aria-pressed="false"
+                  data-color="off"
                 ></button>
               </div>
               <span id="color-name">BLUE LIGHTS</span>
@@ -375,7 +376,22 @@ const faqs = [
         <article class="desktop-card">
           <div class="desktop-copy">
             <div class="eyebrow">
-              <Icon name="monitor" size={18} /> ALSO AT HOME ON YOUR DESKTOP
+              <span>MADE FOR</span>
+              <a
+                href="https://omarchy.org"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Omarchy (opens in a new tab)"
+              >
+                <img
+                  class="omarchy-wordmark"
+                  src="/images/omarchy-wordmark.svg"
+                  width="150"
+                  height="35"
+                  alt="Omarchy"
+                  loading="lazy"
+                />
+              </a>
             </div>
             <h3>
               Meet your shoes’
@@ -385,7 +401,7 @@ const faqs = [
             <p>
               A native Omarchy extension for fit, lights, battery, and saved
               modes. Start with your iPhone pairing, then bring your pair to
-              Linux.
+              Linux. Right at home in Tokyo Night, Omarchy’s default theme.
             </p>
             <a
               class="text-link"
@@ -397,21 +413,7 @@ const faqs = [
               <Icon name="arrow" size={18} />
             </a>
           </div>
-          <div class="desktop-preview">
-            <div class="desktop-toolbar">
-              <span class="desktop-logo">O</span>
-              <span>OPENADAPT / OMARCHY</span>
-              <span>···</span>
-            </div>
-            <img
-              src="/images/omarchy-fit.webp"
-              alt="OpenAdapt's native Omarchy panel with left and right fit bars, saved modes, and Tie and Untie controls"
-              width="659"
-              height="798"
-              loading="lazy"
-            />
-            <span class="mono">NATIVE CLIENT / DEMO VIEW</span>
-          </div>
+          <OmarchyPreview />
         </article>
         <div class="compatibility-note">
           <Icon name="bluetooth" size={20} />
@@ -533,70 +535,12 @@ const faqs = [
             </h2>
           </div>
           <p>
-            Beautiful then. Beautiful now.
-            <br />A second life starts with a pair worth keeping.
+            From the court to the everyday.
+            <br />
+            Explore the Adapt family, one silhouette at a time.
           </p>
         </div>
-        <div class="shop-card">
-          <div class="shop-image">
-            <img
-              src="/images/auto-max.jpg"
-              width="1614"
-              height="937"
-              alt="Nike Adapt Auto Max Triple Black side profile"
-              loading="lazy"
-            />
-            <span class="mono">NIKE ADAPT AUTO MAX / TRIPLE BLACK</span>
-          </div>
-          <div class="shop-copy">
-            <span class="pill">THE MODEL WE’RE BUILDING WITH</span>
-            <h3>
-              Nike Adapt
-              <br />
-              Auto Max
-            </h3>
-            <p>
-              The self-lacing silhouette at the heart of OpenAdapt’s
-              development. Explore resale listings, and check the pair’s
-              condition, charger, and firmware before buying.
-            </p>
-            <div class="shop-links">
-              <a
-                href={site.stockx.url}
-                target="_blank"
-                rel={
-                  site.stockx.affiliate
-                    ? "sponsored noopener noreferrer"
-                    : "noopener noreferrer"
-                }
-              >
-                Find on StockX <Icon name="external" />
-              </a>
-              <a
-                href={site.goat.url}
-                target="_blank"
-                rel={
-                  site.goat.affiliate
-                    ? "sponsored noopener noreferrer"
-                    : "noopener noreferrer"
-                }
-              >
-                Find on GOAT <Icon name="external" />
-              </a>
-            </div>
-            <p class="shop-note">
-              A listing is not a compatibility guarantee. OpenAdapt cannot yet
-              offer verified setup for a newly purchased or reset pair.{" "}
-              <a href="#faq">Read the current limits.</a>
-            </p>
-          </div>
-        </div>
-        <p class="affiliate-disclosure">
-          {hasAffiliate
-            ? "Some shopping links are affiliate links. OpenAdapt may earn a commission if you make a purchase."
-            : "These are regular marketplace links. OpenAdapt does not currently earn a commission."}{" "}
-          Availability and prices are set by each marketplace.
-        </p>
+        <ShoeCarousel />
       </section>
 
       <section class="faq-section wrap section" id="faq">
@@ -685,11 +629,7 @@ const faqs = [
         <div>
           <a href="/privacy">Website privacy</a>
           <a href="/app-privacy">App privacy</a>
-          <a
-            href="https://www.goat.com/sneakers/adapt-auto-max-triple-black-cz6799-002"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+          <a href="https://www.goat.com" target="_blank" rel="noopener noreferrer">
             Product photography: GOAT ↗
           </a>
           <span>© {new Date().getFullYear()} OpenAdapt</span>
@@ -717,9 +657,9 @@ const faqs = [
       }
       const names: Record<string, string> = {
         blue: "BLUE LIGHTS",
-        mint: "MINT LIGHTS",
-        orange: "ORANGE LIGHTS",
-        white: "LIGHTS OFF",
+        sky: "ICE BLUE LIGHTS",
+        white: "WHITE LIGHTS",
+        off: "LIGHTS OFF",
       };
       document
         .querySelectorAll<HTMLButtonElement>("[data-color]")
