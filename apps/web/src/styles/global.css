@@ -1377,7 +1377,7 @@ footer {
     font-size: 8px;
   }
   .desktop-card {
-    height: 380px;
+    height: auto;
     gap: 30px;
     padding: 35px;
   }
