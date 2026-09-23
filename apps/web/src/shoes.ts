@@ -7,6 +7,12 @@ export interface MarketplaceLink {
 // Active campaign verified in the owner's eBay Partner Network dashboard.
 const ebayCampaignId = "5339213069";
 
+function stockxSearchUrl(shoe: { brand: string; model: string }) {
+  const url = new URL("https://stockx.com/search");
+  url.searchParams.set("s", `${shoe.brand} ${shoe.model}`);
+  return url.toString();
+}
+
 function ebayAffiliateUrl(shoe: { id: string; brand: string; model: string }) {
   // https://www.developer.ebay.com/api-docs/buy/static/ref-epn-link.html
   const url = new URL("https://www.ebay.com/sch/i.html");
@@ -41,11 +47,9 @@ const models = [
       "Control verified on the development pair. Fresh setup and fit calibration are still being tested.",
     photoSource:
       "https://www.goat.com/sneakers/adapt-auto-max-triple-black-cz6799-002",
-    stockx: "https://stockx.com/nike-adapt-auto-max-triple-black-us-charger",
   },
   {
     id: "adapt-bb",
-    stockx: "https://stockx.com/nike-adapt-bb-black-pure-platinum",
     brand: "Nike Adapt",
     model: "BB",
     year: "2019",
@@ -63,7 +67,6 @@ const models = [
   },
   {
     id: "adapt-bb-2",
-    stockx: "https://stockx.com/nike-adapt-bb-2-black",
     brand: "Nike Adapt",
     model: "BB 2.0",
     year: "2020",
@@ -82,7 +85,6 @@ const models = [
   },
   {
     id: "adapt-huarache",
-    stockx: "https://stockx.com/nike-adapt-huarache-white-black",
     brand: "Nike Adapt",
     model: "Huarache",
     year: "2019",
@@ -101,7 +103,6 @@ const models = [
   },
   {
     id: "jordan-11-adapt",
-    stockx: "https://stockx.com/air-jordan-11-adapt-white",
     brand: "Air Jordan",
     model: "11 Adapt",
     year: "2020",
@@ -126,7 +127,7 @@ export const shoes = models.map((shoe) => ({
   links: [
     {
       name: "StockX",
-      url: shoe.stockx,
+      url: stockxSearchUrl(shoe),
       affiliate: false,
     },
     {

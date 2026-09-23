@@ -66,7 +66,7 @@ Sources:
 
 ## Shoe gallery
 
-The five models mirror the native app catalog, not five verified profiles. The FAQ and compatibility note identify Auto Max firmware 2.4.3M as the verified profile. The shopping cards show only model names, photos, colorways, and marketplace actions; per-model testing badges and descriptions have been removed. Use `src/shoes.ts` to update model evidence and per-link affiliate flags. The carousel is server-rendered, uses native scroll snap and touch scrolling, has keyboard/thumbnail/previous/next controls, and never advances automatically. Reduced Motion disables smooth scrolling. Without JavaScript, all cards and model anchor links remain accessible.
+The five models mirror the native app catalog, not five verified profiles. The FAQ and compatibility note identify Auto Max firmware 2.4.3M as the verified profile. Both StockX and eBay search the full model name without a colorway filter. The shopping cards show only model names, photos, colorways, and marketplace actions; per-model testing badges and descriptions have been removed. Use `src/shoes.ts` to update model evidence and per-link affiliate flags. The carousel is server-rendered, uses native scroll snap and touch scrolling, has keyboard/thumbnail/previous/next controls, and never advances automatically. Reduced Motion disables smooth scrolling. Without JavaScript, all cards and model anchor links remain accessible.
 
 Photo sources (GOAT, retrieved September 23, 2026):
 - Adapt BB: https://image.goat.com/transform/v1/attachments/product_template_additional_pictures/images/079/299/458/original/487879_01.jpg.jpeg
