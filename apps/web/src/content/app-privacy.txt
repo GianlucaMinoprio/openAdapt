@@ -1,0 +1,26 @@
+OpenAdapt Privacy Policy
+Updated September 22, 2026
+
+OpenAdapt is an independent companion for compatible Adapt shoes. It has no account, advertising, analytics SDK, or developer-operated cloud service. The app does not send your shoe data or app activity to its developers, Nike, advertisers, or data brokers. It does not track you across apps or websites, sell your information, or request your location.
+
+Bluetooth and local data
+
+With your permission, OpenAdapt uses Bluetooth to discover and pair with compatible shoes, authenticate saved shoes, read battery and device status, and send the controls you request. Background Bluetooth supports shoe actions you invoke through Siri and Shortcuts. You can revoke Bluetooth permission in iOS Settings; shoe connections and controls will then stop working.
+
+Pairing credentials, shoe identifiers, and interrupted setup records are stored in this iPhone's device-only Keychain. These Keychain entries do not sync through iCloud Keychain or migrate to another device through a backup. Names, appearance choices, saved fits, and other preferences are stored locally in the app's settings. iOS may include these ordinary settings in device backups according to your backup settings.
+
+Retention and removal
+
+Saved pairs remain until you remove them in My shoes. Removing a pair deletes its saved profile and its associated fit, appearance, and connection preferences from OpenAdapt. It does not reset the physical shoes or remove their Bluetooth bond in iOS. Interrupted pairing records are retained separately to protect recovery after a failed setup; removing a saved pair does not erase those records. Keychain records may remain after uninstalling the app, so uninstalling is not a guarantee of erasing every credential. OpenAdapt's developers cannot access or remotely erase these local records.
+
+Apple services and external links
+
+If you use Siri, Shortcuts, TestFlight, or Apple's optional diagnostic and feedback services, Apple processes information under its own privacy terms and your Apple settings. TestFlight feedback you choose to send may be made available to the developer through Apple. Opening a support or help link sends a request to that website, which has its own privacy practices. The app does not automatically attach pairing keys or shoe profiles to those requests.
+
+Development builds
+
+Development builds can keep a short local connection diagnostic history and offer a pairing-file export. An exported pairing file contains sensitive credentials. Export happens only when you choose it, and the selected file or sharing provider controls any resulting copy. These development tools are absent from public Release builds.
+
+Questions and changes
+
+Use the Support link in the app's App Store listing for privacy questions. Please do not send pairing keys or private pairing files. Any changes to how OpenAdapt handles information will be reflected in this policy and in the app's privacy disclosures.

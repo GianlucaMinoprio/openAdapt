@@ -1,0 +1,47 @@
+---
+import "../styles/global.css";
+import policy from "../content/app-privacy.txt?raw";
+
+// Publish the same text bundled in the iPhone app so the two policies stay aligned.
+const [header, ...paragraphs] = policy.trim().split(/\n\s*\n/);
+const [title, updated] = header.split("\n");
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>iPhone Privacy Policy — OpenAdapt</title>
+    <meta
+      name="description"
+      content="How the OpenAdapt iPhone app handles Bluetooth, local shoe profiles, and your privacy."
+    />
+    <link rel="canonical" href="https://openadapt.app/app-privacy" />
+    <link rel="icon" href="/favicon.svg" />
+  </head>
+  <body>
+    <header class="header wrap">
+      <a class="wordmark" href="/">
+        OpenAdapt<span class="wordmark-dot"></span>
+      </a>
+      <a class="text-link" href="/">
+        Back to the project ↗
+      </a>
+    </header>
+    <main class="wrap legal">
+      <span class="mono">{updated}</span>
+      <h1>{title}</h1>
+      {paragraphs.map((paragraph) =>
+        paragraph.length < 50 ? <h2>{paragraph}</h2> : <p>{paragraph}</p>,
+      )}
+      <p>
+        For information about this website's hosting and external links, see the{" "}
+        <a href="/privacy">website privacy policy</a>.
+      </p>
+      <a class="button button-dark" href="/">
+        Back to OpenAdapt →
+      </a>
+    </main>
+  </body>
+</html>

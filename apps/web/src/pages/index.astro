@@ -1,0 +1,754 @@
+---
+import "../styles/global.css";
+import Icon from "../components/Icon.astro";
+import { site, source } from "../site";
+const hasAffiliate = site.stockx.affiliate || site.goat.affiliate;
+const installUrl = site.appStore || site.testflight;
+const installLabel = site.appStore
+  ? "Download on the App Store"
+  : site.testflight
+    ? "Install with TestFlight"
+    : "TestFlight coming soon";
+const faqs = [
+  [
+    "What happened to the original Nike app?",
+    "Nike retired the Adapt app from the Apple and Android app stores on August 6, 2024. The shoes still work with their physical buttons. OpenAdapt is an independent project exploring how to keep app control alive.",
+  ],
+  [
+    "Which shoes work with OpenAdapt?",
+    "Verified control is currently limited to Nike Adapt Auto Max running firmware 2.4.3M. The desktop implementation has physically laced the development pair; the iPhone app has authenticated both shoes and read their status. Other models and firmware versions are not verified.",
+  ],
+  [
+    "Can I set up a newly purchased or reset pair?",
+    "Not as a complete, verified experience yet. First-time pairing is implemented and tested offline, but fresh enrollment and fit calibration still need hardware validation. New pairs keep app fit controls disabled until calibration is verified. Do not reset a working pair just to try OpenAdapt.",
+  ],
+  [
+    "When can I install the iPhone app?",
+    site.appStore
+      ? "OpenAdapt is available on the App Store for iOS 17 and later. Please check the current compatibility and setup requirements before installing."
+      : site.testflight
+        ? "The beta is available through TestFlight. Please read the compatibility and release notes before installing. An App Store release is planned."
+        : "The iPhone app is in development for iOS 17 and later. A public TestFlight beta is planned, followed by an App Store release. There is no public install link or announced release date yet.",
+  ],
+  [
+    "Does the app need an account or cloud connection?",
+    "The clients communicate directly with the shoes over Bluetooth. No OpenAdapt account or sync server is required. Pairing credentials stay on your devices; transfer between iPhone and Omarchy is manual.",
+  ],
+  [
+    "Can I build an Android app or another client?",
+    `That is the idea. The original code uses the MIT license, with a Swift protocol core and a Python Bluetooth implementation to build from. ${site.repositoryPublic ? "The source is available on GitHub." : "Public source access is being prepared."} Android, iPad, wearables, and experimental game integrations are invitations to build, not released products.`,
+  ],
+  [
+    "Is this an official Nike project?",
+    "No. OpenAdapt is an independent project, not affiliated with or endorsed by Nike. Nike, Adapt, and the shoe designs belong to their respective owners.",
+  ],
+];
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <link
+      rel="preload"
+      href="/fonts/inter.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/fonts/inter-tight.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f5f5f2" />
+    <title>OpenAdapt — Good shoes. Second life.</title>
+    <meta
+      name="description"
+      content="A new chapter for Nike Adapt. Explore OpenAdapt's independent iPhone and Omarchy clients, follow the upcoming beta, and help build the future of your shoes."
+    />
+    <link rel="canonical" href={site.url} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preload" as="image" href="/images/auto-max.jpg" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="OpenAdapt — Good shoes. Second life." />
+    <meta
+      property="og:description"
+      content="The next chapter for Nike Adapt. Independent software. Beautiful hardware. More possibilities."
+    />
+    <meta property="og:url" content={site.url} />
+    <meta property="og:image" content={`${site.url}/images/social.png`} />
+    <meta name="twitter:card" content="summary_large_image" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">
+      Skip to content
+    </a>
+    <header class="header wrap">
+      <a class="wordmark" href="/" aria-label="OpenAdapt home">
+        <img src="/favicon.svg" width="44" height="44" alt="" />
+        OpenAdapt<span class="wordmark-dot"></span>
+      </a>
+      <nav aria-label="Main navigation">
+        <a href="#app">The app</a>
+        <a href="#build">For builders</a>
+        <a href="#shoes">The shoes</a>
+      </nav>
+      <a
+        class="button button-small button-outline header-cta"
+        href={site.repositoryPublic ? site.repo : "#build"}
+      >
+        <Icon name={site.repositoryPublic ? "star" : "code"} size={16} />
+        {site.repositoryPublic ? "Star on GitHub" : "Build with us"}
+      </a>
+    </header>
+    <main id="main">
+      <section class="hero wrap" aria-labelledby="hero-title">
+        <div class="hero-top">
+          <span class="eyebrow">
+            <span class="status-dot"></span> A new chapter for Nike Adapt
+          </span>
+          <span class="mono hero-edition">
+            INDEPENDENT BY DESIGN / EST. 2026
+          </span>
+        </div>
+        <div class="hero-main">
+          <div class="hero-copy">
+            <h1 id="hero-title">
+              Good shoes.
+              <br />
+              <span>Second life.</span>
+            </h1>
+            <p>
+              Your favorite shoes still have a future.
+              <br class="desktop-break" /> We’re building the software to keep
+              them moving.
+            </p>
+            <div class="actions">
+              <a class="button button-blue" href="#app">
+                Meet OpenAdapt <Icon name="arrow" />
+              </a>
+              <a class="text-link" href="#build">
+                Make it your own <Icon name="external" size={18} />
+              </a>
+            </div>
+            <div class="hero-availability">
+              <Icon name="phone" size={14} />
+              <span>
+                {site.appStore
+                  ? "Available for iPhone"
+                  : site.testflight
+                    ? "iPhone beta available"
+                    : "iPhone beta coming soon"}
+              </span>
+              <span class="tiny-separator">/</span>
+              <span>MIT-licensed code</span>
+            </div>
+          </div>
+          <div
+            class="hero-art"
+            role="img"
+            aria-label="Nike Adapt Auto Max in Triple Black, with a preview of blue shoe lights"
+          >
+            <div class="hero-orbit"></div>
+            <span class="art-cross art-cross-a">+</span>
+            <span class="art-cross art-cross-b">+</span>
+            <span class="hero-watermark" aria-hidden="true">
+              ADAPT
+            </span>
+            <div class="hero-shoe">
+              <img
+                src="/images/auto-max.jpg"
+                width="1614"
+                height="937"
+                alt=""
+                fetchpriority="high"
+              />
+              <span class="shoe-lamp lamp-one"></span>
+              <span class="shoe-lamp lamp-two"></span>
+            </div>
+            <div class="shoe-caption mono">
+              <span>01 / ADAPT AUTO MAX</span>
+              <span>HARDWARE WORTH KEEPING.</span>
+            </div>
+            <div class="connection-chip">
+              <span class="status-dot"></span>
+              <span>Ready for a second act.</span>
+              <Icon name="bluetooth" size={16} />
+            </div>
+          </div>
+        </div>
+        <div class="hero-bottom">
+          <span>
+            <Icon name="bluetooth" size={17} />
+            Direct Bluetooth connection
+          </span>
+          <span>
+            <Icon name="code" size={17} />
+            Built to be built on
+          </span>
+          <a href="#story">
+            Keep the future on your feet <span aria-hidden="true">↓</span>
+          </a>
+        </div>
+      </section>
+
+      <section id="story" class="story wrap section">
+        <div class="section-label">
+          <span class="mono">01 — THE IDEA</span>
+          <span class="small-dot"></span>
+        </div>
+        <div class="story-content">
+          <h2>
+            Great hardware deserves
+            <br />a longer story.
+          </h2>
+          <div>
+            <p class="large-copy">
+              Self-lacing shoes felt like the future.
+              <br />
+              They still do.
+            </p>
+            <p>
+              When Nike retired the Adapt app, a little of that magic became
+              harder to reach. OpenAdapt is an independent effort to bring it
+              back—and open up what comes next.
+            </p>
+            <a
+              class="text-link"
+              href="https://www.nike.com/gb/en/help/a/adapt-app"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Read Nike’s retirement notice <Icon name="external" size={17} />
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <section id="app" class="app-section wrap section">
+        <div class="section-heading">
+          <div>
+            <span class="mono">02 — BACK IN YOUR HANDS</span>
+            <h2>
+              A familiar pair.
+              <br />A fresh connection.
+            </h2>
+          </div>
+          <p>
+            Fit, lights, and the little details.
+            <br />
+            Thoughtfully built for the devices you use.
+          </p>
+        </div>
+        <div class="app-grid">
+          <div class="interactive-card" id="interactive-demo">
+            <div class="demo-top">
+              <span class="demo-brand">OpenAdapt</span>
+              <span class="demo-label">
+                <span class="status-dot"></span> INTERACTIVE PREVIEW
+              </span>
+            </div>
+            <div class="demo-controls">
+              <div class="fit-control">
+                <label for="left-fit">
+                  L<span>LEFT FIT</span>
+                </label>
+                <input
+                  id="left-fit"
+                  type="range"
+                  min="0"
+                  max="100"
+                  step="5"
+                  value="60"
+                  aria-describedby="demo-note"
+                />
+                <output for="left-fit" id="left-value">
+                  60<span>%</span>
+                </output>
+              </div>
+              <div class="fit-control">
+                <label for="right-fit">
+                  R<span>RIGHT FIT</span>
+                </label>
+                <input
+                  id="right-fit"
+                  type="range"
+                  min="0"
+                  max="100"
+                  step="5"
+                  value="60"
+                  aria-describedby="demo-note"
+                />
+                <output for="right-fit" id="right-value">
+                  60<span>%</span>
+                </output>
+              </div>
+            </div>
+            <div class="demo-bottom">
+              <div
+                class="swatches"
+                role="group"
+                aria-label="Preview light color"
+              >
+                <button
+                  class="swatch blue"
+                  aria-label="Blue lights"
+                  aria-pressed="true"
+                  data-color="blue"
+                ></button>
+                <button
+                  class="swatch mint"
+                  aria-label="Mint lights"
+                  aria-pressed="false"
+                  data-color="mint"
+                ></button>
+                <button
+                  class="swatch orange"
+                  aria-label="Orange lights"
+                  aria-pressed="false"
+                  data-color="orange"
+                ></button>
+                <button
+                  class="swatch white"
+                  aria-label="Lights off"
+                  aria-pressed="false"
+                  data-color="white"
+                ></button>
+              </div>
+              <span id="color-name">BLUE LIGHTS</span>
+            </div>
+            <p id="demo-note">
+              Try the sliders. This preview doesn’t connect to shoes.
+            </p>
+          </div>
+          <article class="iphone-card">
+            <div class="card-top">
+              <Icon name="phone" size={24} />
+              <span class="pill">
+                {site.appStore
+                  ? "AVAILABLE FOR IPHONE"
+                  : site.testflight
+                    ? "PUBLIC BETA"
+                    : "IN DEVELOPMENT"}
+              </span>
+            </div>
+            <h3>
+              Your shoes.
+              <br />
+              Your iPhone.
+            </h3>
+            <p>
+              A native app with independent fit controls, colors, saved modes,
+              and Siri Shortcuts.
+            </p>
+            <div class="app-downloads">
+              <a class="button button-dark" href={installUrl || "#release"}>
+                {installLabel}{" "}
+                <Icon name={installUrl ? "external" : "arrow"} size={18} />
+              </a>
+              <span class="release-caption">
+                {site.appStore
+                  ? "Made for iPhone · iOS 17+"
+                  : "App Store release to follow · iOS 17+"}
+              </span>
+            </div>
+            <div class="phone-crop">
+              <div class="phone-shell">
+                <img
+                  src="/images/iphone-fit.webp"
+                  width="1206"
+                  height="2622"
+                  alt="OpenAdapt iPhone app in Simulator demo mode, showing independent left and right fit controls"
+                  loading="lazy"
+                />
+              </div>
+              <span class="phone-caption mono">
+                ACTUAL APP / SIMULATOR DEMO
+              </span>
+            </div>
+          </article>
+        </div>
+        <article class="desktop-card">
+          <div class="desktop-copy">
+            <div class="eyebrow">
+              <Icon name="monitor" size={18} /> ALSO AT HOME ON YOUR DESKTOP
+            </div>
+            <h3>
+              Meet your shoes’
+              <br />
+              desktop companion.
+            </h3>
+            <p>
+              A native Omarchy extension for fit, lights, battery, and saved
+              modes. Start with your iPhone pairing, then bring your pair to
+              Linux.
+            </p>
+            <a
+              class="text-link"
+              href={site.repositoryPublic ? source("apps/omarchy") : "#build"}
+            >
+              {site.repositoryPublic
+                ? "Explore the Omarchy client"
+                : "Explore the project"}{" "}
+              <Icon name="arrow" size={18} />
+            </a>
+          </div>
+          <div class="desktop-preview">
+            <div class="desktop-toolbar">
+              <span class="desktop-logo">O</span>
+              <span>OPENADAPT / OMARCHY</span>
+              <span>···</span>
+            </div>
+            <img
+              src="/images/omarchy-fit.webp"
+              alt="OpenAdapt's native Omarchy panel with left and right fit bars, saved modes, and Tie and Untie controls"
+              width="659"
+              height="798"
+              loading="lazy"
+            />
+            <span class="mono">NATIVE CLIENT / DEMO VIEW</span>
+          </div>
+        </article>
+        <div class="compatibility-note">
+          <Icon name="bluetooth" size={20} />
+          <p>
+            <strong>Made for the curious. Still in development.</strong>{" "}
+            Verified control is currently limited to Auto Max firmware 2.4.3M.
+            Fresh pairing and fit calibration need further hardware testing.
+          </p>
+          <a href="#faq">
+            Check compatibility <Icon name="arrow" size={17} />
+          </a>
+        </div>
+      </section>
+
+      <section class="build-section" id="build">
+        <div class="wrap section">
+          <div class="section-label">
+            <span class="mono">03 — OPEN POSSIBILITIES</span>
+            <Icon name="code" size={24} />
+          </div>
+          <div class="build-heading">
+            <h2>
+              The next great client
+              <br />
+              could be yours<span>.</span>
+            </h2>
+            <div>
+              <p>
+                Different devices. Different ideas. The same beautiful shoes.
+                Build on original Swift and Python implementations, with an MIT
+                license that gives you room to make something new.
+              </p>
+              {site.repositoryPublic ? (
+                <a class="button button-white" href={site.repo}>
+                  <Icon name="star" size={18} />
+                  Star on GitHub <Icon name="external" size={18} />
+                </a>
+              ) : (
+                <div class="source-status">
+                  <span class="status-dot"></span> Public source opening soon
+                </div>
+              )}
+            </div>
+          </div>
+          <div class="build-ideas">
+            <article>
+              <span class="idea-number mono">01 / NEW PLATFORMS</span>
+              <h3>More ways to connect.</h3>
+              <p>
+                An Android client. An iPad dashboard. A control on your wrist.
+                Bring your pair to your platform.
+              </p>
+            </article>
+            <article>
+              <span class="idea-number mono">02 / NEW INTERACTIONS</span>
+              <h3>A little more magic.</h3>
+              <p>
+                A spatial interface. A game companion. New ways to make software
+                feel a little more physical.
+              </p>
+            </article>
+            <article>
+              <span class="idea-number mono">03 / SHARED PROGRESS</span>
+              <h3>Better, together.</h3>
+              <p>
+                Improve accessibility, document the protocol, test
+                compatibility, or help another pair find its feet.
+              </p>
+            </article>
+          </div>
+          <div class="code-strip">
+            <code>
+              <span>$</span> git clone
+              https://github.com/GianlucaMinoprio/openAdapt.git
+            </code>
+            {site.repositoryPublic ? (
+              <button id="copy-command" aria-label="Copy git clone command">
+                Copy <Icon name="plus" size={16} />
+              </button>
+            ) : (
+              <span class="mono">AVAILABLE AT PUBLIC LAUNCH</span>
+            )}
+          </div>
+          <div class="build-footer">
+            <span>SWIFT + PYTHON</span>
+            <span>MIT LICENSE</span>
+            <span>INDEPENDENT PROJECT</span>
+            <span>
+              YOUR IDEAS WELCOME <Icon name="external" size={14} />
+            </span>
+          </div>
+          {site.repositoryPublic && (
+            <div class="source-links">
+              <a href={source("apps/ios/Sources/OpenAdaptCore")}>
+                Swift protocol core ↗
+              </a>
+              <a href={source("spikes/002-local-enrollment")}>
+                Python implementation ↗
+              </a>
+              <a href={`${site.repo}/issues`}>Share an idea ↗</a>
+            </div>
+          )}
+          <p class="build-note">
+            Client ideas are invitations to experiment. Android, wearables,
+            spatial integrations, and live motion-sensor streaming are not
+            implemented or verified.
+          </p>
+        </div>
+      </section>
+
+      <section class="shoes-section wrap section" id="shoes">
+        <div class="section-heading">
+          <div>
+            <span class="mono">04 — FIND YOUR PAIR</span>
+            <h2>
+              Still ahead
+              <br />
+              of their time.
+            </h2>
+          </div>
+          <p>
+            Beautiful then. Beautiful now.
+            <br />A second life starts with a pair worth keeping.
+          </p>
+        </div>
+        <div class="shop-card">
+          <div class="shop-image">
+            <img
+              src="/images/auto-max.jpg"
+              width="1614"
+              height="937"
+              alt="Nike Adapt Auto Max Triple Black side profile"
+              loading="lazy"
+            />
+            <span class="mono">NIKE ADAPT AUTO MAX / TRIPLE BLACK</span>
+          </div>
+          <div class="shop-copy">
+            <span class="pill">THE MODEL WE’RE BUILDING WITH</span>
+            <h3>
+              Nike Adapt
+              <br />
+              Auto Max
+            </h3>
+            <p>
+              The self-lacing silhouette at the heart of OpenAdapt’s
+              development. Explore resale listings, and check the pair’s
+              condition, charger, and firmware before buying.
+            </p>
+            <div class="shop-links">
+              <a
+                href={site.stockx.url}
+                target="_blank"
+                rel={
+                  site.stockx.affiliate
+                    ? "sponsored noopener noreferrer"
+                    : "noopener noreferrer"
+                }
+              >
+                Find on StockX <Icon name="external" />
+              </a>
+              <a
+                href={site.goat.url}
+                target="_blank"
+                rel={
+                  site.goat.affiliate
+                    ? "sponsored noopener noreferrer"
+                    : "noopener noreferrer"
+                }
+              >
+                Find on GOAT <Icon name="external" />
+              </a>
+            </div>
+            <p class="shop-note">
+              A listing is not a compatibility guarantee. OpenAdapt cannot yet
+              offer verified setup for a newly purchased or reset pair.{" "}
+              <a href="#faq">Read the current limits.</a>
+            </p>
+          </div>
+        </div>
+        <p class="affiliate-disclosure">
+          {hasAffiliate
+            ? "Some shopping links are affiliate links. OpenAdapt may earn a commission if you make a purchase."
+            : "These are regular marketplace links. OpenAdapt does not currently earn a commission."}{" "}
+          Availability and prices are set by each marketplace.
+        </p>
+      </section>
+
+      <section class="faq-section wrap section" id="faq">
+        <div>
+          <span class="mono">05 — A FEW GOOD QUESTIONS</span>
+          <h2>
+            Before you
+            <br />
+            lace up.
+          </h2>
+        </div>
+        <div class="faq-list">
+          {faqs.map(([question, answer]) => (
+            <details>
+              <summary>
+                {question}
+                <Icon name="plus" size={20} />
+              </summary>
+              <p>{answer}</p>
+            </details>
+          ))}
+        </div>
+      </section>
+      <section class="release-section wrap" id="release">
+        <span class="eyebrow">
+          <span class="status-dot"></span> THIS IS JUST THE BEGINNING
+        </span>
+        <h2>
+          Keep the future
+          <br />
+          on your feet.
+        </h2>
+        <p>
+          {installUrl
+            ? "A new chapter for your favorite pair."
+            : "We’re getting OpenAdapt ready for more people."}
+          <br />
+          {installUrl
+            ? "Explore the app, check compatibility, and make it your own."
+            : "TestFlight first. The App Store next. A whole new chapter ahead."}
+        </p>
+        <div class="release-milestones">
+          <span>
+            <span class="milestone-dot active"></span>Always evolving
+          </span>
+          <span class:list={[{ ready: Boolean(site.testflight) }]}>
+            <span class="milestone-dot"></span>
+            {site.testflight
+              ? "TestFlight available"
+              : "TestFlight · coming soon"}
+          </span>
+          <span class:list={[{ ready: Boolean(site.appStore) }]}>
+            <span class="milestone-dot"></span>
+            {site.appStore ? "App Store available" : "App Store · planned"}
+          </span>
+        </div>
+        {site.repositoryPublic && (
+          <a class="button button-blue" href={site.repo}>
+            <Icon name="star" size={18} />
+            Star the project on GitHub <Icon name="external" size={18} />
+          </a>
+        )}
+        <p class="release-small">
+          {installUrl
+            ? "Check the current hardware and setup requirements before installing."
+            : "This page will link directly to the beta when it’s available."}
+        </p>
+      </section>
+    </main>
+    <footer class="wrap">
+      <div class="footer-top">
+        <a class="wordmark" href="/">
+          OpenAdapt<span class="wordmark-dot"></span>
+        </a>
+        <p>Good shoes deserve great software.</p>
+        <a class="text-link" href="#main">
+          Back to the top ↑
+        </a>
+      </div>
+      <div class="footer-bottom">
+        <p>
+          An independent project. Not affiliated with or endorsed by Nike.
+          <br />
+          Product names and trademarks belong to their respective owners.
+        </p>
+        <div>
+          <a href="/privacy">Website privacy</a>
+          <a href="/app-privacy">App privacy</a>
+          <a
+            href="https://www.goat.com/sneakers/adapt-auto-max-triple-black-cz6799-002"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Product photography: GOAT ↗
+          </a>
+          <span>© {new Date().getFullYear()} OpenAdapt</span>
+        </div>
+      </div>
+    </footer>
+    <script>
+      const demo = document.querySelector<HTMLElement>("#interactive-demo");
+      for (const side of ["left", "right"]) {
+        const input = document.querySelector<HTMLInputElement>(`#${side}-fit`);
+        const output = document.querySelector<HTMLOutputElement>(
+          `#${side}-value`,
+        );
+        const update = () => {
+          if (!input || !output) return;
+          output.innerHTML = `${input.value}<span>%</span>`;
+          input.style.setProperty("--fit", `${input.value}%`);
+          input.setAttribute(
+            "aria-valuetext",
+            `${input.value} percent, simulated fit`,
+          );
+        };
+        input?.addEventListener("input", update);
+        update();
+      }
+      const names: Record<string, string> = {
+        blue: "BLUE LIGHTS",
+        mint: "MINT LIGHTS",
+        orange: "ORANGE LIGHTS",
+        white: "LIGHTS OFF",
+      };
+      document
+        .querySelectorAll<HTMLButtonElement>("[data-color]")
+        .forEach((button) => {
+          button.addEventListener("click", () => {
+            const color = button.dataset.color || "blue";
+            if (demo) demo.dataset.theme = color;
+            document
+              .querySelectorAll("[data-color]")
+              .forEach((item) =>
+                item.setAttribute("aria-pressed", String(item === button)),
+              );
+            const name = document.querySelector("#color-name");
+            if (name) name.textContent = names[color];
+          });
+        });
+      document
+        .querySelector("#copy-command")
+        ?.addEventListener("click", async (event) => {
+          const button = event.currentTarget as HTMLButtonElement;
+          try {
+            await navigator.clipboard.writeText(
+              "git clone https://github.com/GianlucaMinoprio/openAdapt.git",
+            );
+            button.textContent = "Copied!";
+          } catch {
+            button.textContent = "Select the command to copy";
+          }
+        });
+    </script>
+  </body>
+</html>
