@@ -18,6 +18,14 @@
   --muted: #61646b;
   --blue: #2357ed;
   --line: #dfe1e6;
+  /* A selection of the iPhone client's shoe-light palette. */
+  --light-blue: oklch(0.63254 0.19859 258.45);
+  --light-volt: oklch(0.91861 0.22974 128.02);
+  --light-orange: oklch(0.72543 0.18455 48.41);
+  --light-pink: oklch(0.69132 0.24608 347.61);
+  --light-white: oklch(1 0 0);
+  --light-off: oklch(0.21018 0.01847 270.39);
+  --lamp-color: var(--light-blue);
   --display: "Inter Tight Variable", "Arial Narrow", sans-serif;
   --body: "Inter Variable", Arial, sans-serif;
   --mono: "SFMono-Regular", Consolas, monospace;
@@ -336,10 +344,10 @@ p {
   width: 4.2%;
   height: 7.1%;
   border-radius: 50%;
-  background: var(--lamp-color, #2575ff);
+  background: var(--lamp-color);
   box-shadow:
-    0 0 12px 4px var(--lamp-color, #2489ff),
-    0 0 40px 8px var(--lamp-glow, #3684ff80);
+    0 0 12px 4px var(--lamp-color),
+    0 0 40px 8px color-mix(in oklab, var(--lamp-color) 50%, transparent);
   transition: opacity 150ms ease;
   opacity: 0.9;
   top: 84.5%;
@@ -400,8 +408,9 @@ p {
   gap: 22px;
 }
 .interactive-card {
-  background: #397ff7;
-  color: #081b39;
+  background: var(--lamp-color);
+  color: var(--ink);
+  container: light-preview / inline-size;
   border-radius: 12px;
   padding: 28px 32px 21px;
   display: flex;
@@ -410,17 +419,9 @@ p {
   min-height: 620px;
   transition: background-color 0.2s;
 }
-.interactive-card[data-theme="sky"] {
-  background: #c7dcff;
-  color: #132747;
-}
-.interactive-card[data-theme="white"] {
-  background: #fff;
-  color: #141518;
-}
 .interactive-card[data-theme="off"] {
-  background: #151821;
-  color: #f5f7fb;
+  background: var(--light-off);
+  color: var(--paper);
 }
 .demo-top {
   display: flex;
@@ -534,13 +535,19 @@ p {
   border-top: 1px solid #06163025;
   padding-top: 24px;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
+  align-items: flex-start;
   gap: 10px;
 }
 .swatches {
-  display: flex;
-  gap: 2px;
+  display: grid;
+  grid-template-columns: repeat(6, 44px);
+  gap: 0;
+}
+@container light-preview (max-width: 263px) {
+  .swatches {
+    grid-template-columns: repeat(3, 44px);
+  }
 }
 .swatch {
   width: 44px;
@@ -570,16 +577,22 @@ p {
   border-color: currentColor;
 }
 .swatch.blue {
-  background-color: #2261e6;
+  background-color: var(--light-blue);
 }
-.swatch.sky {
-  background-color: #c7dcff;
+.swatch.volt {
+  background-color: var(--light-volt);
+}
+.swatch.orange {
+  background-color: var(--light-orange);
+}
+.swatch.pink {
+  background-color: var(--light-pink);
 }
 .swatch.white {
-  background-color: #fff;
+  background-color: var(--light-white);
 }
 .swatch.off {
-  background-color: #151821;
+  background-color: var(--light-off);
 }
 @media (hover: hover) and (pointer: fine) {
   .swatch:hover {
@@ -946,13 +959,17 @@ footer {
 }
 
 /* Light preview shared between the hero shoe and the app demo. */
-:root[data-light="sky"] {
-  --lamp-color: #9ac7ff;
-  --lamp-glow: #9ac7ff80;
+:root[data-light="volt"] {
+  --lamp-color: var(--light-volt);
+}
+:root[data-light="orange"] {
+  --lamp-color: var(--light-orange);
+}
+:root[data-light="pink"] {
+  --lamp-color: var(--light-pink);
 }
 :root[data-light="white"] {
-  --lamp-color: #eef7ff;
-  --lamp-glow: #d8ecff80;
+  --lamp-color: var(--light-white);
 }
 :root[data-light="off"] .shoe-lamp {
   opacity: 0;
@@ -1064,7 +1081,8 @@ footer {
 @media (max-width: 850px) {
   .hero-lights {
     bottom: 28px;
-    gap: 3px;
+    flex-direction: column;
+    gap: 0;
   }
   .hero-lights > span {
     font-size: 10px;
@@ -1086,7 +1104,7 @@ footer {
 @media (max-width: 650px) {
   .hero-lights {
     bottom: 0;
-    gap: 10px;
+    gap: 0;
   }
   .build-resources {
     grid-template-columns: 1fr;
@@ -1526,9 +1544,6 @@ footer {
   }
   .fit-control output {
     font-size: 39px;
-  }
-  .swatches {
-    gap: 2px;
   }
   #color-name {
     font-size: 8px;
