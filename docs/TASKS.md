@@ -15,7 +15,18 @@ Updated September 22, 2026. Current evidence is summarized in [STATUS.md](STATUS
 
 ## Next session
 
-The owner wants to test adding a factory-reset Auto Max. The iOS enrollment flow and candidate journal are now implemented and pass offline/Simulator checks. Next establish owner-operated physical enrollment, restart/reconnect, and shoe power-cycle persistence. A newly enrolled pair lacks verified fit calibration, so it uses physical buttons for fit; app battery/light control is available after authentication. See [first-time pairing](ios/FIRST-PAIRING.md). No hardware reset or enrollment experiment was run by development tools.
+The owner wants a complete first-time Auto Max setup, including fit calibration, before relying on a reset pair in OpenAdapt. Pairing and calibration are separate: a successful connection does not establish a usable fit maximum. The iOS enrollment flow and candidate journal pass offline/Simulator checks, but newly enrolled profiles deliberately keep calibration unknown and block app fit commands.
+
+### Calibration investigation and setup plan
+
+1. **Analyze the existing original-app recording first.** The [September 13/14 setup capture](ORIGINAL-APP-ENROLLMENT-CAPTURE.md#successful-new-profile-setup-and-fit-check) includes the owner's completed fit check and subsequent configuration/position traffic. The later [motor-control verification](AUTO-MAX-MOTOR-CONTROL.md#scope-and-results) checked recovered per-shoe maxima against fit-check completion events. Those results do not yet establish the complete calibration procedure or a supported readback path; a new recording is not automatically necessary.
+2. **Reconstruct the full calibration exchange.** Identify the trigger, instructions shown by Nike Adapt, each shoe's start/progress/completion messages, returned fit limits, storage location, and any subsequent readback. Distinguish calibration from ordinary position commands, saved fits, and the Auto-Lace preset. Determine whether the shoe calibrates itself and reports results or requires a separate app-controlled procedure; do not assume connection alone performs it.
+3. **Capture only missing evidence on the original phone.** If existing logs cannot answer those questions, prepare a bounded Bluetooth recording with screen/action timing while the owner follows Nike Adapt's fit-check flow. Confirm actual radio packets before starting. Prefer its existing Calibrate Fit flow if it can answer the gap without another reset; a new reset/setup experiment remains an explicit owner-operated step.
+4. **Implement and test the verified protocol.** Add original codecs and synthetic tests for both feet, distinct maxima, invalid/incomplete results, timeouts, cancellation, disconnects, and interrupted recovery. Keep unknown calibration blocked and do not reuse pre-reset maxima or turn authentication success into calibration success.
+5. **Add a guided fit check after pairing in iOS.** Save both verified credentials first, then guide the user through the required physical steps and confirm each shoe's calibration. Preserve pairing if calibration fails, and allow an explicit resume/retry without enrolling again. Enable a shoe's fit controls only after its calibration is verified; paired actions require both ready. Persist the verified limits and include them in pairing exports so Omarchy can use the same profile.
+6. **Validate the full flow on hardware.** Establish pairing → calibration → bounded fit control, then app restart, shoe power-cycle persistence, and export/import to Omarchy. Confirm the actual UI percentage mapping and command readback before claiming complete fresh-shoe support.
+
+Until this is verified, new pairs use their physical buttons for fit; app battery/light control is available after authentication. See [first-time pairing](ios/FIRST-PAIRING.md). This planning update performed no reset, calibration, or shoe command.
 
 ## Remaining
 
@@ -32,6 +43,7 @@ The owner wants to test adding a factory-reset Auto Max. The iOS enrollment flow
 - [ ] Establish fresh-enrollment candidate recovery and shoe key-commit/retention behavior before a concrete owner-authorized hardware experiment.
 - [x] Implement automatic two-shoe setup, side/model detection, button prompts, candidate persistence, verification, and native profile publication.
 - [x] Simplify first-time pairing to one large shoe and sequential physical confirmation, with a detected opposite-side prompt, larger-text scrolling, and VoiceOver focus.
+- [ ] Analyze the captured Nike fit check, fill any evidence gaps, and implement guided post-pairing calibration with verified limits persisted for iOS and Omarchy export.
 - [ ] Validate this enrollment flow on hardware and establish calibration readback before enabling app fit controls for new pairs.
 - [ ] Validate Huarache credentials and firmware behavior before enabling that model.
 - [ ] Investigate exact original-app percentage rounding and worn-shoe behavior.
