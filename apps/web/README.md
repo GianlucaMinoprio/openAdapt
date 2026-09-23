@@ -37,7 +37,9 @@ Use the DNS records Vercel reports for this project when connecting `openadapt.a
 
 ## Referral program
 
-StockX documents an affiliate program through Impact. Apply and use approved tracking links once accepted; current program terms must be verified in the account before making commission claims. eBay also offers the eBay Partner Network, including tracked links to products and search results. Apply separately, then use real campaign links; commission rates depend on the category and qualifying purchase terms. No official GOAT sneaker affiliate program was verified. GOAT has been removed from the shopping options. Photo-source credits remain because the gallery uses GOAT product photography. No affiliate application was submitted by this website task.
+eBay shopping links use the owner's active eBay Partner Network campaign, with one shoe-specific Custom ID per model. Each points to relevant search results so visitors can choose their size, condition, and seller. Links use eBay's documented tracking URL format, are marked `rel="sponsored"`, and have a commission disclosure near the gallery. The website adds no tracking script or visitor identifier. Commission eligibility depends on eBay's qualifying purchase terms.
+
+StockX documents an affiliate program through Impact. Keep its links ordinary until enrollment and tracking details are available. No official GOAT sneaker affiliate program was verified, so GOAT is absent from the shopping options. Photo-source credits remain because the gallery uses GOAT product photography.
 
 Sources:
 - https://stockx.com/news/en-us/affiliate-faq/
@@ -45,6 +47,8 @@ Sources:
 - https://partnernetwork.ebay.com/our-program
 - https://partnernetwork.ebay.com/our-program/rate-card
 - https://partnernetwork.ebay.com/resources/create-your-affiliate-link
+- https://www.developer.ebay.com/api-docs/buy/static/ref-epn-link.html
+- https://partnernetwork.ebay.com/solutions/optimizing-using-tracking-parameters
 
 ## Assets and privacy
 
@@ -70,10 +74,12 @@ Photo sources (GOAT, retrieved September 23, 2026):
 - Adapt Huarache: https://image.goat.com/transform/v1/attachments/product_template_additional_pictures/images/079/333/407/original/546697_01.jpg.jpeg
 - Air Jordan 11 Adapt: https://image.goat.com/transform/v1/attachments/product_template_additional_pictures/images/100/071/868/original/704154_01.jpg.jpeg
 
-### Application preparation — September 23, 2026
+### Affiliate status — September 23, 2026
 
-Both official application flows have been opened. eBay requires the owner to sign in before its application form is accessible. StockX requires acceptance of its Publisher Agreement before account setup; owner approval is pending. No application has been submitted and no tracking link has been issued.
+The owner completed eBay sign-in and its Partner Network dashboard shows campaign `5339213069` (`default`) as Active. All five shoe links use that campaign and `openadapt-<shoe-id>` Custom IDs. The campaign ID is intentionally public in referral URLs; it is not an API credential. Link format and disclosure were checked, but attributed sales and payouts have not been verified.
 
-StockX’s current offer shows 3% on qualifying sneaker sales to new customers, 1% to existing customers, and 15-day last-click attribution. Section 2.2 restricts links near competing marketplaces and use of creative assets. Before activating StockX tracking, use separate StockX shopping pages without competitor links, or obtain an explicit exception. Keep ordinary links and the no-commission disclosure until actual enrollment and tracking details are verified.
+Impact's marketplace application shows **In Review**. StockX affiliate approval and tracking links have not been verified. The homepage contains the owner's Impact site-verification meta tag.
+
+StockX’s current offer shows 3% on qualifying sneaker sales to new customers, 1% to existing customers, and 15-day last-click attribution. Section 2.2 restricts links near competing marketplaces and use of creative assets. Before activating StockX tracking, use separate StockX shopping pages without competitor links, or obtain an explicit exception. Update the disclosure to identify every affiliate marketplace when adding another program.
 
 Application description: OpenAdapt is an independent software project working to restore app control to Nike Adapt shoes. Its website presents the iPhone and Omarchy clients, documents compatibility limits, and introduces the five-model Adapt family. Marketplace links help visitors find relevant resale listings. Promotion is through editorial content on https://openadapt.app; no paid advertising, coupon distribution, or incentivized traffic is planned. Do not invent audience or traffic metrics for application forms.

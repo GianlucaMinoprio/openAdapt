@@ -4,6 +4,24 @@ export interface MarketplaceLink {
   affiliate: boolean;
 }
 
+// Active campaign verified in the owner's eBay Partner Network dashboard.
+const ebayCampaignId = "5339213069";
+
+function ebayAffiliateUrl(shoe: { id: string; brand: string; model: string }) {
+  // https://www.developer.ebay.com/api-docs/buy/static/ref-epn-link.html
+  const url = new URL("https://www.ebay.com/sch/i.html");
+  url.search = new URLSearchParams({
+    _nkw: `${shoe.brand} ${shoe.model}`,
+    mkevt: "1",
+    mkcid: "1",
+    mkrid: "711-53200-19255-0",
+    campid: ebayCampaignId,
+    toolid: "10001",
+    customid: `openadapt-${shoe.id}`,
+  }).toString();
+  return url.toString();
+}
+
 // Catalog membership is not hardware verification. Keep evidence explicit per model.
 const models = [
   {
@@ -104,7 +122,7 @@ const models = [
 
 export const shoes = models.map((shoe) => ({
   ...shoe,
-  // Replace individual URLs with approved tracking links and enable their affiliate flag.
+  // StockX stays a regular link while its affiliate enrollment is pending.
   links: [
     {
       name: "StockX",
@@ -113,8 +131,8 @@ export const shoes = models.map((shoe) => ({
     },
     {
       name: "eBay",
-      url: `https://www.ebay.com/sch/i.html?_nkw=${encodeURIComponent(`${shoe.brand} ${shoe.model}`)}`,
-      affiliate: false,
+      url: ebayAffiliateUrl(shoe),
+      affiliate: true,
     },
   ] satisfies MarketplaceLink[],
 }));
