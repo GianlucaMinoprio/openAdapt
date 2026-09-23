@@ -1,9 +1,8 @@
-/** Launch controls: never advertise a download or public source until it exists. */
+/** Website destinations. Download buttons activate when real release URLs exist. */
 export const site = {
   name: "OpenAdapt",
   url: "https://openadapt.app",
   repo: "https://github.com/GianlucaMinoprio/openAdapt",
-  repositoryPublic: false,
   branch: "master",
   testflight: "",
   appStore: "",

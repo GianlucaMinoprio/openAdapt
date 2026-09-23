@@ -183,13 +183,13 @@ import { shoes, hasAffiliate } from "../shoes";
       if (changed)
         announcement.textContent = `${index + 1} of ${slides.length}: ${slides[index].dataset.name}. ${slides[index].querySelector(".shoe-compatibility strong")?.textContent}`;
     };
-    const goTo = (index: number) => {
+    const goTo = (index: number, immediate = false) => {
       requested = Math.max(0, Math.min(slides.length - 1, index));
       track.scrollTo({
         left: slides[requested].offsetLeft,
-        behavior: reducedMotion.matches ? "instant" : "smooth",
+        behavior: immediate || reducedMotion.matches ? "instant" : "smooth",
       });
-      if (reducedMotion.matches) update(requested);
+      if (immediate || reducedMotion.matches) update(requested);
     };
     previous.addEventListener("click", () => goTo(requested - 1));
     next.addEventListener("click", () => goTo(requested + 1));
@@ -211,7 +211,7 @@ import { shoes, hasAffiliate } from "../shoes";
       }[event.key];
       if (target === undefined) return;
       event.preventDefault();
-      goTo(target);
+      goTo(target, true);
     });
     track.addEventListener(
       "scroll",

@@ -16,7 +16,7 @@ npm run build
 
 Edit `src/site.ts` and redeploy:
 
-- `repositoryPublic`: leave `false` while the repository is private. Once public release is approved and the repository actually becomes public, set `true` to activate GitHub star, source, clone, and contribution links. This flag never changes GitHub visibility itself.
+- `repo` and `branch`: source, star, clone, and contribution links are enabled for the owner's requested open-source launch presentation. The repository was still private when this presentation was prepared; publishing the website does not change GitHub visibility or make these links accessible to anonymous visitors. Repository publication remains a separate owner action.
 - `testflight`: set to the real approved public invitation URL. An empty value renders “coming soon” and links to the release status.
 - `appStore`: set to the actual Apple listing after release.
 - Marketplace URLs in `src/shoes.ts`: replace only with real product or approved affiliate links. Set the matching `affiliate` field to `true` when the URL earns commission. The site then renders a nearby disclosure and marks that link `rel="sponsored"`.

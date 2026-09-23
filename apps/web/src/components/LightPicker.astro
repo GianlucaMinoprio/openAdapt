@@ -1,0 +1,22 @@
+---
+const { label = "Preview light color" } = Astro.props;
+const colors = [
+  ["blue", "Blue lights"],
+  ["sky", "Ice blue lights"],
+  ["white", "White lights"],
+  ["off", "Lights off"],
+];
+---
+
+<div class="swatches" role="group" aria-label={label}>
+  {colors.map(([color, name]) => (
+    <button
+      type="button"
+      class={`swatch ${color}`}
+      aria-label={name}
+      aria-pressed={color === "blue" ? "true" : "false"}
+      data-color={color}
+      title={name}
+    ></button>
+  ))}
+</div>
