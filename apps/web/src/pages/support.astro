@@ -1,5 +1,6 @@
 ---
 import "../styles/global.css";
+import { site } from "../site";
 ---
 
 <!doctype html>
@@ -58,6 +59,12 @@ import "../styles/global.css";
         interrupted pairing, stop and send feedback rather than repeatedly
         resetting or enrolling. Removing a saved pair deletes its local profile;
         it does not reset the shoes or remove their Bluetooth bond in iOS.
+      </p>
+      <h2>Questions and bug reports</h2>
+      <p>
+        OpenAdapt is open source. Browse existing questions or open an issue on{" "}
+        <a href={`${site.repo}/issues`}>GitHub</a>. Issues are public, so never
+        include pairing files, encryption keys, or private device identifiers.
       </p>
       <h2>Send beta feedback</h2>
       <p>

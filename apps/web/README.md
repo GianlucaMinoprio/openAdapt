@@ -16,10 +16,10 @@ npm run build
 
 Edit `src/site.ts` and redeploy:
 
-- `repo` and `branch`: source, star, clone, and contribution links are enabled for the owner's requested open-source launch presentation. The repository was still private when this presentation was prepared; publishing the website does not change GitHub visibility or make these links accessible to anonymous visitors. Repository publication remains a separate owner action.
+- `repo` and `branch`: source, star, clone, and contribution links point to the public, MIT-licensed [OpenAdapt repository](https://github.com/GianlucaMinoprio/openAdapt) and its `master` branch. Anonymous repository access, all three linked source directories, issues, and the HTTPS clone URL were verified on September 23, 2026.
 - `testflight`: set to the real approved public invitation URL. An empty value renders “coming soon” and links to the release status.
 - `appStore`: set to the actual Apple listing after release.
-- Marketplace URLs in `src/shoes.ts`: replace only with real product or approved affiliate links. Set the matching `affiliate` field to `true` when the URL earns commission. The site marks that link `rel="sponsored"`; the website privacy page describes affiliate redirects.
+- Marketplace URLs in `src/shoes.ts`: use model-wide search results, without a colorway filter, and add only approved affiliate tracking. Set the matching `affiliate` field to `true` when the URL earns commission. The site marks that link `rel="sponsored"`; the website privacy page describes affiliate redirects.
 
 Compatibility copy reflects the repository's September 22, 2026 documentation: Auto Max 2.4.3M is the verified profile; new enrollment/calibration and broader iPhone hardware validation are pending. Update the FAQ, compatibility note, and client copy when new hardware evidence or release status changes. Client ideas are not advertised as implemented features.
 
