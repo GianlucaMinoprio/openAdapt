@@ -11,7 +11,7 @@ OpenAdapt is an original, MIT-licensed project with native iPhone and Omarchy cl
 | **[iOS · iPhone](apps/ios/README.md)** | Guided shoe setup, simultaneous L/R fit controls, haptics, lights, battery, saved fits, Auto-Lace, Quick Unlace, and Siri/Shortcuts. | [Build and install with Xcode](apps/ios/README.md#open-and-build) · [Pairing guide](docs/ios/FIRST-PAIRING.md) |
 | **[Omarchy · Linux](apps/omarchy/README.md)** | A native desktop extension with linked or independent 5% fit bars, Tie/Untie, lights, battery, and saved fits. Both shoes connect and receive commands concurrently. | [Install the extension](apps/omarchy/README.md#install-or-update-locally) · [Import your iPhone pairing](docs/ios/PAIRING-TRANSFER.md) |
 
-The iPhone client is currently a source build; there is no public App Store or TestFlight download yet. See [release status](docs/ios/VERIFICATION.md).
+There is no public App Store or TestFlight download yet. The newer iOS development candidate, **0.1.0 (12)**, adds older-firmware compatibility, including firmware below **2.0.0**. This documentation update reports that candidate's results; its app changes are not yet included in the source on `master`, and build 12 has not been uploaded to TestFlight. See [firmware support and roadmap](docs/FIRMWARE-ROADMAP.md).
 
 ## Start on iPhone, continue on Omarchy
 
@@ -25,7 +25,7 @@ Omarchy acts as a companion to shoes already configured on iPhone. The iOS app c
 
 The export contains secrets that allow control of your shoes. Keep it private and out of Git. Importing it does not copy the iPhone's system Bluetooth bond: Omarchy also needs its own local Bluetooth pairing. This is a manual transfer, with no account or sync server; fit modes and later changes are not synchronized. Use one client connection at a time until simultaneous multi-client support is established.
 
-**Fresh-pairing status:** the iPhone's first-time setup flow is implemented and tested offline and in Simulator, but factory-reset enrollment and subsequent transfer still need hardware validation. Fit calibration is a future feature. New pairs have unknown fit calibration, so app lacing stays disabled until calibration is verified; battery and lights are available after authentication. Existing calibrated profiles retain their fit controls. See the [transfer guide](docs/ios/PAIRING-TRANSFER.md) for the full flow and current limits.
+**Fresh-pairing status:** the newer iOS candidate includes guided calibration after pairing, shared L/R fit adjustment, a Move fit starting at 50%, and a Chill preset at 30%. Unknown calibration still blocks ordinary fit controls until setup succeeds. Complete first setup on another pair and subsequent Omarchy transfer still need hardware validation; the [transfer guide](docs/ios/PAIRING-TRANSFER.md) describes the published source's flow and limits.
 
 ## Build your own client
 
@@ -48,11 +48,12 @@ Start with the [Swift protocol core](apps/ios/Sources/OpenAdaptCore), [Python Bl
 
 ## What works today
 
-- Verified control is currently limited to **Nike Adapt Auto Max firmware `2.4.3M`**. Displaying other Adapt model names in the app does not establish Bluetooth compatibility with them.
+- **Older iOS firmware support:** the development candidate accepts `M` revisions from **1.1.0 through 2.4.3**, including versions below **2.0.0**. Both development **BB 2.0 shoes on `1.4.1M`** authenticated and completed direct raw-position movements **0 → 30 → 0**, with matching readbacks. Raw position 30 is not 30% fit. This is evidence for that pair and sequence, not every model/revision or a complete new-pair calibration.
+- **Movement compatibility:** `2.4.3M` retains its existing Stop-before-target sequence. Other supported revisions use the direct-position path observed on `1.4.1M`; features are shown only when the connected shoes support them. Unknown versions and suffixes remain restricted. This iOS policy does not broaden Omarchy's firmware support.
 - OpenAdapt has authenticated and physically laced both shoes of the development Auto Max pair through the desktop implementation. Both shoes also authenticate and return status through the iPhone client. Detailed platform-specific validation is recorded in [current status](docs/STATUS.md).
 - Omarchy opens on Fit for the last fully connected pair without automatically connecting. One **Connect** action attempts both shoes and can retry a missing partner. Paired controls run concurrently, with separate results for each shoe; exact physical synchronization is not guaranteed.
 - Fit percentages are targets relative to each shoe's verified calibration, not measurements of force. Battery, charging, and fit-limit checks remain in place. Failed or disconnected commands are never queued for automatic replay.
-- Huarache control, fresh-pairing recovery and calibration, live IMU streaming, firmware updates, and broad hardware compatibility remain work in progress. There is no OTA updater in either client.
+- Broader model/firmware validation, complete fresh-pairing and calibration recovery, and live IMU streaming remain work in progress. The proposed next firmware research step is to inspect the **PCB and bootloader**, understand **OTA updates**, and assess upgrades toward **2.4.3M** and eventually **custom firmware**. There is no OTA updater or custom firmware release yet; see the [firmware roadmap](docs/FIRMWARE-ROADMAP.md).
 
 See [iOS verification](docs/ios/VERIFICATION.md), [Omarchy verification](docs/omarchy/PANEL-POLISH.md), [host authentication](docs/AUTO-MAX-HOST-AUTHENTICATION.md), and [motor results](docs/AUTO-MAX-MOTOR-CONTROL.md). Historical reports describe the evidence available at their stated dates.
 
@@ -83,7 +84,7 @@ For the Swift core on macOS:
 swift test --package-path apps/ios
 ```
 
-The latest recorded checks pass **97 Swift core tests, 37 discovery tests, 410 Python protocol/backend tests, and 33 Qt test results**. The 410-test suite also passes on Omarchy. These checks do not establish new hardware compatibility or successful fresh enrollment. See the client guides for build requirements and UI testing.
+The published source's recorded checks pass **97 Swift core tests, 37 discovery tests, 410 Python protocol/backend tests, and 33 Qt test results**. The newer iOS build-12 candidate separately passes **185 core tests and five targeted UI tests**. The 410-test suite also passes on Omarchy. Tests do not establish compatibility with untested hardware or successful fresh enrollment. See the client guides for build requirements and UI testing.
 
 ## Research and contributions
 

@@ -2,6 +2,12 @@
 
 Updated September 23, 2026. Start here and in [TASKS.md](TASKS.md); use [STATUS.md](STATUS.md) for the current verified scope. Older research reports are dated evidence, not new instructions or current authorization.
 
+## September 23: firmware support documentation
+
+The [firmware roadmap](FIRMWARE-ROADMAP.md) records the newer iOS build-12 candidate, admitted M firmware 1.1.0–2.4.3, and ordinary direct-position success on both owned BB 2.0 / 1.4.1M shoes. It preserves 2.4.3M behavior and proposes PCB/bootloader inspection, OTA research, and custom-firmware feasibility as future work. This update publishes documentation only; the candidate's implementation still needs reviewed migration onto the cleaned source history and TestFlight distribution. Do not interpret the earlier fit-calibration deferral below as the candidate's current state, or this roadmap as authorization for a hardware write.
+
+## Earlier publication checkpoint
+
 **Current priority:** the owner has deferred fit calibration as a future feature and authorized the history cleanup identified by the privacy review. Both the saved Bluetooth name and personal email are removed from all local branches and freshly cloned GitHub history; see [publication review](PUBLICATION-REVIEW.md). GitHub Support reported completing cache clearance and garbage collection. Independent authenticated checks confirm all four reported obsolete Git commit objects return 404; both clean branch tips remain accessible and the website pull request is still open. The receipt and verification results remain private outside the repository. Preserve the clean replacement website branch and its current pull request. Preserve uncommitted work in old development checkouts, including the Omarchy research checkout, and migrate it before any future push; do not merge old history back. Keep unknown-calibration fit controls blocked. The owner authorized public release on September 23. GitHub visibility is now public under the existing MIT license, verified without authentication after a fresh history and GitHub-surface privacy scan. The new developer protocol guide and shared examples remain deferred.
 
 ## September 21 iPhone update

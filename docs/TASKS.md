@@ -2,6 +2,12 @@
 
 Updated September 23, 2026. Current evidence is summarized in [STATUS.md](STATUS.md) and [new-shoe readiness](ios/NEW-SHOES-READINESS.md). Completed hardware work does not authorize repeating it.
 
+## Current development and firmware roadmap
+
+The later iOS **build-12 candidate** includes older-firmware compatibility and guided fit setup. Both owned BB 2.0 shoes on **1.4.1M** have verified ordinary direct-position movements; 2.4.3M keeps its existing sequence. The app changes still need migration onto the cleaned public history and distribution. Earlier calibration deferral and implementation tasks below describe the published source baseline, not the current candidate.
+
+The proposed next research phase is **PCB and bootloader inspection → OTA update research toward 2.4.3M → custom-firmware feasibility**. Universal model compatibility, an installable firmware package, and a recovery path must be established rather than assumed. The [firmware roadmap](FIRMWARE-ROADMAP.md) tracks those milestones and the remaining real-pair validation. This documentation update performs no hardware access or firmware write.
+
 ## Completed
 
 - [x] Import and reconcile the original research into an independent working copy.

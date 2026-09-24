@@ -1,5 +1,15 @@
 # Project status
 
+## September 23: older-firmware support and next research phase
+
+The newer iOS **build-12 development candidate** supports attempts on M firmware **1.1.0–2.4.3**, including firmware below 2.0.0. Both owned BB 2.0 shoes on **1.4.1M** completed ordinary direct raw-position movements **0 → 30 → 0**, with matching readbacks. Firmware **2.4.3M** retains its existing sequence; other admitted revisions use the direct-position strategy, with unsupported features hidden and fault checks retained. Other revisions and complete first setup on another pair still need hardware validation.
+
+The proposed next research phase is PCB/bootloader inspection, understanding OTA updates toward **2.4.3M** where hardware compatibility permits, and assessing original custom firmware. There is no updater or custom firmware release yet. See [firmware support and roadmap](FIRMWARE-ROADMAP.md) for evidence, limits, and milestones.
+
+This is a documentation update: build 12 and its newer app changes are not distributed by this commit. The entries below describe the earlier published source baseline.
+
+## Earlier implementation checkpoint
+
 Updated September 22, 2026.
 
 **Calibration is deferred:** the existing recordings have been [examined](ios/FIT-CALIBRATION-EVIDENCE.md), but the owner has chosen to leave implementation for a future feature. New profiles with unknown calibration still use the physical shoe buttons for fit; existing calibrated profiles retain app controls. The [publication review](PUBLICATION-REVIEW.md) records source/history privacy checks separately from functional readiness.
