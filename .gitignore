@@ -43,3 +43,10 @@ xcuserdata/
 # Siri downloads are signed for a specific app distribution.
 apps/ios/Config/SiriShortcuts/*.shortcut
 apps/ios/Config/SiriShortcuts/manifest.json
+
+# Website dependencies, build output and deployment state.
+node_modules/
+apps/web/dist/
+apps/web/.astro/
+.vercel/
+apps/web/test-results/

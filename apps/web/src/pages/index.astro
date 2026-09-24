@@ -1,0 +1,500 @@
+---
+import "../styles/global.css";
+import Icon from "../components/Icon.astro";
+import ShoeCarousel from "../components/ShoeCarousel.astro";
+import OmarchyPreview from "../components/OmarchyPreview.astro";
+import LightPicker from "../components/LightPicker.astro";
+import { site, source } from "../site";
+const installUrl = site.appStore || site.testflight;
+const installLabel = site.appStore
+  ? "Download on the App Store"
+  : site.testflight
+    ? "Install with TestFlight"
+    : "TestFlight coming soon";
+const faqs = [
+  [
+    "What happened to the original Nike app?",
+    "Nike retired the Adapt app from the Apple and Android app stores on August 6, 2024. The shoes still work with their physical buttons. OpenAdapt is an independent project exploring how to keep app control alive.",
+  ],
+  [
+    "Which shoes work with OpenAdapt?",
+    "Verified control is currently limited to Nike Adapt Auto Max running firmware 2.4.3M. The desktop implementation has physically laced the development pair; the iPhone app has authenticated both shoes and read their status. Other models and firmware versions are not verified.",
+  ],
+  [
+    "Can I set up a newly purchased or reset pair?",
+    "Not as a complete, verified experience yet. First-time pairing is implemented and tested offline, but fresh enrollment and fit calibration still need hardware validation. New pairs keep app fit controls disabled until calibration is verified. Do not reset a working pair just to try OpenAdapt.",
+  ],
+  [
+    "When can I install the iPhone app?",
+    site.appStore
+      ? "OpenAdapt is available on the App Store for iOS 17 and later. Please check the current compatibility and setup requirements before installing."
+      : site.testflight
+        ? "The beta is available through TestFlight. Please read the compatibility and release notes before installing. An App Store release is planned."
+        : "The iPhone app is in development for iOS 17 and later. A public TestFlight beta is planned, followed by an App Store release. There is no public install link or announced release date yet.",
+  ],
+  [
+    "Does the app need an account or cloud connection?",
+    "The clients communicate directly with the shoes over Bluetooth. No OpenAdapt account or sync server is required. Pairing credentials stay on your devices; transfer between iPhone and Omarchy is manual.",
+  ],
+  [
+    "Can I build an Android app or another client?",
+    "Yes. Start with the Swift protocol core or Python Bluetooth implementation on GitHub. The original code is MIT licensed, so you can study it, change it, and build your own client. Android and wearable clients are welcome contributions, not existing releases.",
+  ],
+  [
+    "Is this an official Nike project?",
+    "No. OpenAdapt is an independent project, not affiliated with or endorsed by Nike. Nike, Adapt, and the shoe designs belong to their respective owners.",
+  ],
+];
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <link
+      rel="preload"
+      href="/fonts/inter.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/fonts/inter-tight.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f7f8fa" />
+    <meta
+      name="impact-site-verification"
+      {...{ value: "2d349744-ad88-4ec0-ace7-1e5542e21c45" }}
+    />
+    <title>OpenAdapt — Good shoes, second life</title>
+    <meta
+      name="description"
+      content="Open-source software for a second life with Nike Adapt. Explore the iPhone and Omarchy clients, find your pair, or build your own."
+    />
+    <link rel="canonical" href={site.url} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preload" as="image" href="/images/auto-max.jpg" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="OpenAdapt — Good shoes, second life" />
+    <meta
+      property="og:description"
+      content="Open-source software for your Nike Adapt shoes. Made for iPhone, Omarchy, and whatever you build next."
+    />
+    <meta property="og:url" content={site.url} />
+    <meta property="og:image" content={`${site.url}/images/social.png`} />
+    <meta name="twitter:card" content="summary_large_image" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">
+      Skip to content
+    </a>
+    <header class="header wrap">
+      <a class="wordmark" href="/" aria-label="OpenAdapt home">
+        <img src="/favicon.svg" width="44" height="44" alt="" />
+        OpenAdapt
+      </a>
+      <nav aria-label="Main navigation">
+        <a href="#app">Apps</a>
+        <a href="#shoes">Shoes</a>
+        <a href="#build">Build</a>
+      </nav>
+      <a class="button button-small button-outline header-cta" href={site.repo}>
+        <Icon name="star" size={16} />
+        Star on GitHub
+      </a>
+    </header>
+    <main id="main">
+      <section class="hero wrap" aria-labelledby="hero-title">
+        <div class="hero-top">
+          <span class="eyebrow">
+            <span class="status-dot"></span> Open source for Nike Adapt
+          </span>
+        </div>
+        <div class="hero-main">
+          <div class="hero-copy">
+            <h1 id="hero-title">
+              Good shoes
+              <br />
+              <span>Second life</span>
+            </h1>
+            <p>
+              A new connection to the shoes you love.
+              <br class="desktop-break" /> Open-source control for Nike Adapt.
+            </p>
+            <div class="actions">
+              <a class="button button-blue" href="#app">
+                Explore apps <Icon name="arrow" />
+              </a>
+              <a class="text-link" href={site.repo}>
+                View source <Icon name="external" size={18} />
+              </a>
+            </div>
+            <div class="hero-availability">
+              <Icon name="phone" size={14} />
+              <span>
+                {site.appStore
+                  ? "Available for iPhone"
+                  : site.testflight
+                    ? "iPhone beta available"
+                    : "iPhone beta coming soon"}
+              </span>
+              <span class="tiny-separator">/</span>
+              <span>Free &amp; MIT licensed</span>
+            </div>
+          </div>
+          <div class="hero-art">
+            <div class="hero-shoe">
+              <img
+                src="/images/auto-max.jpg"
+                width="1614"
+                height="937"
+                alt="Nike Adapt Auto Max in Triple Black"
+                fetchpriority="high"
+              />
+              <span class="shoe-lamp lamp-one" aria-hidden="true"></span>
+              <span class="shoe-lamp lamp-two" aria-hidden="true"></span>
+            </div>
+            <div class="hero-lights">
+              <span>Try the lights</span>
+              <LightPicker label="Preview the shoe lights" />
+            </div>
+          </div>
+        </div>
+        <div class="hero-bottom">
+          <span>
+            <Icon name="bluetooth" size={17} />
+            Direct Bluetooth
+          </span>
+          <span>
+            <Icon name="code" size={17} />
+            Yours to build on
+          </span>
+          <a href="#shoes">
+            Find your pair <Icon name="arrow" size={16} />
+          </a>
+        </div>
+      </section>
+
+      <section id="app" class="app-section wrap section">
+        <div class="section-heading">
+          <div>
+            <span class="mono">THE APPS</span>
+            <h2>
+              Back in
+              <br />
+              your hands
+            </h2>
+          </div>
+          <p>
+            Nike retired the app. The shoes still have a future.
+            <br />
+            Independent client for any device.
+          </p>
+        </div>
+        <div class="app-grid">
+          <article class="iphone-card">
+            <div class="card-top">
+              <Icon name="phone" size={24} />
+              <span class="pill">
+                {site.appStore
+                  ? "AVAILABLE FOR IPHONE"
+                  : site.testflight
+                    ? "PUBLIC BETA"
+                    : "IN DEVELOPMENT"}
+              </span>
+            </div>
+            <h3>
+              Your shoes
+              <br />
+              Your iPhone
+            </h3>
+            <p>
+              Fit, lights, and saved modes. All a tap or a Siri Shortcut away.
+            </p>
+            <div class="app-downloads">
+              <a class="button button-dark" href={installUrl || "#release"}>
+                {installLabel}{" "}
+                <Icon name={installUrl ? "external" : "arrow"} size={18} />
+              </a>
+              <span class="release-caption">
+                {site.appStore
+                  ? "Made for iPhone · iOS 17+"
+                  : "App Store release to follow · iOS 17+"}
+              </span>
+            </div>
+            <div class="phone-crop">
+              <div class="phone-shell">
+                <img
+                  src="/images/iphone-fit.webp"
+                  width="1206"
+                  height="2622"
+                  alt="OpenAdapt iPhone app in Simulator demo mode, showing independent left and right fit controls"
+                  loading="lazy"
+                />
+              </div>
+              <span class="phone-caption mono">
+                ACTUAL APP / SIMULATOR DEMO
+              </span>
+            </div>
+          </article>
+          <article class="desktop-card">
+            <div class="desktop-copy">
+              <div class="eyebrow">
+                <span>MADE FOR</span>
+                <a
+                  href="https://omarchy.org"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Omarchy (opens in a new tab)"
+                >
+                  <img
+                    class="omarchy-wordmark"
+                    src="/images/omarchy-wordmark.svg"
+                    width="150"
+                    height="35"
+                    alt="Omarchy"
+                    loading="lazy"
+                  />
+                </a>
+              </div>
+              <h3>
+                Right at home
+                <br />
+                on your desktop
+              </h3>
+              <p>
+                Fit, lights, and battery in your Omarchy panel. Pair on iPhone,
+                bring your shoes to Linux, and settle into Tokyo Night.
+              </p>
+              <a class="text-link" href={source("apps/omarchy")}>
+                Get the Omarchy client <Icon name="arrow" size={18} />
+              </a>
+            </div>
+            <OmarchyPreview />
+          </article>
+        </div>
+        <div class="compatibility-note">
+          <Icon name="bluetooth" size={20} />
+          <p>
+            <strong>Early software, real progress.</strong> Auto Max firmware
+            2.4.3M is verified. Fresh setup and other models still need testing.
+          </p>
+          <a href="#faq">
+            Check compatibility <Icon name="arrow" size={17} />
+          </a>
+        </div>
+      </section>
+
+      <section class="shoes-section wrap section" id="shoes">
+        <div class="section-heading">
+          <div>
+            <span class="mono">THE SHOES</span>
+            <h2>
+              Still ahead
+              <br />
+              of their time
+            </h2>
+          </div>
+          <p>
+            Five silhouettes. One Adapt family.
+            <br />
+            Find your pair. Make it yours with OpenAdapt.
+          </p>
+        </div>
+        <ShoeCarousel />
+      </section>
+
+      <section class="build-section" id="build">
+        <div class="wrap section">
+          <div class="section-label">
+            <span class="mono">OPEN SOURCE, OPEN POSSIBILITIES</span>
+            <Icon name="code" size={22} />
+          </div>
+          <div class="build-heading">
+            <h2>
+              Make it
+              <br />
+              <span>your own</span>
+            </h2>
+            <div>
+              <p>
+                Read the code. Build a client. Give another pair a second life.
+                Start with Swift or Python and take it somewhere new.
+              </p>
+              <a class="button button-white" href={site.repo}>
+                Explore on GitHub <Icon name="external" size={18} />
+              </a>
+            </div>
+          </div>
+          <div class="build-resources">
+            <article>
+              <span class="mono">SWIFT</span>
+              <a href={source("apps/ios/Sources/OpenAdaptCore")}>
+                The protocol core <Icon name="arrow" size={18} />
+              </a>
+              <p>Start with the language your shoes speak.</p>
+            </article>
+            <article>
+              <span class="mono">PYTHON</span>
+              <a href={source("spikes/002-local-enrollment")}>
+                The Bluetooth toolkit <Icon name="arrow" size={18} />
+              </a>
+              <p>Explore the connection, build your own client.</p>
+            </article>
+            <article>
+              <span class="mono">COMMUNITY</span>
+              <a href={`${site.repo}/issues`}>
+                Your next idea <Icon name="arrow" size={18} />
+              </a>
+              <p>A new platform, a useful fix, a pair to test.</p>
+            </article>
+          </div>
+          <div class="code-strip">
+            <code>
+              <span aria-hidden="true">$</span> git clone
+              https://github.com/GianlucaMinoprio/openAdapt.git
+            </code>
+            <button
+              id="copy-command"
+              type="button"
+              aria-label="Copy git clone command"
+            >
+              <span data-copy-label>Copy</span>
+              <Icon name="copy" size={16} />
+            </button>
+          </div>
+          <span id="copy-status" class="sr-only" role="status"></span>
+          <p class="build-license">
+            MIT licensed. Free to use, change, and share.
+          </p>
+        </div>
+      </section>
+
+      <section class="faq-section wrap section" id="faq">
+        <div>
+          <span class="mono">GOOD TO KNOW</span>
+          <h2>
+            Before you
+            <br />
+            lace up
+          </h2>
+        </div>
+        <div class="faq-list">
+          {faqs.map(([question, answer]) => (
+            <details name="questions">
+              <summary>
+                {question}
+                <Icon name="plus" size={20} />
+              </summary>
+              <p>{answer}</p>
+            </details>
+          ))}
+        </div>
+      </section>
+      <section class="release-section wrap" id="release">
+        <div>
+          <span class="eyebrow">
+            <span class="status-dot"></span> FOLLOW ALONG
+          </span>
+          <h2>More life in every pair</h2>
+          <p>
+            {installUrl
+              ? "The next chapter is yours. Explore the app and make it your own."
+              : "The iPhone beta is coming. Star the project and follow what’s next."}
+          </p>
+        </div>
+        <div class="release-actions">
+          <a class="button button-blue" href={installUrl || site.repo}>
+            <Icon name={installUrl ? "phone" : "star"} size={18} />
+            {installUrl ? installLabel : "Star on GitHub"}
+          </a>
+          <span>
+            {site.appStore
+              ? "Available for iPhone"
+              : site.testflight
+                ? "App Store release to follow"
+                : "TestFlight soon · App Store next"}
+          </span>
+        </div>
+      </section>
+    </main>
+    <footer class="wrap">
+      <div class="footer-top">
+        <a class="wordmark" href="/">
+          OpenAdapt
+        </a>
+        <p>Good shoes deserve great software.</p>
+        <a class="text-link" href="#main">
+          Back to the top ↑
+        </a>
+      </div>
+      <div class="footer-bottom">
+        <p>
+          An independent project. Not affiliated with or endorsed by Nike.
+          <br />
+          Product names and trademarks belong to their respective owners.
+        </p>
+        <div>
+          <a href="/privacy">Website privacy</a>
+          <a href="/app-privacy">App privacy</a>
+          <a href="/support">Support</a>
+          <a
+            href="https://www.goat.com"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Product photography: GOAT ↗
+          </a>
+          <span>© {new Date().getFullYear()} OpenAdapt</span>
+        </div>
+      </div>
+    </footer>
+    <script>
+      document
+        .querySelectorAll<HTMLButtonElement>("[data-color]")
+        .forEach((button) => {
+          button.addEventListener("click", () => {
+            const color = button.dataset.color || "blue";
+            document.documentElement.dataset.light = color;
+            document
+              .querySelectorAll("[data-color]")
+              .forEach((item) =>
+                item.setAttribute(
+                  "aria-pressed",
+                  String((item as HTMLButtonElement).dataset.color === color),
+                ),
+              );
+          });
+        });
+      const copyButton =
+        document.querySelector<HTMLButtonElement>("#copy-command");
+      const copyLabel =
+        copyButton?.querySelector<HTMLElement>("[data-copy-label]");
+      const copyStatus = document.querySelector<HTMLElement>("#copy-status");
+      let copyTimeout: ReturnType<typeof setTimeout>;
+      copyButton?.addEventListener("click", async () => {
+        clearTimeout(copyTimeout);
+        try {
+          await navigator.clipboard.writeText(
+            "git clone https://github.com/GianlucaMinoprio/openAdapt.git",
+          );
+          if (copyLabel) copyLabel.textContent = "Copied";
+          if (copyStatus)
+            copyStatus.textContent = "Clone command copied to clipboard.";
+          copyTimeout = setTimeout(() => {
+            if (copyLabel) copyLabel.textContent = "Copy";
+            if (copyStatus) copyStatus.textContent = "";
+          }, 1800);
+        } catch {
+          if (copyStatus)
+            copyStatus.textContent = "Select the command and copy it manually.";
+        }
+      });
+    </script>
+  </body>
+</html>

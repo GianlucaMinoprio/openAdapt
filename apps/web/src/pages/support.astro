@@ -1,0 +1,99 @@
+---
+import "../styles/global.css";
+import { site } from "../site";
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Support — OpenAdapt</title>
+    <meta
+      name="description"
+      content="OpenAdapt iPhone beta compatibility, pairing help, feedback, and privacy information."
+    />
+    <link rel="canonical" href="https://openadapt.app/support" />
+    <link rel="icon" href="/favicon.svg" />
+  </head>
+  <body>
+    <header class="header wrap">
+      <a class="wordmark" href="/">
+        OpenAdapt
+      </a>
+      <a class="text-link" href="/">
+        Back to the project ↗
+      </a>
+    </header>
+    <main class="wrap legal">
+      <span class="mono">IPHONE BETA SUPPORT</span>
+      <h1>A little help for your shoes.</h1>
+      <p>
+        OpenAdapt is an independent companion for Nike Adapt Auto Max shoes. The
+        first public beta is being prepared for TestFlight review.
+      </p>
+      <h2>What this beta supports</h2>
+      <p>
+        Use an iPhone running iOS 17 or later and Nike Adapt Auto Max shoes with
+        firmware 2.4.3M. This beta focuses on Bluetooth pairing and
+        reconnecting, battery levels, and base light colors. Other shoe models
+        and firmware are not supported.
+      </p>
+      <p>
+        Fresh fit calibration is not available. Newly paired shoes cannot use
+        app fit adjustments, saved fit modes, or fit-related Siri actions. Use
+        the physical shoe buttons for fit. OpenAdapt does not update firmware or
+        perform a factory reset.
+      </p>
+      <h2>Before pairing</h2>
+      <p>
+        Keep your shoes close to your iPhone and allow Bluetooth access when
+        asked. Follow the app’s illuminated-button prompts, one shoe at a time.
+        Pairing and interrupted recovery are experimental. Do not reset a
+        working pair solely to try this beta.
+      </p>
+      <h2>If a connection fails</h2>
+      <p>
+        Check Bluetooth permission in iOS Settings and bring the shoes nearby.
+        Cancel a stalled connection before trying again. If setup reports an
+        interrupted pairing, stop and send feedback rather than repeatedly
+        resetting or enrolling. Removing a saved pair deletes its local profile;
+        it does not reset the shoes or remove their Bluetooth bond in iOS.
+      </p>
+      <h2>Questions and bug reports</h2>
+      <p>
+        OpenAdapt is open source. Browse existing questions or open an issue on{" "}
+        <a href={`${site.repo}/issues`}>GitHub</a>. Issues are public, so never
+        include pairing files, encryption keys, or private device identifiers.
+      </p>
+      <h2>Send beta feedback</h2>
+      <p>
+        Once you have OpenAdapt through TestFlight, open Apple’s TestFlight app,
+        select OpenAdapt, then choose Send Beta Feedback to contact the
+        developer. You can also send a screenshot through TestFlight’s feedback
+        flow.
+      </p>
+      <p>
+        Include your iPhone model and iOS version, shoe model and firmware, the
+        steps you took, and what happened. Never send pairing files, encryption
+        keys, or private device identifiers. For privacy questions, use the same
+        feedback route and include “Privacy” in your message.
+      </p>
+      <h2>Your data stays with you</h2>
+      <p>
+        The app has no account, advertising, analytics, or developer-operated
+        cloud service. Shoe profiles and pairing credentials remain on your
+        device. Apple processes TestFlight feedback under its own terms. Read
+        the <a href="/app-privacy">iPhone app privacy policy</a> and the{" "}
+        <a href="/privacy">website privacy policy</a> for details.
+      </p>
+      <p>
+        OpenAdapt is not affiliated with or endorsed by Nike. Nike and Adapt are
+        trademarks of their respective owner.
+      </p>
+      <a class="button button-dark" href="/">
+        Back to OpenAdapt →
+      </a>
+    </main>
+  </body>
+</html>
